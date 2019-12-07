@@ -27,7 +27,6 @@ CONFIG += c++11
 PRECOMPILED_HEADER  = stable.h
 
 SOURCES += \
-        Cover-Tree/CoverTreePoint.cpp \
         cloud.cpp \
         dictionarylearning/MatchingPursuit.cpp \
         dictionarylearning/OrthogonalPursuit.cpp \
@@ -37,9 +36,10 @@ SOURCES += \
         glwidget.cpp \
         main.cpp \
         mainwindow.cpp \
-        release/moc_glwidget.cpp \
-        release/moc_mainwindow.cpp \
-        release/moc_window.cpp \
+		release/moc_glwidget.cpp \
+		release/moc_mainwindow.cpp \
+		release/moc_window.cpp \
+	utils/cloud_normal.cpp \
         utils/pt_to_pt_distsq.cpp \
         window.cpp
 
@@ -55,29 +55,28 @@ HEADERS += \
         dictionarylearning/ksvd_dct2D.h \
         glwidget.h \
         mainwindow.h \
-        release/moc_predefs.h \
+		release/moc_predefs.h \
         stable.h \
         ui_mainwindow.h \         \
+	utils/cloud_normal.h \
         utils/ensure_buffer_size.h \
-        utils/pt_to_pt_distsq.h
+        utils/pt_to_pt_distsq.h \
+	window.h
         window.h
 
 FORMS += \
         mainwindow.ui
 
 # Default rules for deployment.
-#qnx: target.path = /tmp/$${TARGET}/bin
-#else: unix:!android: target.path = /opt/$${TARGET}/bin
-#!isEmpty(target.path): INSTALLS += target
-# Default rules for deployment.
-target.path = ..\workspace4\PCReconstruct
-INSTALLS += target
+qnx: target.path = /tmp/$${TARGET}/bin
+else: unix:!android: target.path = /opt/$${TARGET}/bin
+!isEmpty(target.path): INSTALLS += target
 
-INCLUDEPATH += $$PWD/'../lib/PCL 1.9.1/include/pcl-1.9' \
-	       $$PWD/'../lib/eigen3' \
-	       $$PWD/'../lib/Boost/include/boost-1_68' \
-	       $$PWD/'../lib/OpenNI2/Include' \
-		   $$PWD/'../lib/FLANN/include' \
+INCLUDEPATH += $$PWD/'../../lib/PCL 1.9.1/include/pcl-1.9' \
+		   $$PWD/'../../lib/eigen3' \
+		   $$PWD/'../../lib/Boost/include/boost-1_68' \
+		   $$PWD/'../../lib/OpenNI2/Include' \
+		   $$PWD/'../../lib/FLANN/include' \
 		   $$PWD/'Cover-Tree' \
 		   $$PWD/'dictionarylearning' \
 		   $$PWD/'utils'
@@ -86,7 +85,7 @@ INCLUDEPATH += $$PWD/'../lib/PCL 1.9.1/include/pcl-1.9' \
 #DEPENDPATH += $$PWD/'../lib/eigen3'
 
 
-LIBS += -L$$PWD/'../lib/PCL 1.9.1/lib/'
+LIBS += -L$$PWD/'../../lib/PCL 1.9.1/lib/'
 LIBS += \
 	-lpcl_common_release \
 	-lpcl_filters_release \
@@ -94,8 +93,8 @@ LIBS += \
 	-lpcl_search_release \
 	-lpcl_io_release \
 	-lpcl_io_ply_release
-LIBS += -L$$PWD/'../lib/Boost/lib/'
-LIBS += -L$$PWD/'../lib/OpenNI2/Lib/' -lOpenNI2
+LIBS += -L$$PWD/'../../lib/Boost/lib/'
+LIBS += -L$$PWD/'../../lib/OpenNI2/Lib/' -lOpenNI2
 
 
 #PRE_TARGETDEPS += $$PWD/'../lib/PCL 1.9.1/lib/pcl_io_release.lib'
