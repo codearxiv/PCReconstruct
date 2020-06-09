@@ -34,7 +34,7 @@ public:
 
 	~OrthogonalPursuit(){
 		delete ldlt;
-    }
+	}
 
 	void ensure(Index nd, Index na, Index lm);
 

@@ -7,6 +7,7 @@
 //#include "glwidget.h"
 
 #include <pcl/io/pcd_io.h>
+#include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 //#include <QMenuBar>
 //#include <QMenu>
@@ -37,14 +38,13 @@ void MainWindow::on_openButton_pressed()
 	std::string pcdPath = q_pcdPath.toStdString();
 
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
-
 	if (pcl::io::loadPCDFile<pcl::PointXYZ> (pcdPath, *cloud) == -1) //* load the file
 	{
 		PCL_ERROR ("Couldn't read PCD file\n");
 		return;
 	}
 
-	cloudChanged(cloud);
+	emit cloudChanged(cloud);
 
 }
 
@@ -52,6 +52,6 @@ void MainWindow::on_openButton_pressed()
 void MainWindow::on_saveButton_pressed()
 {
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
-	cloudChanged(cloud);
+	emit cloudChanged(cloud);
 
 }

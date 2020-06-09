@@ -2,7 +2,7 @@
 
 #if defined __cplusplus
 /* Add C++ includes here */
-
+#include <array>
 #include <iostream>
 #include <ctime>
 #include <limits>
@@ -21,12 +21,14 @@
 #include <QDesktopWidget>
 #include <QHBoxLayout>
 #include <QKeyEvent>
+//#include <qmath.h>
 #include <QMainWindow>
 #include <QMatrix4x4>
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QMouseEvent>
+#include <qopengl.h>
 #include <QOpenGLBuffer>
 #include <QOpenGLFunctions>
 #include <QOpenGLVertexArrayObject>
@@ -36,8 +38,11 @@
 #include <QSlider>
 #include <QSurfaceFormat>
 #include <QVBoxLayout>
+#include <QVector>
+#include <QVector3D>
 #include <QWidget>
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QGraphicsScene>
+#include <vector>
 
 #endif

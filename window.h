@@ -53,6 +53,7 @@
 
 #include <QWidget>
 #include <pcl/point_types.h>
+#include <pcl/point_cloud.h>
 
 QT_BEGIN_NAMESPACE
 class QSlider;

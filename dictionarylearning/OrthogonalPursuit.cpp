@@ -101,72 +101,72 @@ void OrthogonalPursuit::operator() (
 	ensure(D.rows(),D.cols(),latm);
 
 	X.setZero();
-    R = Y;    
+	R = Y;
 
 	for(Index j = 1; j <= latm; ++j){
-        // Find the next 'nearest' atom to current residual R.
+		// Find the next 'nearest' atom to current residual R.
 		float absprojmax = -float_infinity;
 		float projmax = 0;
-        Index imax = 0;
-        for(Index i = 0; i < natm; ++i){
+		Index imax = 0;
+		for(Index i = 0; i < natm; ++i){
 			if( X(i) != 0.0f ) continue;
 			float proj = R.dot(D.col(i));
 			float absproj = abs(proj);
-            if( absproj > absprojmax ){
-                projmax = proj;
-                absprojmax = absproj;
-                imax = i;
-            }
-        }
+			if( absproj > absprojmax ){
+				projmax = proj;
+				absprojmax = absproj;
+				imax = i;
+			}
+		}
 		U = D.col(imax);   // Dictionary atom U 'nearest' to R
-        E.col(j-1) = U;    // ...save it in j^th column of E
+		E.col(j-1) = U;    // ...save it in j^th column of E
 		I(j-1) = imax;     // ...and save column index of U
 		X(imax) = 1.0f;    // Set temporarily 1.0 to mark traversed.
 
-        // Map to pre-allocated workspace.
-        Index p = dworkOffset;
+		// Map to pre-allocated workspace.
+		Index p = dworkOffset;
 		new (&ETblk) MapMtrxf(&dwork[p],j,ndim);
 		p = p + align_padded(j*ndim);
 		new (&Fblk) MapMtrxf(&dwork[p],j,j);
 
-        // With U added to the current set E of j nearest atoms,
-        // optimise the coefficients of XI w.r.t this E. This is
-        // done by projecting Y onto the subspace spanned by E.
-        if( j > 1 ) {
+		// With U added to the current set E of j nearest atoms,
+		// optimise the coefficients of XI w.r.t this E. This is
+		// done by projecting Y onto the subspace spanned by E.
+		if( j > 1 ) {
 			// Compute the product E^T(:,1:j) * E(:,1:j),
 			// This can be done quicker by reusing the product
-            // E^T(:,1:j-1) * E(:,1:j-1) from the previous
-            // iteration.
+			// E^T(:,1:j-1) * E(:,1:j-1) from the previous
+			// iteration.
 
-            V.segment(0,j-1).noalias() = U.transpose() * E.block(0,0,ndim,j-1);
-            F.col(j-1).segment(0,j-1) = V.segment(0,j-1);
-            F.row(j-1).segment(0,j-1) = V.segment(0,j-1);
+			V.segment(0,j-1).noalias() = U.transpose() * E.block(0,0,ndim,j-1);
+			F.col(j-1).segment(0,j-1) = V.segment(0,j-1);
+			F.row(j-1).segment(0,j-1) = V.segment(0,j-1);
 			F(j-1,j-1) = 1.0f;
 
-            Fblk = F.block(0,0,j,j);
-            ETblk = E.block(0,0,ndim,j).transpose();
-            W.segment(0,j).noalias() = ETblk * Y;
+			Fblk = F.block(0,0,j,j);
+			ETblk = E.block(0,0,ndim,j).transpose();
+			W.segment(0,j).noalias() = ETblk * Y;
 			// Solve (E^T*E)*XI = (E^T)*Y
-            ldlt->compute(Fblk);
-            XI.segment(0,j) = ldlt->solve(W.segment(0,j));
+			ldlt->compute(Fblk);
+			XI.segment(0,j) = ldlt->solve(W.segment(0,j));
 
-            //Update residual R
-            R = Y;
-            R.noalias() -= (E.block(0,0,ndim,j))*(XI.segment(0,j));
-        }
-        else{
+			//Update residual R
+			R = Y;
+			R.noalias() -= (E.block(0,0,ndim,j))*(XI.segment(0,j));
+		}
+		else{
 			F(0,0) = 1.0f;
-            XI(0) = Y.dot(U);
-            //Update residual R
-            R = Y;
-            R.noalias() -= XI(0)*U;
-        }
-    }
+			XI(0) = Y.dot(U);
+			//Update residual R
+			R = Y;
+			R.noalias() -= XI(0)*U;
+		}
+	}
 
-    // Map back to code vector.
+	// Map back to code vector.
 	for(Index i = 0; i < latm; ++i){
-        X(I(i)) = XI(i);
-    }
+		X(I(i)) = XI(i);
+	}
 
 
 }

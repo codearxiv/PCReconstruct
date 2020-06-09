@@ -48,16 +48,22 @@
 **
 ****************************************************************************/
 
+//     Peter Beben: modified this file for the purposes of this project.
+//     Views ALL points in the point cloud without any pruning (so it
+//     must be small enough to fit into video memory!!).
+
 #ifndef GLWIDGET_H
 #define GLWIDGET_H
 
-#include <QOpenGLWidget>
-#include <QOpenGLFunctions>
-#include <QOpenGLVertexArrayObject>
-#include <QOpenGLBuffer>
-#include <QMatrix4x4>
-#include <pcl/point_types.h>
-#include "cloud.h"
+//#include <QOpenGLWidget>
+//#include <QOpenGLFunctions>
+//#include <QOpenGLVertexArrayObject>
+//#include <QOpenGLBuffer>
+//#include <QMatrix4x4>
+//#include <pcl/point_types.h>
+//#include <pcl/point_cloud.h>
+#include "BoundBox.h"
+#include "Cloud.h"
 
 QT_FORWARD_DECLARE_CLASS(QOpenGLShaderProgram)
 
@@ -68,14 +74,14 @@ class GLWidget : public QOpenGLWidget, protected QOpenGLFunctions
 	typedef pcl::PointCloud<pcl::PointXYZ>::Ptr CloudPtr;
 
 public:
-    GLWidget(QWidget *parent = 0);
-    ~GLWidget();
+	GLWidget(QWidget *parent = 0);
+	~GLWidget();
 
-    static bool isTransparent() { return m_transparent; }
-    static void setTransparent(bool t) { m_transparent = t; }
+	static bool isTransparent() { return m_transparent; }
+	static void setTransparent(bool t) { m_transparent = t; }
 
 	QSize minimumSizeHint() const override;
-    QSize sizeHint() const override;
+	QSize sizeHint() const override;
 
 public slots:
 	void setVectRotation(int angle, QVector3D v);
@@ -88,31 +94,36 @@ signals:
 	void vectTranslationChanged(QVector3D v);
 
 protected:
-    void initializeGL() override;
-    void paintGL() override;
-    void resizeGL(int width, int height) override;
-    void mousePressEvent(QMouseEvent *event) override;
-    void mouseMoveEvent(QMouseEvent *event) override;
+	void initializeGL() override;
+	void paintGL() override;
+	void resizeGL(int width, int height) override;
+	void mousePressEvent(QMouseEvent *event) override;
+	void mouseMoveEvent(QMouseEvent *event) override;
 	void wheelEvent(QWheelEvent *event) override;
 
 private:
-    void setupVertexAttribs();
+	void setupVertexAttribs(QOpenGLBuffer vbo) ;
 
-    bool m_core;
+	bool m_core;
 	int m_vRot;
 	QPoint m_lastMousePos;
 	//QPoint m_lastWheelPos;
 	Cloud m_cloud;
-    QOpenGLVertexArrayObject m_vao;
+	BoundBox m_cloudBBox;
+	QOpenGLVertexArrayObject m_cloudVao;
+	QOpenGLVertexArrayObject m_cloudBBoxVao;
 	QOpenGLBuffer m_cloudVbo;
-    QOpenGLShaderProgram *m_program;
-    int m_projMatrixLoc;
-    int m_mvMatrixLoc;
-    int m_normalMatrixLoc;
-    int m_lightPosLoc;
-    QMatrix4x4 m_proj;
-    QMatrix4x4 m_camera;
-    QMatrix4x4 m_world;
+	QOpenGLBuffer m_cloudBBoxVbo;
+	QOpenGLBuffer m_cloudBBoxEbo;
+	QOpenGLShaderProgram *m_program;
+	int m_projMatrixLoc;
+	int m_mvMatrixLoc;
+	int m_normalMatrixLoc;
+	int m_lightPosLoc;
+	int m_colorLoc;
+	QMatrix4x4 m_proj;
+	QMatrix4x4 m_camera;
+	QMatrix4x4 m_world;
 	QVector3D m_rotVect;
 	QVector3D m_movVect;
 	static bool m_transparent;

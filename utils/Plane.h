@@ -1,8 +1,9 @@
 #ifndef PLANE_H
 #define PLANE_H
 
+//#include <Eigen/Dense>
 
-class plane
+class Plane
 {
 	using Index = Eigen::Index;
 	using Matrix3f = Eigen::Matrix3f;
@@ -10,16 +11,18 @@ class plane
 	using Vector2f = Eigen::Vector2f;
 
 public:
-	plane(Vector3f p0, Vector3f norm) { set(p0,norm); }
+	Plane(const Vector3f p0, const Vector3f norm) { set(p0,norm); }
 
-	void set(Vector3f p0, Vector3f norm);
-	void project(Vector3f p, Vector3f& q, Vector2f& uv);
+	void set(const Vector3f p0, const Vector3f norm);
+	Vector2f project_uv(const Vector3f q);
+	Vector3f project(const Vector3f q, Vector2f& puv);
+
 
 private:
-	Vector3f p0;
-	Vector3f norm;
-	Vector3f u;
-	Vector3f v;
+	Vector3f _p0;
+	Vector3f _norm;
+	Vector3f _u;
+	Vector3f _v;
 
 };
 

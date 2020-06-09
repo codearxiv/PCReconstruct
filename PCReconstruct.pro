@@ -27,45 +27,43 @@ CONFIG += c++11
 PRECOMPILED_HEADER  = stable.h
 
 SOURCES += \
-        cloud.cpp \
-        dictionarylearning/MatchingPursuit.cpp \
-        dictionarylearning/OrthogonalPursuit.cpp \
-        dictionarylearning/cosine_transform.cpp \
-        dictionarylearning/ksvd.cpp \
-        dictionarylearning/ksvd_dct2D.cpp \
-        glwidget.cpp \
-        main.cpp \
-        mainwindow.cpp \
-		release/moc_glwidget.cpp \
-		release/moc_mainwindow.cpp \
-		release/moc_window.cpp \
+	BoundBox.cpp \
+	Cloud.cpp \
+	dictionarylearning/MatchingPursuit.cpp \
+	dictionarylearning/OrthogonalPursuit.cpp \
+	dictionarylearning/cosine_transform.cpp \
+	dictionarylearning/ksvd.cpp \
+	dictionarylearning/ksvd_dct2D.cpp \
+	glwidget.cpp \
+	main.cpp \
+	mainwindow.cpp \
+	utils/Plane.cpp \
 	utils/cloud_normal.cpp \
-        utils/pt_to_pt_distsq.cpp \
-        window.cpp
+	window.cpp
 
 HEADERS += \
-        Cover-Tree/CoverTreePoint.h \
-        Cover-Tree/Cover_Tree.h \
-        cloud.h \
-        constants.h \
-        dictionarylearning/MatchingPursuit.h \
-        dictionarylearning/OrthogonalPursuit.h \
-        dictionarylearning/cosine_transform.h \
-        dictionarylearning/ksvd.h \
-        dictionarylearning/ksvd_dct2D.h \
-        glwidget.h \
-        mainwindow.h \
-		release/moc_predefs.h \
-        stable.h \
-        ui_mainwindow.h \         \
+	BoundBox.h \
+	Cloud.h \
+	Cover-Tree/CoverTreePoint.h \
+	Cover-Tree/Cover_Tree.h \
+	constants.h \
+	dictionarylearning/MatchingPursuit.h \
+	dictionarylearning/OrthogonalPursuit.h \
+	dictionarylearning/cosine_transform.h \
+	dictionarylearning/ksvd.h \
+	dictionarylearning/ksvd_dct2D.h \
+	glwidget.h \
+	mainwindow.h \
+	stable.h \
+	ui_mainwindow.h \         \
+	utils/Plane.h \
 	utils/cloud_normal.h \
-        utils/ensure_buffer_size.h \
-        utils/pt_to_pt_distsq.h \
+	utils/ensure_buffer_size.h \
+	utils/pt_to_pt_distsq.h \
 	window.h
-        window.h
 
 FORMS += \
-        mainwindow.ui
+	mainwindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -81,11 +79,19 @@ INCLUDEPATH += $$PWD/'../../lib/PCL 1.9.1/include/pcl-1.9' \
 		   $$PWD/'dictionarylearning' \
 		   $$PWD/'utils'
 
-#DEPENDPATH += $$PWD/'../lib/PCL 1.9.1/include/pcl-1.9'
-#DEPENDPATH += $$PWD/'../lib/eigen3'
-
-
 LIBS += -L$$PWD/'../../lib/PCL 1.9.1/lib/'
+CONFIG( debug, debug|release ) {
+## debug
+LIBS += \
+	-lpcl_common_debug \
+	-lpcl_filters_debug \
+	-lpcl_kdtree_debug \
+	-lpcl_search_debug \
+	-lpcl_io_debug \
+	-lpcl_io_ply_debug
+}
+else {
+# release
 LIBS += \
 	-lpcl_common_release \
 	-lpcl_filters_release \
@@ -93,14 +99,10 @@ LIBS += \
 	-lpcl_search_release \
 	-lpcl_io_release \
 	-lpcl_io_ply_release
+}
+
 LIBS += -L$$PWD/'../../lib/Boost/lib/'
 LIBS += -L$$PWD/'../../lib/OpenNI2/Lib/' -lOpenNI2
-
-
-#PRE_TARGETDEPS += $$PWD/'../lib/PCL 1.9.1/lib/pcl_io_release.lib'
-#PRE_TARGETDEPS += $$PWD/'../lib/PCL 1.9.1/lib/pcl_io_ply_release.lib'
-#PRE_TARGETDEPS += $$PWD/'../lib/PCL 1.9.1/lib/pcl_common_release.lib'
-#PRE_TARGETDEPS += $$PWD/'../lib/OpenNI2/Lib/OpenNI2.lib'
 
 
 

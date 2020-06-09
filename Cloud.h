@@ -4,34 +4,39 @@
 #ifndef CLOUD_H
 #define CLOUD_H
 
-#include <qopengl.h>
-#include <QVector>
-#include <QVector3D>
-#include <pcl/point_types.h>
+//#include <qopengl.h>
+//#include <vector>
+//#include <Eigen/Dense>
+//#include <pcl/point_types.h>
+//#include <pcl/point_cloud.h>
 
 class Cloud
 {
+	template<typename T> using vector = std::vector<T>;
+	using Index = Eigen::Index;
+	using Vector3f = Eigen::Vector3f;
+
 	typedef pcl::PointCloud<pcl::PointXYZ>::Ptr CloudPtr;
 
 public:
 	Cloud();
-    const GLfloat *constData() const { return m_data.constData(); }
-    int count() const { return m_count; }
-    int vertexCount() const { return m_count / 6; }
-
+	const Vector3f point(size_t idx) const { return m_cloud[idx]; }
+	const GLfloat *vertGLData();
+	size_t count() const { return 6 * m_cloud.size(); }
+	size_t pointCount() const { return m_cloud.size(); }
 	void create(CloudPtr cloud);
 
 private:
-	void addPoint(const QVector3D &v);
-	void addPointNorm(const QVector3D &v, const QVector3D &n);
+	void addPoint(const Vector3f &v, const Vector3f &n)
+	{
+		m_cloud.push_back(v);
+		m_norms.push_back(n);
+	}
 
-	void quad(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, GLfloat x3, GLfloat y3, GLfloat x4, GLfloat y4);
-	void extrude(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2);
-	void add(const QVector3D &v, const QVector3D &n);
-
-
-    QVector<GLfloat> m_data;
-    int m_count;
+	vector<Vector3f> m_cloud;
+	vector<Vector3f> m_norms;
+	vector<GLfloat> m_vertGL;
 };
+
 
 #endif // CLOUD_H

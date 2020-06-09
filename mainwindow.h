@@ -4,14 +4,16 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
+//#include <QMainWindow>
 #include <pcl/point_types.h>
+#include <pcl/point_cloud.h>
 
 class GLWidget;
 
 namespace Ui {
 class MainWindow;
 }
+
 
 class MainWindow : public QMainWindow
 {

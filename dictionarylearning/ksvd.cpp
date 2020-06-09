@@ -172,7 +172,7 @@ void ksvd(
 		}
 
 
-        for(Index iatm = 0; iatm < natm; ++iatm){
+		for(Index iatm = 0; iatm < natm; ++iatm){
 			A = D.col(iatm); // Original atom is our initial approx.
 			// Compute the matrix Z of residuals for current atom.
 			Index nsigUsing = 0;
@@ -181,11 +181,11 @@ void ksvd(
 				Z.col(nsigUsing) = Y.col(isig);
 				for(Index i = 0; i < natmUsed(isig); ++i){
 					Index jatm = iatmUsed(i,isig);
-                    if( jatm == iatm ) continue;
+					if( jatm == iatm ) continue;
 					Z.col(nsigUsing) -= X(jatm,isig)*D.col(jatm);
-                }
+				}
 				++nsigUsing;
-            }
+			}
 
 			if( nsigUsing == 0 ) continue;
 
@@ -205,14 +205,14 @@ void ksvd(
 			// corresponding to the updated atom.
 			B.segment(0,nsigUsing).noalias() = Zblk.transpose()*A;
 			Index ic2 = 0;
-            for(Index isig = 0; isig < nsig; ++isig){
+			for(Index isig = 0; isig < nsig; ++isig){
 				if( X(iatm,isig) == 0.0f ) continue;
 				X(iatm,isig) = B(ic2);
-                ++ic2;
-            }
+				++ic2;
+			}
 
 			D.col(iatm) = A;
-        }
+		}
 
 }//single
 	}

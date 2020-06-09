@@ -14,13 +14,13 @@ template<class T> class function;
 
 
 void ksvd(
-        bool useOpenMP,
+		bool useOpenMP,
 		const Eigen::MatrixXf& Y,
 		Eigen::Index latm,
-        int maxIters,
+		int maxIters,
 		float maxError,
-        int svPowIters,
-        const std::function<void(
+		int svPowIters,
+		const std::function<void(
 			const Eigen::VectorXf&,
 			const Eigen::MatrixXf&,
 			Eigen::Index,
@@ -28,6 +28,6 @@ void ksvd(
 			Eigen::VectorXf&)> sparseFunct,
 		Eigen::MatrixXf& D,
 		Eigen::MatrixXf& X
-        );
+		);
 
 #endif // KSVD_H

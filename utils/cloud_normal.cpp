@@ -1,6 +1,8 @@
 //     Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
 //     See LICENSE included.
 
+#include "cloud_normal.h"
+
 using Eigen::Vector3f;
 using Eigen::Matrix;
 using Eigen::Index;
@@ -38,7 +40,7 @@ using Matrix3Xf = Matrix<float, 3, Eigen::Dynamic>;
 
 */
 
-Vector3f cloud_normal(Vector3f p0, const Matrix3Xf& cloud, int niters, double zeroTol = 0.0)
+Vector3f cloud_normal(Vector3f p0, const Matrix3Xf& cloud, int niters, double zeroTol)
 {
 	const float ONE_OVER_SQRT3 = 1.0f/sqrt(3.0f);
 
