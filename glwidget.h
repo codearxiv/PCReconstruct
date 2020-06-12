@@ -103,6 +103,8 @@ protected:
 
 private:
 	void setupVertexAttribs(QOpenGLBuffer vbo) ;
+	void setGLBBox(
+			BoundBox bBox, QOpenGLBuffer vbo, QOpenGLBuffer ebo);
 
 	bool m_core;
 	int m_vRot;
@@ -112,9 +114,11 @@ private:
 	BoundBox m_cloudBBox;
 	QOpenGLVertexArrayObject m_cloudVao;
 	QOpenGLVertexArrayObject m_cloudBBoxVao;
+	QOpenGLVertexArrayObject m_cloudNormsVao;
 	QOpenGLBuffer m_cloudVbo;
 	QOpenGLBuffer m_cloudBBoxVbo;
 	QOpenGLBuffer m_cloudBBoxEbo;
+	QOpenGLBuffer m_cloudNormsVbo;
 	QOpenGLShaderProgram *m_program;
 	int m_projMatrixLoc;
 	int m_mvMatrixLoc;
@@ -127,6 +131,7 @@ private:
 	QVector3D m_rotVect;
 	QVector3D m_movVect;
 	static bool m_transparent;
+
 };
 
 #endif

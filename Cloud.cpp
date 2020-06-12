@@ -7,6 +7,8 @@
 template<typename T> using vector = std::vector<T>;
 using Vector3f = Eigen::Vector3f;
 
+//---------------------------------------------------------
+
 Cloud::Cloud()
 {
 	m_cloud.reserve(2500);
@@ -14,6 +16,7 @@ Cloud::Cloud()
 	m_vertGL.reserve(2500 * 6);
 }
 
+//---------------------------------------------------------
 
 void Cloud::create(CloudPtr cloud)
 {
@@ -43,6 +46,7 @@ void Cloud::create(CloudPtr cloud)
 
 }
 
+//---------------------------------------------------------
 
 const GLfloat *Cloud::vertGLData() {
 	m_vertGL.resize(6 * m_cloud.size());
@@ -59,6 +63,29 @@ const GLfloat *Cloud::vertGLData() {
 	return static_cast<const GLfloat*>(m_vertGL.data());
 }
 
+//---------------------------------------------------------
+
+const GLfloat *Cloud::normGLData(float scale) {
+	m_normGL.resize(12 * m_cloud.size());
+	for(size_t i = 0, j = 0; i < m_cloud.size(); ++i){
+		m_normGL[j] = m_cloud[i][0];
+		m_normGL[j+1] = m_cloud[i][1];
+		m_normGL[j+2] = m_cloud[i][2];
+		m_normGL[j+3] = m_norms[i][0];
+		m_normGL[j+4] = m_norms[i][1];
+		m_normGL[j+5] = m_norms[i][2];
+		m_normGL[j+6] = m_cloud[i][0] + scale*m_norms[i][0];
+		m_normGL[j+7] = m_cloud[i][1] + scale*m_norms[i][1];
+		m_normGL[j+8] = m_cloud[i][2] + scale*m_norms[i][2];
+		m_normGL[j+9] = m_norms[i][0];
+		m_normGL[j+10] = m_norms[i][1];
+		m_normGL[j+11] = m_norms[i][2];
+		j += 12;
+	}
+
+	return static_cast<const GLfloat*>(m_normGL.data());
+}
+//---------------------------------------------------------
 
 
 

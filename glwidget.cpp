@@ -59,7 +59,11 @@
 //#include <math.h>
 
 
+//#define DBUG_CLOUD_NORMS_H
+
 bool GLWidget::m_transparent = false;
+
+//---------------------------------------------------------
 
 GLWidget::GLWidget(QWidget *parent)
 	: QOpenGLWidget(parent),
@@ -80,21 +84,25 @@ GLWidget::GLWidget(QWidget *parent)
 		setFormat(fmt);
 	}
 }
+//---------------------------------------------------------
 
 GLWidget::~GLWidget()
 {
 	cleanup();
 }
+//---------------------------------------------------------
 
 QSize GLWidget::minimumSizeHint() const
 {
 	return QSize(50, 50);
 }
+//---------------------------------------------------------
 
 QSize GLWidget::sizeHint() const
 {
 	return QSize(400, 400);
 }
+//---------------------------------------------------------
 
 static void qNormalizeAngle(int &angle)
 {
@@ -104,6 +112,7 @@ static void qNormalizeAngle(int &angle)
 		angle -= 360 * 16;
 }
 
+//---------------------------------------------------------
 
 void GLWidget::setVectRotation(int angle, QVector3D v)
 {
@@ -114,6 +123,7 @@ void GLWidget::setVectRotation(int angle, QVector3D v)
 	emit vectRotationChanged(angle, v);
 	update();
 }
+//---------------------------------------------------------
 
 void GLWidget::setVectTranslation(QVector3D v)
 {
@@ -123,6 +133,7 @@ void GLWidget::setVectTranslation(QVector3D v)
 	emit vectTranslationChanged(v);
 	update();
 }
+//---------------------------------------------------------
 
 void GLWidget::cleanup()
 {
@@ -135,6 +146,7 @@ void GLWidget::cleanup()
 	m_program = 0;
 	doneCurrent();
 }
+//---------------------------------------------------------
 
 static const char *vertexShaderSourceCore =
 		"#version 150\n"
@@ -195,16 +207,13 @@ static const char *fragmentShaderSource =
 		"   gl_FragColor = vec4(col, 1.0);\n"
 		"}\n";
 
+
+//---------------------------------------------------------
+
 void GLWidget::initializeGL()
 {
-	// In this example the widget's corresponding top-level window can change
-	// several times during the widget's lifetime. Whenever this happens, the
-	// QOpenGLWidget's associated context is destroyed and a new one is created.
-	// Therefore we have to be prepared to clean up the resources on the
-	// aboutToBeDestroyed() signal, instead of the destructor. The emission of
-	// the signal will be followed by an invocation of initializeGL() where we
-	// can recreate all resources.
-	connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &GLWidget::cleanup);
+	connect(context(), &QOpenGLContext::aboutToBeDestroyed,
+			this, &GLWidget::cleanup);
 
 	initializeOpenGLFunctions();
 	glClearColor(0, 0, 0, m_transparent ? 0 : 1);
@@ -227,31 +236,30 @@ void GLWidget::initializeGL()
 	m_lightPosLoc = m_program->uniformLocation("lightPos");
 	m_colorLoc = m_program->uniformLocation("vertColor");
 
-	// Create a vertex array object. In OpenGL ES 2.0 and OpenGL 2.x
-	// implementations this is optional and support may not be present
-	// at all. Nonetheless the below code works in all cases and makes
-	// sure there is a VAO when one is needed.
+
 	m_cloudVao.create();
 	QOpenGLVertexArrayObject::Binder vaoBinderCloud(&m_cloudVao);
 	// Setup our vertex buffer object for point cloud.
 	m_cloudVbo.create();
 	m_cloudVbo.bind();
-	m_cloudVbo.allocate(m_cloud.vertGLData(), m_cloud.count()*sizeof(GLfloat));
+	m_cloudVbo.allocate(
+				m_cloud.vertGLData(), 6*m_cloud.pointCount()*sizeof(GLfloat));
 	// Store the vertex attribute bindings for the program.
 	setupVertexAttribs(m_cloudVbo);
 
-
 	m_cloudBBoxVao.create();
 	QOpenGLVertexArrayObject::Binder vaoBinderCloudBBox(&m_cloudBBoxVao);
-	m_cloudBBoxVbo.create();
-	m_cloudBBoxVbo.bind();
-	m_cloudBBoxVbo.allocate(
-				m_cloudBBox.vertGLData(), m_cloudBBox.count()*sizeof(GLfloat));
-	m_cloudBBoxEbo.create();
-	m_cloudBBoxEbo.bind();
-	int idxCount = (m_cloudBBox.vertCount()==0) ? 0 : 24;
-	m_cloudBBoxEbo.allocate(m_cloudBBox.elemGLData(), idxCount*sizeof(GLuint));
-	setupVertexAttribs(m_cloudBBoxVbo);
+	setGLBBox(m_cloudBBox, m_cloudBBoxVbo, m_cloudBBoxEbo);
+
+#ifdef DBUG_CLOUD_NORMS_H
+	m_cloudNormsVao.create();
+	QOpenGLVertexArrayObject::Binder vaoBinderCloudNorms(&m_cloudNormsVao);
+	m_cloudNormsVbo.create();
+	m_cloudNormsVbo.bind();
+	m_cloudNormsVbo.allocate(
+				m_cloud.normGLData(1.0f), 12*m_cloud.pointCount()*sizeof(GLfloat));
+	setupVertexAttribs(m_cloudNormsVbo);
+#endif
 
 
 	m_rotVect = QVector3D(0.0f,0.0f,0.0f);
@@ -265,23 +273,9 @@ void GLWidget::initializeGL()
 	m_program->setUniformValue(m_lightPosLoc, QVector3D(0, 0, 70));
 
 	m_program->release();
-
 }
 
-void GLWidget::setupVertexAttribs(QOpenGLBuffer vbo)
-{
-	vbo.bind();
-	QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-	f->glEnableVertexAttribArray(0);
-	f->glEnableVertexAttribArray(1);
-	f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), 0);
-	f->glVertexAttribPointer(
-				1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat),
-				reinterpret_cast<void *>(3 * sizeof(GLfloat)));		
-	vbo.release();
-
-}
-
+//---------------------------------------------------------
 void GLWidget::paintGL()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -306,21 +300,30 @@ void GLWidget::paintGL()
 	QOpenGLVertexArrayObject::Binder vaoBinder2(&m_cloudBBoxVao);
 	int idxCount = (m_cloudBBox.vertCount()==0) ? 0 : 24;
 	glDrawElements(GL_LINES, idxCount, GL_UNSIGNED_INT, 0);
-	glDrawElements(GL_LINES, idxCount, GL_UNSIGNED_INT, m_cloudBBox.elemGLData());
+//	glDrawElements(GL_LINES, idxCount, GL_UNSIGNED_INT, m_cloudBBox.elemGLData());
+
+#ifdef DBUG_CLOUD_NORMS_H
+	m_program->setUniformValue(m_colorLoc, QVector3D(0.0f, 0.0f, 1.0f));
+	QOpenGLVertexArrayObject::Binder vaoBinder3(&m_cloudNormsVao);
+	glDrawArrays(GL_LINES, 0, 2*m_cloud.pointCount());
+#endif
 
 	m_program->release();
 }
+//---------------------------------------------------------
 
 void GLWidget::resizeGL(int w, int h)
 {
 	m_proj.setToIdentity();
 	m_proj.perspective(45.0f, GLfloat(w) / h, 0.01f, 100.0f);
 }
+//---------------------------------------------------------
 
 void GLWidget::mousePressEvent(QMouseEvent *event)
 {
 	m_lastMousePos = event->pos();
 }
+//---------------------------------------------------------
 
 void GLWidget::mouseMoveEvent(QMouseEvent *event)
 {
@@ -342,31 +345,72 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
 
 	m_lastMousePos = event->pos();
 }
+//---------------------------------------------------------
 
 void GLWidget::wheelEvent(QWheelEvent *event)
 {
 	setVectTranslation(QVector3D(0.0f,0.0f,event->delta()));
 }
-
+//---------------------------------------------------------
 
 void GLWidget::setCloud(CloudPtr cloud)
 {
 	m_cloud.create(cloud);
 	m_cloudVbo.create();
 	m_cloudVbo.bind();
-	m_cloudVbo.allocate(m_cloud.vertGLData(), m_cloud.count()*sizeof(GLfloat));
+	m_cloudVbo.allocate(
+				m_cloud.vertGLData(),
+				6*m_cloud.pointCount()*sizeof(GLfloat));
 	setupVertexAttribs(m_cloudVbo);
 
+
 	m_cloudBBox.set(m_cloud);
-	m_cloudBBoxVbo.create();
-	m_cloudBBoxVbo.bind();
-	m_cloudBBoxVbo.allocate(
-				m_cloudBBox.vertGLData(), m_cloudBBox.count()*sizeof(GLfloat));
-	m_cloudBBoxEbo.create();
-	m_cloudBBoxEbo.bind();
-	int idxCount = (m_cloudBBox.vertCount()==0) ? 0 : 24;
-	m_cloudBBoxEbo.allocate(m_cloudBBox.elemGLData(), idxCount*sizeof(GLuint));
-	setupVertexAttribs(m_cloudBBoxVbo);
+	setGLBBox(m_cloudBBox, m_cloudBBoxVbo, m_cloudBBoxEbo);
+
+
+#ifdef DBUG_CLOUD_NORMS_H
+	m_cloudNormsVbo.create();
+	m_cloudNormsVbo.bind();
+	float scale = 2e-3*m_cloudBBox.diagonalSize();
+	m_cloudNormsVbo.allocate(
+				m_cloud.normGLData(scale),
+				12*m_cloud.pointCount()*sizeof(GLfloat));
+	setupVertexAttribs(m_cloudNormsVbo);
+#endif
+
 
 	update();
 }
+
+//---------------------------------------------------------
+
+void GLWidget::setGLBBox(
+		BoundBox bBox, QOpenGLBuffer vbo, QOpenGLBuffer ebo)
+{
+	vbo.create();
+	vbo.bind();
+	vbo.allocate(bBox.vertGLData(), 6*bBox.vertCount()*sizeof(GLfloat));
+	ebo.create();
+	ebo.bind();
+	int idxCount = (bBox.vertCount()==0) ? 0 : 24;
+	ebo.allocate(bBox.elemGLData(), idxCount*sizeof(GLuint));
+	setupVertexAttribs(vbo);
+
+}
+
+//---------------------------------------------------------
+
+void GLWidget::setupVertexAttribs(QOpenGLBuffer vbo)
+{
+	vbo.bind();
+	QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+	f->glEnableVertexAttribArray(0);
+	f->glEnableVertexAttribArray(1);
+	f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), 0);
+	f->glVertexAttribPointer(
+				1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat),
+				reinterpret_cast<void *>(3 * sizeof(GLfloat)));
+	vbo.release();
+
+}
+//---------------------------------------------------------

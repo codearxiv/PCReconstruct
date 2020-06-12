@@ -6,6 +6,8 @@
 //#include <QVector3D>
 //#include <Eigen/Dense>
 //#include <array>
+#include "pt_to_pt_distsq.h"
+
 
 class Cloud;
 
@@ -23,8 +25,10 @@ public:
 	void set(const float minBBox[3], const float maxBBox[3]);
 	void set(Cloud cloud);
 
-	int count() const { return 6 * m_vertCount; }
 	int vertCount() const { return m_vertCount; }
+	float diagonalSize() const {
+		return sqrt(pt_to_pt_distsq(m_minBBox, m_maxBBox));
+	}
 
 	const GLfloat *vertGLData();
 	const GLuint *elemGLData() const

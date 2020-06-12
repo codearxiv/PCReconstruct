@@ -39,6 +39,7 @@ SOURCES += \
 	mainwindow.cpp \
 	utils/Plane.cpp \
 	utils/cloud_normal.cpp \
+	utils/pt_to_pt_distsq.cpp \
 	window.cpp
 
 HEADERS += \

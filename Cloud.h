@@ -22,7 +22,7 @@ public:
 	Cloud();
 	const Vector3f point(size_t idx) const { return m_cloud[idx]; }
 	const GLfloat *vertGLData();
-	size_t count() const { return 6 * m_cloud.size(); }
+	const GLfloat *normGLData(float scale);
 	size_t pointCount() const { return m_cloud.size(); }
 	void create(CloudPtr cloud);
 
@@ -36,6 +36,7 @@ private:
 	vector<Vector3f> m_cloud;
 	vector<Vector3f> m_norms;
 	vector<GLfloat> m_vertGL;
+	vector<GLfloat> m_normGL;
 };
 
 

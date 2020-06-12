@@ -21,17 +21,20 @@ const std::array<GLuint, 24> BoundBox::m_elemGL = {
 	6, 7
 };
 
+//---------------------------------------------------------
 
 BoundBox::BoundBox(const float minBBox[3], const float maxBBox[3])
 {
 	set(minBBox, maxBBox);
 }
 
+//---------------------------------------------------------
 
 BoundBox::BoundBox(Cloud cloud)
 {
 	set(cloud);
 }
+//---------------------------------------------------------
 
 
 void BoundBox::set(const float minBBox[3], const float maxBBox[3])
@@ -43,6 +46,7 @@ void BoundBox::set(const float minBBox[3], const float maxBBox[3])
 	m_vertCount = 8;
 }
 
+//---------------------------------------------------------
 
 void BoundBox::set(Cloud cloud)
 {
@@ -62,6 +66,7 @@ void BoundBox::set(Cloud cloud)
 
 }
 
+//---------------------------------------------------------
 
 const GLfloat *BoundBox::vertGLData() {
 	for(int i = 0, j = 0; i<m_vertCount; ++i){
@@ -77,4 +82,5 @@ const GLfloat *BoundBox::vertGLData() {
 	}
 	return static_cast<const GLfloat*>(m_vertGL.data());
 }
+//---------------------------------------------------------
 
