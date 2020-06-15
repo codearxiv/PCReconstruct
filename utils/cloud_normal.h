@@ -8,6 +8,7 @@
 //#include <Eigen/Dense>
 
 Eigen::Vector3f cloud_normal(
-		Eigen::Vector3f p0, const Eigen::Matrix3Xf& cloud, int niters, double zeroTol = 0.0);
+		const Eigen::Vector3f& p0, const Eigen::Matrix3Xf& cloud,
+		int niters, double zeroTol = 0.0);
 
 #endif // CLOUD_NORMAL_H

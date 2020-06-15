@@ -40,9 +40,10 @@ using Matrix3Xf = Matrix<float, 3, Eigen::Dynamic>;
 
 */
 
-Vector3f cloud_normal(Vector3f p0, const Matrix3Xf& cloud, int niters, double zeroTol)
+Vector3f cloud_normal(const Vector3f& p0, const Matrix3Xf& cloud,
+					  int niters, double zeroTol)
 {
-	const float ONE_OVER_SQRT3 = 1.0f/sqrt(3.0f);
+	static const float ONE_OVER_SQRT3 = 1.0f/sqrt(3.0f);
 
 	Vector3f N(ONE_OVER_SQRT3, ONE_OVER_SQRT3, ONE_OVER_SQRT3);
 

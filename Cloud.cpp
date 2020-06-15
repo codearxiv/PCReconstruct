@@ -1,8 +1,12 @@
 //     Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
 //     See LICENSE included.
 
-#include "Cloud.h"
 //#include <qmath.h>
+
+#include "Cloud.h"
+#include "cloud_normal.h"
+#include "Cover_Tree.h"
+#include "CoverTreePoint.h"
 
 template<typename T> using vector = std::vector<T>;
 using Vector3f = Eigen::Vector3f;
@@ -18,14 +22,16 @@ Cloud::Cloud()
 
 //---------------------------------------------------------
 
-void Cloud::create(CloudPtr cloud)
+void Cloud::create(CloudPtr cloud, int normIters, int normKNN)
 {
+
 	Vector3f n(0.0f, 0.0f, 1.0f);
+
+	size_t npoints = cloud->points.size();
+
 	float centx = 0.0f;
 	float centy = 0.0f;
 	float centz = 0.0f;
-
-	size_t npoints = cloud->points.size();
 
 	for(size_t i = 0; i < npoints; ++i){
 		centx = centx + cloud->points[i].x;
@@ -34,7 +40,7 @@ void Cloud::create(CloudPtr cloud)
 	}
 	centx = centx/float(npoints);
 	centy = centy/float(npoints);
-	centz = centz/float(npoints);
+	centz = centz/float(npoints);	
 
 	for(size_t i = 0; i < cloud->points.size(); ++i){
 		Vector3f v;
@@ -87,5 +93,10 @@ const GLfloat *Cloud::normGLData(float scale) {
 }
 //---------------------------------------------------------
 
-
+void Cloud::addPoint(const Vector3f &v, const Vector3f &n)
+{
+	m_cloud.push_back(v);
+	m_norms.push_back(n);
+}
+//---------------------------------------------------------
 

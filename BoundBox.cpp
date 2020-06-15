@@ -6,21 +6,6 @@
 using Vector3f = Eigen::Vector3f;
 
 
-const std::array<GLuint, 24> BoundBox::m_elemGL = {
-	0, 1,
-	0, 2,
-	0, 4,
-	1, 3,
-	1, 5,
-	2, 3,
-	2, 6,
-	3, 7,
-	4, 5,
-	4, 6,
-	5, 7,
-	6, 7
-};
-
 //---------------------------------------------------------
 
 BoundBox::BoundBox(const float minBBox[3], const float maxBBox[3])

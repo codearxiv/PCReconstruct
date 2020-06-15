@@ -1,18 +1,19 @@
 //     Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
 //     See LICENSE included.
 
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
-#include "window.h"
-//#include "glwidget.h"
 
-#include <pcl/io/pcd_io.h>
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
+//#include <pcl/io/pcd_io.h>
+//#include <pcl/point_cloud.h>
+//#include <pcl/point_types.h>
 //#include <QMenuBar>
 //#include <QMenu>
 //#include <QMessageBox>
 //#include <QMainWindow>
+
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
+#include "window.h"
+//#include "glwidget.h"
 
 
 MainWindow::MainWindow(QWidget *parent) :

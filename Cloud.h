@@ -24,14 +24,14 @@ public:
 	const GLfloat *vertGLData();
 	const GLfloat *normGLData(float scale);
 	size_t pointCount() const { return m_cloud.size(); }
-	void create(CloudPtr cloud);
-
+	void create(CloudPtr cloud, int normIters=10, int normKNN=10);
+	void addPoint(const Vector3f &v, const Vector3f &n);
+	void refreshNorms(int normIters=10, int normKNN=10);
+	void pointKNN(
+			int k, const Vector3f &v, vector<Vector3f>& neighs);
+	void pointNeighboursWithin(
+			double radius, const Vector3f &v, vector<Vector3f>& neighs);
 private:
-	void addPoint(const Vector3f &v, const Vector3f &n)
-	{
-		m_cloud.push_back(v);
-		m_norms.push_back(n);
-	}
 
 	vector<Vector3f> m_cloud;
 	vector<Vector3f> m_norms;
