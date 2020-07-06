@@ -1,5 +1,7 @@
 //-----------------------------------------------------------
 //     Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
+//     See LICENSE included.
+
 //
 //  Brief description
 //     Point on a cover tree stored as a vector in Eigen.

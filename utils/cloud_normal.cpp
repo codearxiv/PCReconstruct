@@ -4,11 +4,13 @@
 #include "cloud_normal.h"
 
 using Eigen::Vector3f;
-using Eigen::Matrix;
+//using Eigen::Matrix;
 using Eigen::Index;
 using Eigen::Ref;
 
-using Matrix3Xf = Matrix<float, 3, Eigen::Dynamic>;
+//using Matrix3Xf = Matrix<float, 3, Eigen::Dynamic>;
+using Vector3f = Eigen::Vector3f;
+template<typename T> using vector = std::vector<T>;
 
 
 //-------------------------------------------------------------------------
@@ -34,13 +36,13 @@ using Matrix3Xf = Matrix<float, 3, Eigen::Dynamic>;
 
 
    @param[in]  p0: point to query normal.
-   @param[in]  cloud: point cloud of n points as a 3 x n matrix.
+   @param[in]  cloud: point cloud of n points.
    @param[in]  niters: number of iterations to optimize the normal.
    @param[in]  zeroTol: tolerance to zero vector length.
 
 */
 
-Vector3f cloud_normal(const Vector3f& p0, const Matrix3Xf& cloud,
+Vector3f cloud_normal(const Vector3f& p0, const vector<Vector3f>& cloud,
 					  int niters, double zeroTol)
 {
 	static const float ONE_OVER_SQRT3 = 1.0f/sqrt(3.0f);
@@ -50,7 +52,7 @@ Vector3f cloud_normal(const Vector3f& p0, const Matrix3Xf& cloud,
 	Vector3f X(0.0f, 0.0f, 0.0f);
 	Vector3f V;
 	for(Index i=0; i < cloud.cols(); ++i) {
-		V = cloud.col(i) - p0;
+		V = cloud[i] - p0;
 		float v4 = V.dot(V);
 		v4 = v4*v4;
 		if(v4 <= zeroTol) continue;

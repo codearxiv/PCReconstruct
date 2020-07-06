@@ -13,7 +13,7 @@ using Vector3f = Eigen::Vector3f;
 
 //---------------------------------------------------------
 
-Cloud::Cloud()
+Cloud::Cloud() : CT()
 {
 	m_cloud.reserve(2500);
 	m_norms.reserve(2500);
@@ -22,7 +22,7 @@ Cloud::Cloud()
 
 //---------------------------------------------------------
 
-void Cloud::create(CloudPtr cloud, int normIters, int normKNN)
+void Cloud::create(CloudPtr cloud)
 {
 
 	Vector3f n(0.0f, 0.0f, 1.0f);
@@ -47,11 +47,43 @@ void Cloud::create(CloudPtr cloud, int normIters, int normKNN)
 		v[0] = cloud->points[i].x - centx;
 		v[1] = cloud->points[i].y - centy;
 		v[2] = cloud->points[i].z - centz;
-		addPoint(v, n);
+		addPoint(v, n);	
 	}
 
 }
 
+//---------------------------------------------------------
+
+Vector3f Cloud::approxNorm(
+	const Vector3f& p, int iters, int kNN)
+{
+	vector<CoverTreePoint<Vector3f>> neighs = kNearestNeighbors(p, kNN);	
+	vector<Vector3f> vneighs(neighs.size());	
+    typename vector<CoverTreePoint<Vector3f>>::const_iterator it;
+    for(it=neighs.begin(); it!=neighs.end(); ++it){
+		vneighs.push_back( it->getVec() );
+	}
+	return cloud_normal(p, vneighs, iters);
+}
+//---------------------------------------------------------
+
+Vector3f Cloud::approxCloudNorms(int iters, int kNN)
+{
+	vector<Vector3f> vneighs;	
+
+	for(size_t i = 0; i < m_cloud.size(); ++i){
+		Vector3f p = m_cloud[i];
+		vector<CoverTreePoint<Vector3f>> neighs = kNearestNeighbors(p, kNN);	
+		vneighs.reserve(neighs.size());
+		vneighs.resize(0);
+		typename vector<CoverTreePoint<Vector3f>>::const_iterator it;
+		for(it=neighs.begin(); it!=neighs.end(); ++it){
+			vneighs.push_back( it->getVec() );
+		}
+		m_norms[i] = cloud_normal(p, vneighs, iters);
+	}
+
+}
 //---------------------------------------------------------
 
 const GLfloat *Cloud::vertGLData() {
@@ -90,13 +122,6 @@ const GLfloat *Cloud::normGLData(float scale) {
 	}
 
 	return static_cast<const GLfloat*>(m_normGL.data());
-}
-//---------------------------------------------------------
-
-void Cloud::addPoint(const Vector3f &v, const Vector3f &n)
-{
-	m_cloud.push_back(v);
-	m_norms.push_back(n);
 }
 //---------------------------------------------------------
 
