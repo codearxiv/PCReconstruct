@@ -48,90 +48,47 @@
 **
 ****************************************************************************/
 
-//     Peter Beben: modified this file for the purposes of this project.
-//     Views ALL points in the point cloud without any pruning (so it
-//     must be small enough to fit into video memory!!).
+#include "Window.h"
+#include "GLWidget.h"
+//#include "mainwindow.h"
+//#include <QVBoxLayout>
+//#include <QHBoxLayout>
+//#include <QKeyEvent>
+//#include <QPushButton>
+//#include <QDesktopWidget>
+//#include <QApplication>
+//#include <QMessageBox>
+//#include <QMainWindow>
+#include "MessageLogger.h"
 
-#ifndef GLWIDGET_H
-#define GLWIDGET_H
-
-//#include <QOpenGLWidget>
-//#include <QOpenGLFunctions>
-//#include <QOpenGLVertexArrayObject>
-//#include <QOpenGLBuffer>
-//#include <QMatrix4x4>
-//#include <pcl/point_types.h>
-//#include <pcl/point_cloud.h>
-#include "BoundBox.h"
-#include "Cloud.h"
-
-QT_FORWARD_DECLARE_CLASS(QOpenGLShaderProgram)
-
-class GLWidget : public QOpenGLWidget, protected QOpenGLFunctions
+Window::Window(QMainWindow *mw, MessageLogger* msgLogger)
+	: mainWindow(mw), m_msgLogger(msgLogger)
 {
-    Q_OBJECT
+	glWidget = new GLWidget(this, msgLogger);
+	QWidget *w = new QWidget;
+	//QVBoxLayout *mainLayout = new QVBoxLayout;
+    QHBoxLayout *container = new QHBoxLayout;
+	//LogWindow *logWindow = new LogWindow;
 
-	typedef pcl::PointCloud<pcl::PointXYZ>::Ptr CloudPtr;
+	container->addWidget(glWidget);
+    w->setLayout(container);
+	//mainLayout->addWidget(w);
+	//setLayout(mainLayout);
+	setLayout(container);
 
-public:
-	GLWidget(QWidget *parent = 0);
-	~GLWidget();
+	setWindowTitle(tr("PCReconstruct"));
 
-	static bool isTransparent() { return m_transparent; }
-	static void setTransparent(bool t) { m_transparent = t; }
+	connect(this, &Window::cloudChanged, glWidget, &GLWidget::setCloud);
+	connect(this, &Window::cloudQueried, glWidget, &GLWidget::getCloud);
 
-	QSize minimumSizeHint() const override;
-	QSize sizeHint() const override;
+}
 
-public slots:
-	void setVectRotation(int angle, QVector3D v);
-	void setVectTranslation(QVector3D v);
-	void cleanup();
-	void setCloud(CloudPtr cloud);
 
-signals:
-	void vectRotationChanged(int angle, QVector3D v);
-	void vectTranslationChanged(QVector3D v);
+void Window::keyPressEvent(QKeyEvent *e)
+{
+    if (e->key() == Qt::Key_Escape)
+        close();
+    else
+        QWidget::keyPressEvent(e);
+}
 
-protected:
-	void initializeGL() override;
-	void paintGL() override;
-	void resizeGL(int width, int height) override;
-	void mousePressEvent(QMouseEvent *event) override;
-	void mouseMoveEvent(QMouseEvent *event) override;
-	void wheelEvent(QWheelEvent *event) override;
-
-private:
-	void setupVertexAttribs(QOpenGLBuffer vbo) ;
-	void setGLBBox(
-			BoundBox bBox, QOpenGLBuffer vbo, QOpenGLBuffer ebo);
-
-	bool m_core;
-	int m_vRot;
-	QPoint m_lastMousePos;
-	//QPoint m_lastWheelPos;
-	Cloud m_cloud;
-	BoundBox m_cloudBBox;
-	QOpenGLVertexArrayObject m_cloudVao;
-	QOpenGLVertexArrayObject m_cloudBBoxVao;
-	QOpenGLVertexArrayObject m_cloudNormsVao;
-	QOpenGLBuffer m_cloudVbo;
-	QOpenGLBuffer m_cloudBBoxVbo;
-	QOpenGLBuffer m_cloudBBoxEbo;
-	QOpenGLBuffer m_cloudNormsVbo;
-	QOpenGLShaderProgram *m_program;
-	int m_projMatrixLoc;
-	int m_mvMatrixLoc;
-	int m_normalMatrixLoc;
-	int m_lightPosLoc;
-	int m_colorLoc;
-	QMatrix4x4 m_proj;
-	QMatrix4x4 m_camera;
-	QMatrix4x4 m_world;
-	QVector3D m_rotVect;
-	QVector3D m_movVect;
-	static bool m_transparent;
-
-};
-
-#endif

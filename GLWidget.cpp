@@ -47,17 +47,21 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+/****************************************************************************
+**     Peter Beben: modified this file for the purposes of this project.
+**     Views ALL points in the point cloud without any pruning (thus it
+**     must be small enough to fit into video memory!!).
+****************************************************************************/
 
-//     Peter Beben: modified this file for the purposes of this project.
-//     Views ALL points in the point cloud without any pruning (so it
-//     must be small enough to fit into video memory!!).
-
-#include "glwidget.h"
+#include "GLWidget.h"
 //#include <QMouseEvent>
 //#include <QOpenGLShaderProgram>
 //#include <QCoreApplication>
+//#include <QDebug>
 //#include <math.h>
-
+#include "BoundBox.h"
+#include "Cloud.h"
+#include "MessageLogger.h"
 
 //#define DBUG_CLOUD_NORMS_H
 
@@ -65,15 +69,17 @@ bool GLWidget::m_transparent = false;
 
 //---------------------------------------------------------
 
-GLWidget::GLWidget(QWidget *parent)
+GLWidget::GLWidget(QWidget *parent, MessageLogger* msgLogger)
 	: QOpenGLWidget(parent),
+	  m_msgLogger(msgLogger),
 	  m_vRot(0),
 	  m_program(0),
 	  m_rotVect(0.0f,0.0f,0.0f),
 	  m_movVect(0.0f,0.0f,0.0f),
 	  m_cloudVbo(QOpenGLBuffer::VertexBuffer),
 	  m_cloudBBoxVbo(QOpenGLBuffer::VertexBuffer),
-	  m_cloudBBoxEbo(QOpenGLBuffer::IndexBuffer)
+	  m_cloudBBoxEbo(QOpenGLBuffer::IndexBuffer),
+	  m_cloud(msgLogger)
 {
 	m_core = QSurfaceFormat::defaultFormat().profile() == QSurfaceFormat::CoreProfile;
 	// --transparent causes the clear color to be transparent. Therefore, on systems that
@@ -83,6 +89,8 @@ GLWidget::GLWidget(QWidget *parent)
 		fmt.setAlphaBufferSize(8);
 		setFormat(fmt);
 	}
+
+	//connect(this, &GLWidget::logMessage, m_msgLogger, &MessageLogger::logMessage);
 }
 //---------------------------------------------------------
 
@@ -161,7 +169,7 @@ static const char *vertexShaderSourceCore =
 		"   vert = vertex.xyz;\n"
 		"   vertNormal = normalMatrix * normal;\n"
 		"   gl_Position = projMatrix * mvMatrix * vertex;\n"
-		"   gl_PointSize = 10.0/(0.1+2.0*gl_Position.z);\n"
+		"   gl_PointSize = 10.0/(0.1+2.0*abs(gl_Position.z));\n"
 		"}\n";
 
 static const char *fragmentShaderSourceCore =
@@ -191,7 +199,7 @@ static const char *vertexShaderSource =
 		"   vert = vertex.xyz;\n"
 		"   vertNormal = normalMatrix * normal;\n"
 		"   gl_Position = projMatrix * mvMatrix * vertex;\n"
-		"   gl_PointSize = 10.0/(0.1+2.0*gl_Position.z);\n"
+		"   gl_PointSize = 10.0/(0.1+2.0*abs(gl_Position.z));\n"
 		"}\n";
 
 static const char *fragmentShaderSource =
@@ -355,14 +363,15 @@ void GLWidget::wheelEvent(QWheelEvent *event)
 
 void GLWidget::setCloud(CloudPtr cloud)
 {
-	m_cloud.create(cloud);
+	m_cloud.fromPCL(cloud);
+	m_cloud.buildSpatialIndex();
+
 	m_cloudVbo.create();
 	m_cloudVbo.bind();
 	m_cloudVbo.allocate(
 				m_cloud.vertGLData(),
 				6*m_cloud.pointCount()*sizeof(GLfloat));
 	setupVertexAttribs(m_cloudVbo);
-
 
 	m_cloudBBox.set(m_cloud);
 	setGLBBox(m_cloudBBox, m_cloudBBoxVbo, m_cloudBBoxEbo);
@@ -376,10 +385,18 @@ void GLWidget::setCloud(CloudPtr cloud)
 				m_cloud.normGLData(scale),
 				12*m_cloud.pointCount()*sizeof(GLfloat));
 	setupVertexAttribs(m_cloudNormsVbo);
+	m_cloud.approxCloudNorms(3, 10);
 #endif
 
 
 	update();
+}
+
+//---------------------------------------------------------
+
+void GLWidget::getCloud(CloudPtr& cloud)
+{
+	m_cloud.toPCL(cloud);
 }
 
 //---------------------------------------------------------

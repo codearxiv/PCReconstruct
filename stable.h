@@ -18,6 +18,7 @@
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QCommandLineOption>
+#include <QDebug>
 #include <QDesktopWidget>
 #include <QHBoxLayout>
 #include <QKeyEvent>
@@ -28,6 +29,7 @@
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QMouseEvent>
+#include <QObject>
 #include <qopengl.h>
 #include <QOpenGLBuffer>
 #include <QOpenGLFunctions>
@@ -41,8 +43,19 @@
 #include <QVector>
 #include <QVector3D>
 #include <QWidget>
+#include <QDockWidget>
+#include <QPlainTextEdit>
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QGraphicsScene>
-#include <vector>
+#include <QtCore/QVariant>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QMainWindow>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QStatusBar>
+#include <QtWidgets/QToolBar>
+#include <QMutex>
+#include <QRecursiveMutex>
+#include <QThread>
+#include <window.h>
 
 #endif

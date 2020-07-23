@@ -7,8 +7,8 @@
 //#include <QCommandLineParser>
 //#include <QCommandLineOption>
 
-#include "glwidget.h"
-#include "mainwindow.h"
+#include "GLWidget.h"
+#include "MainWindow.h"
 
 int main(int argc, char *argv[])
 {

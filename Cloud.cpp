@@ -1,29 +1,59 @@
 //     Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
 //     See LICENSE included.
 
-//#include <qmath.h>
-
 #include "Cloud.h"
+#include "BuildSpatialIndex.h"
 #include "cloud_normal.h"
-#include "Cover_Tree.h"
-#include "CoverTreePoint.h"
 
 template<typename T> using vector = std::vector<T>;
 using Vector3f = Eigen::Vector3f;
 
 //---------------------------------------------------------
 
-Cloud::Cloud() : CT()
+Cloud::Cloud(MessageLogger* msgLogger, bool threadSafe)
+	: QObject(), m_CT(nullptr), m_msgLogger(msgLogger)
 {
 	m_cloud.reserve(2500);
 	m_norms.reserve(2500);
 	m_vertGL.reserve(2500 * 6);
+
+	if( threadSafe ) {
+		m_recMutex = new QRecursiveMutex;
+	}
+	else{
+		m_recMutex = nullptr;
+	}
+
+	connect(this, &Cloud::logMessage, m_msgLogger, &MessageLogger::logMessage);
+	connect(this, &Cloud::logProgress, m_msgLogger, &MessageLogger::logProgress);
 }
 
 //---------------------------------------------------------
 
-void Cloud::create(CloudPtr cloud)
+Cloud::~Cloud()
 {
+	delete m_CT;
+	delete m_recMutex;
+}
+
+//---------------------------------------------------------
+
+void Cloud::clear()
+{
+	QMutexLocker locker(&m_recMutex);
+
+	m_cloud.clear();
+	m_norms.clear();
+	delete m_CT;
+	m_CT = nullptr;
+}
+//---------------------------------------------------------
+
+void Cloud::fromPCL(CloudPtr cloud)
+{
+	QMutexLocker locker(&m_recMutex);
+
+	clear();
 
 	Vector3f n(0.0f, 0.0f, 1.0f);
 
@@ -47,17 +77,92 @@ void Cloud::create(CloudPtr cloud)
 		v[0] = cloud->points[i].x - centx;
 		v[1] = cloud->points[i].y - centy;
 		v[2] = cloud->points[i].z - centz;
-		addPoint(v, n);	
+		//addPoint(v, n);
+		m_cloud.push_back(v);
+		m_norms.push_back(n);
+	}
+
+	if(m_msgLogger != nullptr) {
+		emit logMessage(QString::number(npoints) + " points loaded.");
 	}
 
 }
 
 //---------------------------------------------------------
 
+void Cloud::toPCL(CloudPtr& cloud)
+{
+	QMutexLocker locker(&m_recMutex);
+
+	for(size_t i = 0; i < m_cloud.size(); ++i){
+		pcl::PointXYZ v;
+		v.x = m_cloud[i][0];
+		v.y = m_cloud[i][1];
+		v.z = m_cloud[i][2];
+		cloud->push_back(v);
+	}
+
+}
+
+//---------------------------------------------------------
+
+void Cloud::addPoint(const Vector3f& v, const Vector3f& n)
+{
+	QMutexLocker locker(&m_recMutex);
+
+	m_cloud.push_back(v);
+	m_norms.push_back(n);
+
+	if( m_CT != nullptr ) {
+		CoverTreePoint<Vector3f> cp(v, m_cloud.size());
+		m_CT->insert(cp);
+	}
+}
+
+//---------------------------------------------------------
+
+void Cloud::buildSpatialIndex()
+{
+	QMutexLocker locker(&m_recMutex);
+
+	if( m_CT != nullptr ) {
+		delete m_CT;
+		m_CT = nullptr;
+	}
+
+	m_CT = new CoverTree<CoverTreePoint<Vector3f>>();
+
+	size_t npoints = m_cloud.size();
+	int threshold = 0;
+
+	for(size_t i = 0; i < npoints; ++i){
+//		break;
+		// Log progress
+		QCoreApplication::processEvents();
+		if(m_msgLogger != nullptr) {
+			emit logProgress(
+						"Building cloud spatial index",
+						i, npoints, 5, threshold);
+			//***
+			if(threshold > 25) break;
+		}
+
+		Vector3f v;
+		v[0] = m_cloud[i][0];
+		v[1] = m_cloud[i][1];
+		v[2] = m_cloud[i][2];
+		CoverTreePoint<Vector3f> cp(v, i);
+		m_CT->insert(cp);
+	}
+}
+//---------------------------------------------------------
+
 Vector3f Cloud::approxNorm(
 	const Vector3f& p, int iters, int kNN)
 {
-	vector<CoverTreePoint<Vector3f>> neighs = kNearestNeighbors(p, kNN);	
+	assert(m_CT != nullptr);
+	CoverTreePoint<Vector3f> cp(p, 0);
+	vector<CoverTreePoint<Vector3f>> neighs = m_CT->kNearestNeighbors(cp, kNN);
 	vector<Vector3f> vneighs(neighs.size());	
     typename vector<CoverTreePoint<Vector3f>>::const_iterator it;
     for(it=neighs.begin(); it!=neighs.end(); ++it){
@@ -67,13 +172,25 @@ Vector3f Cloud::approxNorm(
 }
 //---------------------------------------------------------
 
-Vector3f Cloud::approxCloudNorms(int iters, int kNN)
+void Cloud::approxCloudNorms(int iters, int kNN)
 {
-	vector<Vector3f> vneighs;	
+	assert(m_CT != nullptr);
 
-	for(size_t i = 0; i < m_cloud.size(); ++i){
+	size_t npoints = m_cloud.size();
+	int threshold = 0;
+	vector<Vector3f> vneighs;
+
+	for(size_t i = 0; i < npoints; ++i){
+		// Log progress
+		if(m_msgLogger != nullptr) {
+//			emit logProgress(
+//						"Building cloud normals",
+//						i, npoints, 5, threshold);
+		}
+
 		Vector3f p = m_cloud[i];
-		vector<CoverTreePoint<Vector3f>> neighs = kNearestNeighbors(p, kNN);	
+		CoverTreePoint<Vector3f> cp(p, 0);
+		vector<CoverTreePoint<Vector3f>> neighs = m_CT->kNearestNeighbors(cp, kNN);
 		vneighs.reserve(neighs.size());
 		vneighs.resize(0);
 		typename vector<CoverTreePoint<Vector3f>>::const_iterator it;
@@ -84,9 +201,22 @@ Vector3f Cloud::approxCloudNorms(int iters, int kNN)
 	}
 
 }
+
 //---------------------------------------------------------
 
-const GLfloat *Cloud::vertGLData() {
+void Cloud::pointKNN(
+		const Vector3f& p, int k,
+		vector<CoverTreePoint<Vector3f>>& neighs)
+{
+	assert(m_CT != nullptr);
+	CoverTreePoint<Vector3f> cp(p, 0);
+	neighs = m_CT->kNearestNeighbors(cp, k);
+}
+
+//---------------------------------------------------------
+
+const GLfloat *Cloud::vertGLData()
+{
 	m_vertGL.resize(6 * m_cloud.size());
 	for(size_t i = 0, j = 0; i < m_cloud.size(); ++i){
 		m_vertGL[j] = m_cloud[i][0];
@@ -103,7 +233,8 @@ const GLfloat *Cloud::vertGLData() {
 
 //---------------------------------------------------------
 
-const GLfloat *Cloud::normGLData(float scale) {
+const GLfloat *Cloud::normGLData(float scale)
+{
 	m_normGL.resize(12 * m_cloud.size());
 	for(size_t i = 0, j = 0; i < m_cloud.size(); ++i){
 		m_normGL[j] = m_cloud[i][0];

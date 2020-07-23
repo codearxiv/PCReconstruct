@@ -20,10 +20,10 @@ class BoundBox
 public:
 	BoundBox() { m_vertCount = 0; }
 	BoundBox(const float minBBox[3], const float maxBBox[3]);
-	BoundBox(Cloud cloud);
+	BoundBox(const Cloud& cloud);
 
 	void set(const float minBBox[3], const float maxBBox[3]);
-	void set(Cloud cloud);
+	void set(const Cloud& cloud);
 
 	int vertCount() const { return m_vertCount; }
 	float diagonalSize() const {

@@ -91,7 +91,6 @@ void OrthogonalPursuit::ensureWorkspace()
 */
 
 
-
 void OrthogonalPursuit::operator() (
 		const VectorXf& Y, const MatrixXf& D, Index latm,
 		VectorXf& X, VectorXf& R)

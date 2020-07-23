@@ -7,56 +7,57 @@
 //#include <qopengl.h>
 //#include <vector>
 //#include <Eigen/Dense>
+//#include <QObject>
+//#include <QRecursiveMutex>
 //#include <pcl/point_types.h>
 //#include <pcl/point_cloud.h>
+#include "Cover_Tree.h"
+#include "CoverTreePoint.h"
+#include "MessageLogger.h"
 
-//#include "Cover_Tree.h"
-//#include "CoverTreePoint.h"
-
-template<Class T> Cover_tree;
-template<Class T> CoverTreePoint;
-
-class Cloud
+class Cloud : public QObject
 {
+	Q_OBJECT
+
 	template<typename T> using vector = std::vector<T>;
 	using Index = Eigen::Index;
 	using Vector3f = Eigen::Vector3f;
-
 	typedef pcl::PointCloud<pcl::PointXYZ>::Ptr CloudPtr;
 	
 public:
-	Cloud();
+	Cloud(MessageLogger* msgLogger = nullptr, boold threadSafe = false);
+	~Cloud();
 	const Vector3f point(size_t idx) const { return m_cloud[idx]; }
 	const GLfloat *vertGLData();
 	const GLfloat *normGLData(float scale);
 	size_t pointCount() const { return m_cloud.size(); }
-	void create(CloudPtr cloud);
-	void addPoint(const Vector3f &v, const Vector3f &n)
-	{
-		m_cloud.push_back(v);
-		m_norms.push_back(n);
-		CoverTreePoint<Vector3f> cp(v, m.cloud.size());
-		CT.insert(cp);
-	}
-
+	void clear();
+	void fromPCL(CloudPtr cloud);
+	void toPCL(CloudPtr& cloud);
+	void buildSpatialIndex();
 	void approxCloudNorms(int iters=10, int kNN=10);
+
+	void addPoint(const Vector3f& v, const Vector3f &n);
 	Vector3f approxNorm(
-			const Vector3f &p,int iters=10, int kNN=10
-			Vector3f &n);
-
+			const Vector3f& p, int iters=10, int kNN=10);
 	void pointKNN(
-			const Vector3f &p, int k, 
-			vector<CoverTreePoint<Vector3f>>& neighs)
-	{
-		neighs = kNearestNeighbors(p, k);			
-	}
-private:
+			const Vector3f& p, int k,
+			vector<CoverTreePoint<Vector3f>>& neighs);
 
+signals:
+	void logMessage(const QString& text);
+	void logProgress(const QString& msgPrefix,
+					 size_t i, size_t n, int infreq, int& threshold);
+
+private:
 	vector<Vector3f> m_cloud;
 	vector<Vector3f> m_norms;
 	vector<GLfloat> m_vertGL;
 	vector<GLfloat> m_normGL;
-	CoverTree<CoverTreePoint<Vector3f>> CT;
+	CoverTree<CoverTreePoint<Vector3f>> *m_CT;
+	MessageLogger* m_msgLogger;
+	QRecursiveMutex* m_recMutex;
+
 };
 
 

@@ -15,7 +15,7 @@ BoundBox::BoundBox(const float minBBox[3], const float maxBBox[3])
 
 //---------------------------------------------------------
 
-BoundBox::BoundBox(Cloud cloud)
+BoundBox::BoundBox(const Cloud& cloud)
 {
 	set(cloud);
 }
@@ -33,12 +33,13 @@ void BoundBox::set(const float minBBox[3], const float maxBBox[3])
 
 //---------------------------------------------------------
 
-void BoundBox::set(Cloud cloud)
+void BoundBox::set(const Cloud& cloud)
 {
 	for(int j=0; j<3; ++j) {
 		m_minBBox[j] = float_infinity;
 		m_maxBBox[j] = -float_infinity;
 	}
+
 	size_t numPoints = cloud.pointCount();
 	for(size_t i = 0; i < numPoints; ++i){
 		Vector3f v = cloud.point(i);
@@ -53,7 +54,8 @@ void BoundBox::set(Cloud cloud)
 
 //---------------------------------------------------------
 
-const GLfloat *BoundBox::vertGLData() {
+const GLfloat *BoundBox::vertGLData()
+{
 	for(int i = 0, j = 0; i<m_vertCount; ++i){
 		for(int k = 0; k < 3; ++k){
 			m_vertGL[j+k] =

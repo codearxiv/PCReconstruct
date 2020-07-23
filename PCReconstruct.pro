@@ -28,43 +28,46 @@ PRECOMPILED_HEADER  = stable.h
 
 SOURCES += \
 	BoundBox.cpp \
+	BuildSpatialIndex.cpp \
 	Cloud.cpp \
+	GLWidget.cpp \
+	MainWindow.cpp \
+	MessageLogger.cpp \
+	Window.cpp \
 	dictionarylearning/MatchingPursuit.cpp \
 	dictionarylearning/OrthogonalPursuit.cpp \
 	dictionarylearning/cosine_transform.cpp \
 	dictionarylearning/ksvd.cpp \
 	dictionarylearning/ksvd_dct2D.cpp \
-	glwidget.cpp \
 	main.cpp \
-	mainwindow.cpp \
 	utils/Plane.cpp \
 	utils/cloud_normal.cpp \
-	utils/pt_to_pt_distsq.cpp \
-	window.cpp
+	utils/pt_to_pt_distsq.cpp
 
 HEADERS += \
 	BoundBox.h \
+	BuildSpatialIndex.h \
 	Cloud.h \
 	Cover-Tree/CoverTreePoint.h \
 	Cover-Tree/Cover_Tree.h \
+	GLWidget.h \
+	MainWindow.h \
+	MessageLogger.h \
+	Window.h \
 	constants.h \
 	dictionarylearning/MatchingPursuit.h \
 	dictionarylearning/OrthogonalPursuit.h \
 	dictionarylearning/cosine_transform.h \
 	dictionarylearning/ksvd.h \
 	dictionarylearning/ksvd_dct2D.h \
-	glwidget.h \
-	mainwindow.h \
 	stable.h \
-	ui_mainwindow.h \         \
+	\         \
 	utils/Plane.h \
 	utils/cloud_normal.h \
 	utils/ensure_buffer_size.h \
-	utils/pt_to_pt_distsq.h \
-	window.h
+	utils/pt_to_pt_distsq.h
 
-FORMS += \
-	mainwindow.ui
+FORMS +=
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -104,6 +107,9 @@ LIBS += \
 
 LIBS += -L$$PWD/'../../lib/Boost/lib/'
 LIBS += -L$$PWD/'../../lib/OpenNI2/Lib/' -lOpenNI2
+
+RESOURCES += \
+	PCReconstruct.qrc
 
 
 

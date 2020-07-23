@@ -33,8 +33,8 @@ double CoverTreePoint<T>::distance(const CoverTreePoint<T>& p) const {
 	const T& vec2 = p.getVec();
 	assert(vec2.size() == _vec.size());
 	double distsq = 0.0;
-	for(size_t i=0; i < v.size(); ++i) {
-		distsq += (v[i]-w[i])*(v[i]-w[i]);
+	for(size_t i=0; i < _vec.size(); ++i) {
+		distsq += (_vec[i]-vec2[i])*(_vec[i]-vec2[i]);
 	}
 	return distsq;
 }

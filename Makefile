@@ -265,6 +265,7 @@ Makefile: PCReconstruct.pro C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\win32-msvc
 		C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\lib\Qt5Core.prl \
 		C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\lib\qtmain.prl \
 		C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\build_pass.prf \
+		PCReconstruct.qrc \
 		C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\lib\Qt5Widgetsd.prl \
 		C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\lib\Qt5Guid.prl \
 		C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\lib\Qt5Cored.prl \
@@ -451,6 +452,7 @@ C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\lib\Qt5Gui.prl:
 C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\lib\Qt5Core.prl:
 C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\lib\qtmain.prl:
 C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\build_pass.prf:
+PCReconstruct.qrc:
 C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\lib\Qt5Widgetsd.prl:
 C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\lib\Qt5Guid.prl:
 C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\lib\Qt5Cored.prl:

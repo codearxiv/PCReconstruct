@@ -13,8 +13,6 @@ extern const size_t ALIGNEDX;
 void cosine_transform(
 		const Eigen::VectorXf& U,
 		const Eigen::VectorXf& V,
-//		const Eigen::VectorXf& U,
-//		const Eigen::VectorXf& V,
 		Eigen::Index nfreq,
 		std::vector<float, Eigen::aligned_allocator<float>>& dwork,
 		Eigen::Ref<Eigen::MatrixXf, ALIGNEDX> T

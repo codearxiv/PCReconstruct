@@ -48,44 +48,54 @@
 **
 ****************************************************************************/
 
-#include "window.h"
-#include "glwidget.h"
-//#include "mainwindow.h"
-//#include <QVBoxLayout>
-//#include <QHBoxLayout>
-//#include <QKeyEvent>
-//#include <QPushButton>
-//#include <QDesktopWidget>
-//#include <QApplication>
-//#include <QMessageBox>
-//#include <QMainWindow>
+#ifndef WINDOW_H
+#define WINDOW_H
 
-Window::Window(QMainWindow *mw)
-	: mainWindow(mw)
+//#include <QWidget>
+//#include <pcl/point_types.h>
+//#include <pcl/point_cloud.h>
+#include "MessageLogger.h"
+
+QT_BEGIN_NAMESPACE
+class QSlider;
+class QPushButton;
+class QMainWindow;
+QT_END_NAMESPACE
+
+class GLWidget;
+
+
+class Window : public QWidget
 {
-    glWidget = new GLWidget;
-	QWidget *w = new QWidget;
-	//QVBoxLayout *mainLayout = new QVBoxLayout;
-    QHBoxLayout *container = new QHBoxLayout;
+    Q_OBJECT
 
-	container->addWidget(glWidget);
-    w->setLayout(container);
-	//mainLayout->addWidget(w);
-//	setLayout(mainLayout);
-	setLayout(container);
+	typedef pcl::PointCloud<pcl::PointXYZ>::Ptr CloudPtr;
 
-	setWindowTitle(tr("PCReconstruct"));
+public:
+	Window(QMainWindow *mw, MessageLogger* msgLogger = nullptr);
 
-	connect(this, &Window::cloudChanged, glWidget, &GLWidget::setCloud);
+public slots:
+	void setCloud(CloudPtr cloud)
+	{ emit cloudChanged(cloud); }
 
-}
+	void getCloud(CloudPtr& cloud)
+	{ emit cloudQueried(cloud); }
 
 
-void Window::keyPressEvent(QKeyEvent *e)
-{
-    if (e->key() == Qt::Key_Escape)
-        close();
-    else
-        QWidget::keyPressEvent(e);
-}
+signals:
+	void cloudChanged(CloudPtr cloud);
+	void cloudQueried(CloudPtr& cloud);
 
+protected:
+    void keyPressEvent(QKeyEvent *event) override;
+
+private:
+    QSlider *createSlider();
+
+    GLWidget *glWidget;
+	QMainWindow *mainWindow;
+	MessageLogger* m_msgLogger;
+
+};
+
+#endif

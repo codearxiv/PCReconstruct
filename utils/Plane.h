@@ -1,3 +1,8 @@
+//-----------------------------------------------------------
+//     Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
+//     See LICENSE included.
+
+
 #ifndef PLANE_H
 #define PLANE_H
 
@@ -19,10 +24,10 @@ public:
 
 
 private:
-	Vector3f _p0;
-	Vector3f _norm;
-	Vector3f _u;
-	Vector3f _v;
+	Vector3f m_p0;
+	Vector3f m_norm;
+	Vector3f m_u;
+	Vector3f m_v;
 
 };
 

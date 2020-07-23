@@ -1,0 +1,4 @@
+MessageLogger::~MessageLogger()
+{
+
+}

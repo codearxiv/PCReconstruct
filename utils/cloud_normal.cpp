@@ -51,7 +51,7 @@ Vector3f cloud_normal(const Vector3f& p0, const vector<Vector3f>& cloud,
 
 	Vector3f X(0.0f, 0.0f, 0.0f);
 	Vector3f V;
-	for(Index i=0; i < cloud.cols(); ++i) {
+	for(Index i=0; i < cloud.size(); ++i) {
 		V = cloud[i] - p0;
 		float v4 = V.dot(V);
 		v4 = v4*v4;
