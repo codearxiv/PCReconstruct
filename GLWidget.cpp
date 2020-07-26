@@ -63,7 +63,7 @@
 #include "Cloud.h"
 #include "MessageLogger.h"
 
-//#define DBUG_CLOUD_NORMS_H
+#define DBUG_CLOUD_NORMS_H
 
 bool GLWidget::m_transparent = false;
 
@@ -169,7 +169,8 @@ static const char *vertexShaderSourceCore =
 		"   vert = vertex.xyz;\n"
 		"   vertNormal = normalMatrix * normal;\n"
 		"   gl_Position = projMatrix * mvMatrix * vertex;\n"
-		"   gl_PointSize = 10.0/(0.1+2.0*abs(gl_Position.z));\n"
+		"   gl_PointSize = 10.0/(0.1+10.0*abs(gl_Position.z));\n"
+//		"   gl_PointSize = 50.0;\n"
 		"}\n";
 
 static const char *fragmentShaderSourceCore =
@@ -184,6 +185,7 @@ static const char *fragmentShaderSourceCore =
 		"   highp float NL = max(dot(normalize(vertNormal), L), 0.0);\n"
 		"   highp vec3 color = vertColor;\n"
 		"   highp vec3 col = clamp(color * 0.2 + color * 0.8 * NL, 0.0, 1.0);\n"
+//		"   highp vec3 col = color;\n"
 		"   fragColor = vec4(col, 1.0);\n"
 		"}\n";
 
@@ -199,7 +201,8 @@ static const char *vertexShaderSource =
 		"   vert = vertex.xyz;\n"
 		"   vertNormal = normalMatrix * normal;\n"
 		"   gl_Position = projMatrix * mvMatrix * vertex;\n"
-		"   gl_PointSize = 10.0/(0.1+2.0*abs(gl_Position.z));\n"
+		"   gl_PointSize = 10.0/(0.1+10.0*abs(gl_Position.z));\n"
+//		"   gl_PointSize = 500.0;\n"
 		"}\n";
 
 static const char *fragmentShaderSource =
@@ -212,6 +215,7 @@ static const char *fragmentShaderSource =
 		"   highp float NL = max(dot(normalize(vertNormal), L), 0.0);\n"
 		"   highp vec3 color = vertColor;\n"
 		"   highp vec3 col = clamp(color * 0.2 + color * 0.8 * NL, 0.0, 1.0);\n"
+//		"   highp vec3 col = color;\n"
 		"   gl_FragColor = vec4(col, 1.0);\n"
 		"}\n";
 
@@ -311,7 +315,7 @@ void GLWidget::paintGL()
 //	glDrawElements(GL_LINES, idxCount, GL_UNSIGNED_INT, m_cloudBBox.elemGLData());
 
 #ifdef DBUG_CLOUD_NORMS_H
-	m_program->setUniformValue(m_colorLoc, QVector3D(0.0f, 0.0f, 1.0f));
+	m_program->setUniformValue(m_colorLoc, QVector3D(1.0f, 0.0f, 1.0f));
 	QOpenGLVertexArrayObject::Binder vaoBinder3(&m_cloudNormsVao);
 	glDrawArrays(GL_LINES, 0, 2*m_cloud.pointCount());
 #endif
@@ -365,6 +369,7 @@ void GLWidget::setCloud(CloudPtr cloud)
 {
 	m_cloud.fromPCL(cloud);
 	m_cloud.buildSpatialIndex();
+	//m_cloud.approxCloudNorms(5, 10);
 
 	m_cloudVbo.create();
 	m_cloudVbo.bind();
@@ -378,14 +383,14 @@ void GLWidget::setCloud(CloudPtr cloud)
 
 
 #ifdef DBUG_CLOUD_NORMS_H
+	m_cloud.approxCloudNorms(10, 25);
 	m_cloudNormsVbo.create();
 	m_cloudNormsVbo.bind();
-	float scale = 2e-3*m_cloudBBox.diagonalSize();
+	float scale = 2e-2*m_cloudBBox.diagonalSize();
 	m_cloudNormsVbo.allocate(
 				m_cloud.normGLData(scale),
 				12*m_cloud.pointCount()*sizeof(GLfloat));
 	setupVertexAttribs(m_cloudNormsVbo);
-	m_cloud.approxCloudNorms(3, 10);
 #endif
 
 

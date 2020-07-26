@@ -55,6 +55,7 @@
 #include <QtWidgets/QToolBar>
 #include <QMutex>
 #include <QRecursiveMutex>
+#include <QMutexLocker>
 #include <QThread>
 #include <window.h>
 

@@ -2,7 +2,7 @@
 //     See LICENSE included.
 
 #include "Cloud.h"
-#include "BuildSpatialIndex.h"
+#include "ReconstructThread.h"
 #include "cloud_normal.h"
 
 template<typename T> using vector = std::vector<T>;
@@ -10,19 +10,12 @@ using Vector3f = Eigen::Vector3f;
 
 //---------------------------------------------------------
 
-Cloud::Cloud(MessageLogger* msgLogger, bool threadSafe)
+Cloud::Cloud(MessageLogger* msgLogger)
 	: QObject(), m_CT(nullptr), m_msgLogger(msgLogger)
 {
 	m_cloud.reserve(2500);
 	m_norms.reserve(2500);
 	m_vertGL.reserve(2500 * 6);
-
-	if( threadSafe ) {
-		m_recMutex = new QRecursiveMutex;
-	}
-	else{
-		m_recMutex = nullptr;
-	}
 
 	connect(this, &Cloud::logMessage, m_msgLogger, &MessageLogger::logMessage);
 	connect(this, &Cloud::logProgress, m_msgLogger, &MessageLogger::logProgress);
@@ -33,7 +26,6 @@ Cloud::Cloud(MessageLogger* msgLogger, bool threadSafe)
 Cloud::~Cloud()
 {
 	delete m_CT;
-	delete m_recMutex;
 }
 
 //---------------------------------------------------------
@@ -57,7 +49,8 @@ void Cloud::fromPCL(CloudPtr cloud)
 
 	Vector3f n(0.0f, 0.0f, 1.0f);
 
-	size_t npoints = cloud->points.size();
+	//***
+	size_t npoints = cloud->points.size()/25;
 
 	float centx = 0.0f;
 	float centy = 0.0f;
@@ -72,7 +65,7 @@ void Cloud::fromPCL(CloudPtr cloud)
 	centy = centy/float(npoints);
 	centz = centz/float(npoints);	
 
-	for(size_t i = 0; i < cloud->points.size(); ++i){
+	for(size_t i = 0; i < npoints; ++i){
 		Vector3f v;
 		v[0] = cloud->points[i].x - centx;
 		v[1] = cloud->points[i].y - centy;
@@ -106,9 +99,10 @@ void Cloud::toPCL(CloudPtr& cloud)
 
 //---------------------------------------------------------
 
-void Cloud::addPoint(const Vector3f& v, const Vector3f& n)
+void Cloud::addPoint(const Vector3f& v, const Vector3f& n, bool threadSafe)
 {
-	QMutexLocker locker(&m_recMutex);
+
+	if ( threadSafe ) m_recMutex.lock();
 
 	m_cloud.push_back(v);
 	m_norms.push_back(n);
@@ -117,6 +111,9 @@ void Cloud::addPoint(const Vector3f& v, const Vector3f& n)
 		CoverTreePoint<Vector3f> cp(v, m_cloud.size());
 		m_CT->insert(cp);
 	}
+
+	if ( threadSafe ) m_recMutex.unlock();
+
 }
 
 //---------------------------------------------------------
@@ -136,15 +133,15 @@ void Cloud::buildSpatialIndex()
 	int threshold = 0;
 
 	for(size_t i = 0; i < npoints; ++i){
-//		break;
 		// Log progress
+		//***
 		QCoreApplication::processEvents();
 		if(m_msgLogger != nullptr) {
 			emit logProgress(
 						"Building cloud spatial index",
 						i, npoints, 5, threshold);
 			//***
-			if(threshold > 25) break;
+			//if(threshold > 25) break;
 		}
 
 		Vector3f v;
@@ -174,6 +171,8 @@ Vector3f Cloud::approxNorm(
 
 void Cloud::approxCloudNorms(int iters, int kNN)
 {
+	QMutexLocker locker(&m_recMutex);
+
 	assert(m_CT != nullptr);
 
 	size_t npoints = m_cloud.size();
@@ -182,10 +181,12 @@ void Cloud::approxCloudNorms(int iters, int kNN)
 
 	for(size_t i = 0; i < npoints; ++i){
 		// Log progress
+		//***
+		QCoreApplication::processEvents();
 		if(m_msgLogger != nullptr) {
-//			emit logProgress(
-//						"Building cloud normals",
-//						i, npoints, 5, threshold);
+			emit logProgress(
+						"Building cloud normals",
+						i, npoints, 5, threshold);
 		}
 
 		Vector3f p = m_cloud[i];

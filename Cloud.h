@@ -8,7 +8,8 @@
 //#include <vector>
 //#include <Eigen/Dense>
 //#include <QObject>
-//#include <QRecursiveMutex>
+#include <QRecursiveMutex>
+#include <QMutexLocker>
 //#include <pcl/point_types.h>
 //#include <pcl/point_cloud.h>
 #include "Cover_Tree.h"
@@ -25,7 +26,7 @@ class Cloud : public QObject
 	typedef pcl::PointCloud<pcl::PointXYZ>::Ptr CloudPtr;
 	
 public:
-	Cloud(MessageLogger* msgLogger = nullptr, boold threadSafe = false);
+	Cloud(MessageLogger* msgLogger = nullptr);
 	~Cloud();
 	const Vector3f point(size_t idx) const { return m_cloud[idx]; }
 	const GLfloat *vertGLData();
@@ -37,7 +38,8 @@ public:
 	void buildSpatialIndex();
 	void approxCloudNorms(int iters=10, int kNN=10);
 
-	void addPoint(const Vector3f& v, const Vector3f &n);
+	void addPoint(const Vector3f& v, const Vector3f &n,
+				  bool threadSafe = false);
 	Vector3f approxNorm(
 			const Vector3f& p, int iters=10, int kNN=10);
 	void pointKNN(
@@ -56,7 +58,7 @@ private:
 	vector<GLfloat> m_normGL;
 	CoverTree<CoverTreePoint<Vector3f>> *m_CT;
 	MessageLogger* m_msgLogger;
-	QRecursiveMutex* m_recMutex;
+	QRecursiveMutex m_recMutex;
 
 };
 

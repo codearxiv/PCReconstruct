@@ -28,11 +28,11 @@ PRECOMPILED_HEADER  = stable.h
 
 SOURCES += \
 	BoundBox.cpp \
-	BuildSpatialIndex.cpp \
 	Cloud.cpp \
 	GLWidget.cpp \
 	MainWindow.cpp \
 	MessageLogger.cpp \
+	ReconstructThread.cpp \
 	Window.cpp \
 	dictionarylearning/MatchingPursuit.cpp \
 	dictionarylearning/OrthogonalPursuit.cpp \
@@ -46,13 +46,13 @@ SOURCES += \
 
 HEADERS += \
 	BoundBox.h \
-	BuildSpatialIndex.h \
 	Cloud.h \
 	Cover-Tree/CoverTreePoint.h \
 	Cover-Tree/Cover_Tree.h \
 	GLWidget.h \
 	MainWindow.h \
 	MessageLogger.h \
+	ReconstructThread.h \
 	Window.h \
 	constants.h \
 	dictionarylearning/MatchingPursuit.h \
@@ -110,6 +110,4 @@ LIBS += -L$$PWD/'../../lib/OpenNI2/Lib/' -lOpenNI2
 
 RESOURCES += \
 	PCReconstruct.qrc
-
-
 

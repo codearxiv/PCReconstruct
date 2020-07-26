@@ -4,6 +4,8 @@
 
 #include "Plane.h"
 
+//-----------------------------------------------------------
+
 void Plane::set(const Vector3f p0, const Vector3f norm)
 {
 
@@ -27,6 +29,7 @@ void Plane::set(const Vector3f p0, const Vector3f norm)
 	m_v.normalize();
 
 }
+//-----------------------------------------------------------
 
 Eigen::Vector2f Plane::project_uv(const Vector3f q)
 {
@@ -37,6 +40,7 @@ Eigen::Vector2f Plane::project_uv(const Vector3f q)
 	return puv;
 }
 
+//-----------------------------------------------------------
 
 
 Eigen::Vector3f Plane::project(const Vector3f q, Vector2f& puv)
@@ -46,5 +50,6 @@ Eigen::Vector3f Plane::project(const Vector3f q, Vector2f& puv)
 	return p;
 }
 
+//-----------------------------------------------------------
 
 

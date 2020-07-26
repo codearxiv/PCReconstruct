@@ -4,6 +4,7 @@
 
 #include "pt_to_pt_distsq.h"
 
+//-----------------------------------------------------------
 
 double pt_to_pt_distsq(const Eigen::VectorXf& v, const Eigen::VectorXf& w)
 {
@@ -13,6 +14,7 @@ double pt_to_pt_distsq(const Eigen::VectorXf& v, const Eigen::VectorXf& w)
 	}
 	return distsq;
 }
+//-----------------------------------------------------------
 
 double pt_to_pt_distsq(const float v[3], const float w[3])
 {
@@ -22,3 +24,4 @@ double pt_to_pt_distsq(const float v[3], const float w[3])
 	}
 	return distsq;
 }
+//-----------------------------------------------------------
