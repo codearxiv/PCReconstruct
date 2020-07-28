@@ -369,7 +369,7 @@ void GLWidget::setCloud(CloudPtr cloud)
 {
 	m_cloud.fromPCL(cloud);
 	m_cloud.buildSpatialIndex();
-	//m_cloud.approxCloudNorms(5, 10);
+	m_cloud.approxCloudNorms(10, 25);
 
 	m_cloudVbo.create();
 	m_cloudVbo.bind();
@@ -383,7 +383,7 @@ void GLWidget::setCloud(CloudPtr cloud)
 
 
 #ifdef DBUG_CLOUD_NORMS_H
-	m_cloud.approxCloudNorms(10, 25);
+	//m_cloud.approxCloudNorms(10, 25);
 	m_cloudNormsVbo.create();
 	m_cloudNormsVbo.bind();
 	float scale = 2e-2*m_cloudBBox.diagonalSize();

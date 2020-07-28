@@ -2,6 +2,7 @@
 //     Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
 //     See LICENSE included.
 
+//#include <math.h>
 #include "cloud_normal.h"
 #include "ensure_buffer_size.h"
 
@@ -10,8 +11,6 @@ using Eigen::Vector3f;
 using Eigen::Index;
 using Eigen::Ref;
 
-//using Matrix3Xf = Matrix<float, 3, Eigen::Dynamic>;
-using Vector3f = Eigen::Vector3f;
 template<typename T> using vector = std::vector<T>;
 
 

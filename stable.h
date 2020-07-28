@@ -13,6 +13,7 @@
 #include <vector>
 #include <queue>
 #include <Eigen/Dense>
+#include <Eigen/Geometry>
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 #include <QApplication>

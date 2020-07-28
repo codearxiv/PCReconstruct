@@ -42,7 +42,8 @@ SOURCES += \
 	main.cpp \
 	utils/Plane.cpp \
 	utils/cloud_normal.cpp \
-	utils/pt_to_pt_distsq.cpp
+	utils/pt_to_pt_distsq.cpp \
+	utils/rotations.cpp
 
 HEADERS += \
 	BoundBox.h \
@@ -65,7 +66,8 @@ HEADERS += \
 	utils/Plane.h \
 	utils/cloud_normal.h \
 	utils/ensure_buffer_size.h \
-	utils/pt_to_pt_distsq.h
+	utils/pt_to_pt_distsq.h \
+	utils/rotations.h
 
 FORMS +=
 
