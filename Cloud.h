@@ -23,6 +23,8 @@ class Cloud : public QObject
 	template<typename T> using vector = std::vector<T>;
 	using Index = Eigen::Index;
 	using Vector3f = Eigen::Vector3f;
+	using Matrix3f = Eigen::Matrix3f;
+	using MatrixXi = Eigen::MatrixXi;
 	typedef pcl::PointCloud<pcl::PointXYZ>::Ptr CloudPtr;
 	
 public:
@@ -31,17 +33,23 @@ public:
 	const Vector3f point(size_t idx) const { return m_cloud[idx]; }
 	const GLfloat *vertGLData();
 	const GLfloat *normGLData(float scale);
+
 	size_t pointCount() const { return m_cloud.size(); }
 	void clear();
 	void fromPCL(CloudPtr cloud);
 	void toPCL(CloudPtr& cloud);
+
 	void buildSpatialIndex();
-	void approxCloudNorms(int iters=10, int kNN=10);
+	void approxCloudNorms(int iters=10, int kNN=25);
+	void reconstruct(
+			int kSVDIters, int kNN, int natm, int latm);
 
 	void addPoint(const Vector3f& v, const Vector3f &n,
 				  bool threadSafe = false);
 	Vector3f approxNorm(
-			const Vector3f& p, int iters=10, int kNN=10);
+			const Vector3f& p, int iters, int kNN,
+			vector<CoverTreePoint<Vector3f>>& neighs,
+			vector<Vector3f>& vneighs);
 	void pointKNN(
 			const Vector3f& p, int k,
 			vector<CoverTreePoint<Vector3f>>& neighs);

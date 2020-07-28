@@ -1,6 +1,7 @@
-#include <Eigen/Geometry>
-#include <math.h>
+//#include <Eigen/Geometry>
+//#include <math.h>
 #include "rotations.h"
+#include "constants.h"
 
 
 using Eigen::Vector3f;
@@ -24,7 +25,7 @@ void vector_to_vector_rotation_matrix(
 	  if( !normalized ){
 		  float vvww = sqrt(v.dot(v)*w.dot(w));
 
-		  if( vvww > 0.0f ){
+		  if( vvww > float_tiny ){
 			  cosa = cosa/vvww;
 			  sina = sina/vvww;
 		  }
@@ -34,7 +35,7 @@ void vector_to_vector_rotation_matrix(
 		  }
 	  }
 
-	  if( vxwLen > 0.0f ){
+	  if( vxwLen > float_tiny ){
 		  Vector3f u = vxw/vxwLen;
 		  cos_sin_angle_vector_rotation_matrix(cosa, sina, u, M);
 	  }
@@ -48,7 +49,7 @@ void vector_to_vector_rotation_matrix(
 //-----------------------------------------------------------
 /*
 	 Returns the counter-clockwise rotation matrix M around
-	 a unit vector U by an angle. U must have unit lenght.
+	 a unit vector U by an angle. U must have unit length.
 */
 void angle_vector_rotation_matrix(
 		float angle, const Vector3f& u, Matrix3f& M)
@@ -67,15 +68,15 @@ void cos_sin_angle_vector_rotation_matrix(
 	  Vector3f su = sina*u;
 
 	  M(1,1) = tu(1)*u(1) + cosa;
-	  M(1,2) = tu(2)*u(1) - su(3);
-	  M(1,3) = tu(3)*u(1) + su(2);
-
 	  M(2,1) = tu(1)*u(2) + su(3);
-	  M(2,2) = tu(2)*u(2) + cosa;
-	  M(2,3) = tu(3)*u(2) - su(1);
-
 	  M(3,1) = tu(1)*u(3) - su(2);
+
+	  M(1,2) = tu(2)*u(1) - su(3);
+	  M(2,2) = tu(2)*u(2) + cosa;
 	  M(3,2) = tu(2)*u(3) + su(1);
+
+	  M(1,3) = tu(3)*u(1) + su(2);
+	  M(2,3) = tu(3)*u(2) - su(1);
 	  M(3,3) = tu(3)*u(3) + cosa;
 }
 //-----------------------------------------------------------

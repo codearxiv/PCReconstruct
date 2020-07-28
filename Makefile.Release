@@ -65,7 +65,8 @@ SOURCES       = BoundBox.cpp \
 		main.cpp \
 		utils\Plane.cpp \
 		utils\cloud_normal.cpp \
-		utils\pt_to_pt_distsq.cpp release\qrc_PCReconstruct.cpp \
+		utils\pt_to_pt_distsq.cpp \
+		utils\rotations.cpp release\qrc_PCReconstruct.cpp \
 		release\moc_Cloud.cpp \
 		release\moc_GLWidget.cpp \
 		release\moc_MainWindow.cpp \
@@ -88,6 +89,7 @@ OBJECTS       = release\BoundBox.obj \
 		release\Plane.obj \
 		release\cloud_normal.obj \
 		release\pt_to_pt_distsq.obj \
+		release\rotations.obj \
 		release\qrc_PCReconstruct.obj \
 		release\moc_Cloud.obj \
 		release\moc_GLWidget.obj \
@@ -117,7 +119,8 @@ DIST          =  BoundBox.h \
 		utils\Plane.h \
 		utils\cloud_normal.h \
 		utils\ensure_buffer_size.h \
-		utils\pt_to_pt_distsq.h BoundBox.cpp \
+		utils\pt_to_pt_distsq.h \
+		utils\rotations.h BoundBox.cpp \
 		Cloud.cpp \
 		GLWidget.cpp \
 		MainWindow.cpp \
@@ -132,7 +135,8 @@ DIST          =  BoundBox.h \
 		main.cpp \
 		utils\Plane.cpp \
 		utils\cloud_normal.cpp \
-		utils\pt_to_pt_distsq.cpp
+		utils\pt_to_pt_distsq.cpp \
+		utils\rotations.cpp
 QMAKE_TARGET  = PCReconstruct
 DESTDIR        = release\ #avoid trailing-slash linebreak
 TARGET         = PCReconstruct.exe
@@ -229,7 +233,7 @@ all: Makefile.Release  release\PCReconstruct.exe
 
 release\PCReconstruct.exe: C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\lib\Qt5Widgets.lib C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\lib\Qt5Gui.lib C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\lib\Qt5Core.lib C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\lib\qtmain.lib $(OBJECTS) 
 	$(LINKER) $(LFLAGS) /MANIFEST:embed /OUT:$(DESTDIR_TARGET) @<<
-release\BoundBox.obj release\Cloud.obj release\GLWidget.obj release\MainWindow.obj release\MessageLogger.obj release\ReconstructThread.obj release\Window.obj release\MatchingPursuit.obj release\OrthogonalPursuit.obj release\cosine_transform.obj release\ksvd.obj release\ksvd_dct2D.obj release\main.obj release\Plane.obj release\cloud_normal.obj release\pt_to_pt_distsq.obj release\qrc_PCReconstruct.obj release\moc_Cloud.obj release\moc_GLWidget.obj release\moc_MainWindow.obj release\moc_MessageLogger.obj release\moc_ReconstructThread.obj release\moc_Window.obj release\PCReconstruct_pch.obj
+release\BoundBox.obj release\Cloud.obj release\GLWidget.obj release\MainWindow.obj release\MessageLogger.obj release\ReconstructThread.obj release\Window.obj release\MatchingPursuit.obj release\OrthogonalPursuit.obj release\cosine_transform.obj release\ksvd.obj release\ksvd_dct2D.obj release\main.obj release\Plane.obj release\cloud_normal.obj release\pt_to_pt_distsq.obj release\rotations.obj release\qrc_PCReconstruct.obj release\moc_Cloud.obj release\moc_GLWidget.obj release\moc_MainWindow.obj release\moc_MessageLogger.obj release\moc_ReconstructThread.obj release\moc_Window.obj release\PCReconstruct_pch.obj
 $(LIBS)
 <<
 
@@ -239,10 +243,10 @@ qmake: FORCE
 qmake_all: FORCE
 
 dist:
-	$(ZIP) PCReconstruct.zip $(SOURCES) $(DIST) PCReconstruct.pro C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\spec_pre.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\common\angle.conf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\common\windows-desktop.conf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\win32\windows_vulkan_sdk.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\common\windows-vulkan.conf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\common\msvc-desktop.conf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\qconfig.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3danimation.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3danimation_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dcore.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dcore_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dextras.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dextras_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dinput.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dinput_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dlogic.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dlogic_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dquick.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dquick_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dquickanimation.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dquickanimation_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dquickextras.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dquickextras_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dquickinput.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dquickinput_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dquickrender.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dquickrender_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dquickscene2d.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dquickscene2d_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3drender.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3drender_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_accessibility_support_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_axbase.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_axbase_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_axcontainer.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_axcontainer_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_axserver.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_axserver_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_bluetooth.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_bluetooth_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_bootstrap_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_concurrent.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_concurrent_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_core.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_core_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_dbus.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_dbus_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_designer.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_designer_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_designercomponents_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_devicediscovery_support_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_edid_support_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_egl_support_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_eventdispatcher_support_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_fb_support_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_fontdatabase_support_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_gamepad.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_gamepad_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_gui.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_gui_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_help.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_help_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_location.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_location_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_multimedia.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_multimedia_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_multimediawidgets.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_multimediawidgets_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_network.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_network_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_nfc.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_nfc_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_opengl.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_opengl_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_openglextensions.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_openglextensions_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_packetprotocol_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_platformcompositor_support_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_positioning.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_positioning_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_positioningquick.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_positioningquick_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_printsupport.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_printsupport_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_qml.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_qml_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_qmldebug_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_qmldevtools_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_qmlmodels.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_qmlmodels_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_qmltest.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_qmltest_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_qmlworkerscript.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_qmlworkerscript_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_qtmultimediaquicktools_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_quick.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_quick_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_quickcontrols2.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_quickcontrols2_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_quickparticles_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_quickshapes_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_quicktemplates2.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_quicktemplates2_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_quickwidgets.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_quickwidgets_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_remoteobjects.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_remoteobjects_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_repparser.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_repparser_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_scxml.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_scxml_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_sensors.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_sensors_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_serialbus.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_serialbus_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_serialport.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_serialport_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_sql.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_sql_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_svg.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_svg_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_testlib.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_testlib_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_texttospeech.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_texttospeech_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_theme_support_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_uiplugin.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_uitools.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_uitools_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_vulkan_support_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_webchannel.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_webchannel_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_websockets.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_websockets_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_webview.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_webview_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_widgets.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_widgets_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_windowsuiautomation_support_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_winextras.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_winextras_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_xml.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_xml_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_xmlpatterns.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_xmlpatterns_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_zlib_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\qt_functions.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\qt_config.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\win32-msvc\qmake.conf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\spec_post.prf ..\..\.qmake.stash C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\exclusive_builds.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\common\msvc-version.conf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\toolchain.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\default_pre.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\win32\default_pre.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\resolve_config.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\exclusive_builds_post.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\default_post.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\build_pass.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\resources_functions.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\qtquickcompiler.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\precompile_header.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\warn_on.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\qt.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\resources.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\moc.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\win32\opengl.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\uic.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\qmake_use.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\file_copies.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\win32\windows.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\testcase_targets.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\exceptions.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\yacc.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\lex.prf PCReconstruct.pro PCReconstruct.qrc C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\lib\Qt5Widgets.prl C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\lib\Qt5Gui.prl C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\lib\Qt5Core.prl C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\lib\qtmain.prl     PCReconstruct.qrc C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\data\dummy.cpp BoundBox.h Cloud.h Cover-Tree\CoverTreePoint.h Cover-Tree\Cover_Tree.h GLWidget.h MainWindow.h MessageLogger.h ReconstructThread.h Window.h constants.h dictionarylearning\MatchingPursuit.h dictionarylearning\OrthogonalPursuit.h dictionarylearning\cosine_transform.h dictionarylearning\ksvd.h dictionarylearning\ksvd_dct2D.h stable.h \ utils\Plane.h utils\cloud_normal.h utils\ensure_buffer_size.h utils\pt_to_pt_distsq.h  BoundBox.cpp Cloud.cpp GLWidget.cpp MainWindow.cpp MessageLogger.cpp ReconstructThread.cpp Window.cpp dictionarylearning\MatchingPursuit.cpp dictionarylearning\OrthogonalPursuit.cpp dictionarylearning\cosine_transform.cpp dictionarylearning\ksvd.cpp dictionarylearning\ksvd_dct2D.cpp main.cpp utils\Plane.cpp utils\cloud_normal.cpp utils\pt_to_pt_distsq.cpp     
+	$(ZIP) PCReconstruct.zip $(SOURCES) $(DIST) PCReconstruct.pro C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\spec_pre.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\common\angle.conf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\common\windows-desktop.conf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\win32\windows_vulkan_sdk.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\common\windows-vulkan.conf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\common\msvc-desktop.conf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\qconfig.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3danimation.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3danimation_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dcore.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dcore_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dextras.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dextras_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dinput.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dinput_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dlogic.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dlogic_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dquick.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dquick_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dquickanimation.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dquickanimation_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dquickextras.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dquickextras_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dquickinput.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dquickinput_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dquickrender.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dquickrender_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dquickscene2d.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3dquickscene2d_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3drender.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_3drender_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_accessibility_support_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_axbase.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_axbase_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_axcontainer.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_axcontainer_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_axserver.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_axserver_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_bluetooth.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_bluetooth_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_bootstrap_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_concurrent.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_concurrent_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_core.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_core_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_dbus.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_dbus_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_designer.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_designer_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_designercomponents_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_devicediscovery_support_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_edid_support_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_egl_support_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_eventdispatcher_support_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_fb_support_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_fontdatabase_support_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_gamepad.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_gamepad_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_gui.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_gui_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_help.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_help_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_location.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_location_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_multimedia.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_multimedia_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_multimediawidgets.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_multimediawidgets_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_network.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_network_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_nfc.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_nfc_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_opengl.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_opengl_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_openglextensions.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_openglextensions_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_packetprotocol_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_platformcompositor_support_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_positioning.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_positioning_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_positioningquick.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_positioningquick_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_printsupport.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_printsupport_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_qml.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_qml_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_qmldebug_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_qmldevtools_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_qmlmodels.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_qmlmodels_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_qmltest.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_qmltest_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_qmlworkerscript.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_qmlworkerscript_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_qtmultimediaquicktools_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_quick.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_quick_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_quickcontrols2.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_quickcontrols2_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_quickparticles_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_quickshapes_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_quicktemplates2.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_quicktemplates2_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_quickwidgets.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_quickwidgets_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_remoteobjects.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_remoteobjects_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_repparser.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_repparser_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_scxml.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_scxml_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_sensors.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_sensors_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_serialbus.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_serialbus_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_serialport.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_serialport_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_sql.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_sql_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_svg.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_svg_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_testlib.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_testlib_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_texttospeech.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_texttospeech_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_theme_support_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_uiplugin.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_uitools.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_uitools_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_vulkan_support_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_webchannel.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_webchannel_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_websockets.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_websockets_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_webview.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_webview_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_widgets.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_widgets_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_windowsuiautomation_support_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_winextras.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_winextras_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_xml.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_xml_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_xmlpatterns.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_xmlpatterns_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\modules\qt_lib_zlib_private.pri C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\qt_functions.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\qt_config.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\win32-msvc\qmake.conf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\spec_post.prf ..\..\.qmake.stash C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\exclusive_builds.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\common\msvc-version.conf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\toolchain.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\default_pre.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\win32\default_pre.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\resolve_config.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\exclusive_builds_post.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\default_post.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\build_pass.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\resources_functions.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\qtquickcompiler.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\precompile_header.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\warn_on.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\qt.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\resources.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\moc.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\win32\opengl.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\uic.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\qmake_use.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\file_copies.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\win32\windows.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\testcase_targets.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\exceptions.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\yacc.prf C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\lex.prf PCReconstruct.pro PCReconstruct.qrc C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\lib\Qt5Widgets.prl C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\lib\Qt5Gui.prl C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\lib\Qt5Core.prl C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\lib\qtmain.prl     PCReconstruct.qrc C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\features\data\dummy.cpp BoundBox.h Cloud.h Cover-Tree\CoverTreePoint.h Cover-Tree\Cover_Tree.h GLWidget.h MainWindow.h MessageLogger.h ReconstructThread.h Window.h constants.h dictionarylearning\MatchingPursuit.h dictionarylearning\OrthogonalPursuit.h dictionarylearning\cosine_transform.h dictionarylearning\ksvd.h dictionarylearning\ksvd_dct2D.h stable.h \ utils\Plane.h utils\cloud_normal.h utils\ensure_buffer_size.h utils\pt_to_pt_distsq.h utils\rotations.h  BoundBox.cpp Cloud.cpp GLWidget.cpp MainWindow.cpp MessageLogger.cpp ReconstructThread.cpp Window.cpp dictionarylearning\MatchingPursuit.cpp dictionarylearning\OrthogonalPursuit.cpp dictionarylearning\cosine_transform.cpp dictionarylearning\ksvd.cpp dictionarylearning\ksvd_dct2D.cpp main.cpp utils\Plane.cpp utils\cloud_normal.cpp utils\pt_to_pt_distsq.cpp utils\rotations.cpp     
 
 clean: compiler_clean 
-	-$(DEL_FILE) release\BoundBox.obj release\Cloud.obj release\GLWidget.obj release\MainWindow.obj release\MessageLogger.obj release\ReconstructThread.obj release\Window.obj release\MatchingPursuit.obj release\OrthogonalPursuit.obj release\cosine_transform.obj release\ksvd.obj release\ksvd_dct2D.obj release\main.obj release\Plane.obj release\cloud_normal.obj release\pt_to_pt_distsq.obj release\qrc_PCReconstruct.obj release\moc_Cloud.obj release\moc_GLWidget.obj release\moc_MainWindow.obj release\moc_MessageLogger.obj release\moc_ReconstructThread.obj release\moc_Window.obj release\PCReconstruct_pch.obj
+	-$(DEL_FILE) release\BoundBox.obj release\Cloud.obj release\GLWidget.obj release\MainWindow.obj release\MessageLogger.obj release\ReconstructThread.obj release\Window.obj release\MatchingPursuit.obj release\OrthogonalPursuit.obj release\cosine_transform.obj release\ksvd.obj release\ksvd_dct2D.obj release\main.obj release\Plane.obj release\cloud_normal.obj release\pt_to_pt_distsq.obj release\rotations.obj release\qrc_PCReconstruct.obj release\moc_Cloud.obj release\moc_GLWidget.obj release\moc_MainWindow.obj release\moc_MessageLogger.obj release\moc_ReconstructThread.obj release\moc_Window.obj release\PCReconstruct_pch.obj
 	-$(DEL_FILE) release\PCReconstruct_pch.pch
 
 distclean: clean 
@@ -2736,6 +2740,216 @@ release\cloud_normal.obj: utils\cloud_normal.cpp utils\cloud_normal.h \
 		release\PCReconstruct_pch.obj
 
 release\pt_to_pt_distsq.obj: utils\pt_to_pt_distsq.cpp utils\pt_to_pt_distsq.h \
+		release\PCReconstruct_pch.obj
+
+release\rotations.obj: utils\rotations.cpp ..\..\lib\eigen3\Eigen\Geometry \
+		..\..\lib\eigen3\Eigen\Core \
+		..\..\lib\eigen3\Eigen\src\Core\util\DisableStupidWarnings.h \
+		..\..\lib\eigen3\Eigen\src\Core\util\Macros.h \
+		..\..\lib\eigen3\Eigen\src\Core\util\MKL_support.h \
+		..\..\lib\eigen3\Eigen\src\misc\blas.h \
+		..\..\lib\eigen3\Eigen\src\Core\util\Constants.h \
+		..\..\lib\eigen3\Eigen\src\Core\util\Meta.h \
+		..\..\lib\eigen3\Eigen\src\Core\util\ForwardDeclarations.h \
+		..\..\lib\eigen3\Eigen\src\Core\util\StaticAssert.h \
+		..\..\lib\eigen3\Eigen\src\Core\util\XprHelper.h \
+		..\..\lib\eigen3\Eigen\src\Core\util\Memory.h \
+		..\..\lib\eigen3\Eigen\src\Core\NumTraits.h \
+		..\..\lib\eigen3\Eigen\src\Core\MathFunctions.h \
+		..\..\lib\eigen3\Eigen\src\Core\GenericPacketMath.h \
+		..\..\lib\eigen3\Eigen\src\Core\MathFunctionsImpl.h \
+		..\..\lib\eigen3\Eigen\src\Core\arch\Default\ConjHelper.h \
+		..\..\lib\eigen3\Eigen\src\Core\arch\SSE\PacketMath.h \
+		..\..\lib\eigen3\Eigen\src\Core\arch\AVX\PacketMath.h \
+		..\..\lib\eigen3\Eigen\src\Core\arch\AVX512\PacketMath.h \
+		..\..\lib\eigen3\Eigen\src\Core\arch\AVX512\MathFunctions.h \
+		..\..\lib\eigen3\Eigen\src\Core\arch\SSE\Complex.h \
+		..\..\lib\eigen3\Eigen\src\Core\arch\SSE\MathFunctions.h \
+		..\..\lib\eigen3\Eigen\src\Core\arch\AVX\MathFunctions.h \
+		..\..\lib\eigen3\Eigen\src\Core\arch\AVX\Complex.h \
+		..\..\lib\eigen3\Eigen\src\Core\arch\AVX\TypeCasting.h \
+		..\..\lib\eigen3\Eigen\src\Core\arch\SSE\TypeCasting.h \
+		..\..\lib\eigen3\Eigen\src\Core\arch\AltiVec\PacketMath.h \
+		..\..\lib\eigen3\Eigen\src\Core\arch\AltiVec\MathFunctions.h \
+		..\..\lib\eigen3\Eigen\src\Core\arch\AltiVec\Complex.h \
+		..\..\lib\eigen3\Eigen\src\Core\arch\NEON\PacketMath.h \
+		..\..\lib\eigen3\Eigen\src\Core\arch\NEON\MathFunctions.h \
+		..\..\lib\eigen3\Eigen\src\Core\arch\NEON\Complex.h \
+		..\..\lib\eigen3\Eigen\src\Core\arch\ZVector\PacketMath.h \
+		..\..\lib\eigen3\Eigen\src\Core\arch\ZVector\MathFunctions.h \
+		..\..\lib\eigen3\Eigen\src\Core\arch\ZVector\Complex.h \
+		..\..\lib\eigen3\Eigen\src\Core\arch\CUDA\Half.h \
+		..\..\lib\eigen3\Eigen\src\Core\arch\CUDA\PacketMathHalf.h \
+		..\..\lib\eigen3\Eigen\src\Core\arch\CUDA\TypeCasting.h \
+		..\..\lib\eigen3\Eigen\src\Core\arch\CUDA\PacketMath.h \
+		..\..\lib\eigen3\Eigen\src\Core\arch\CUDA\MathFunctions.h \
+		..\..\lib\eigen3\Eigen\src\Core\arch\Default\Settings.h \
+		..\..\lib\eigen3\Eigen\src\Core\functors\TernaryFunctors.h \
+		..\..\lib\eigen3\Eigen\src\Core\functors\BinaryFunctors.h \
+		..\..\lib\eigen3\Eigen\src\Core\functors\UnaryFunctors.h \
+		..\..\lib\eigen3\Eigen\src\Core\functors\NullaryFunctors.h \
+		..\..\lib\eigen3\Eigen\src\Core\functors\StlFunctors.h \
+		..\..\lib\eigen3\Eigen\src\Core\functors\AssignmentFunctors.h \
+		..\..\lib\eigen3\Eigen\src\Core\arch\CUDA\Complex.h \
+		..\..\lib\eigen3\Eigen\src\Core\IO.h \
+		..\..\lib\eigen3\Eigen\src\Core\DenseCoeffsBase.h \
+		..\..\lib\eigen3\Eigen\src\Core\DenseBase.h \
+		..\..\lib\eigen3\Eigen\src\plugins\BlockMethods.h \
+		..\..\lib\eigen3\Eigen\src\Core\MatrixBase.h \
+		..\..\lib\eigen3\Eigen\src\plugins\CommonCwiseUnaryOps.h \
+		..\..\lib\eigen3\Eigen\src\plugins\CommonCwiseBinaryOps.h \
+		..\..\lib\eigen3\Eigen\src\plugins\MatrixCwiseUnaryOps.h \
+		..\..\lib\eigen3\Eigen\src\plugins\MatrixCwiseBinaryOps.h \
+		..\..\lib\eigen3\Eigen\src\Core\EigenBase.h \
+		..\..\lib\eigen3\Eigen\src\Core\Product.h \
+		..\..\lib\eigen3\Eigen\src\Core\CoreEvaluators.h \
+		..\..\lib\eigen3\Eigen\src\Core\AssignEvaluator.h \
+		..\..\lib\eigen3\Eigen\src\Core\Assign.h \
+		..\..\lib\eigen3\Eigen\src\Core\ArrayBase.h \
+		..\..\lib\eigen3\Eigen\src\plugins\ArrayCwiseUnaryOps.h \
+		..\..\lib\eigen3\Eigen\src\plugins\ArrayCwiseBinaryOps.h \
+		..\..\lib\eigen3\Eigen\src\Core\util\BlasUtil.h \
+		..\..\lib\eigen3\Eigen\src\Core\DenseStorage.h \
+		..\..\lib\eigen3\Eigen\src\Core\NestByValue.h \
+		..\..\lib\eigen3\Eigen\src\Core\ReturnByValue.h \
+		..\..\lib\eigen3\Eigen\src\Core\NoAlias.h \
+		..\..\lib\eigen3\Eigen\src\Core\PlainObjectBase.h \
+		..\..\lib\eigen3\Eigen\src\Core\Matrix.h \
+		..\..\lib\eigen3\Eigen\src\Core\Array.h \
+		..\..\lib\eigen3\Eigen\src\Core\CwiseTernaryOp.h \
+		..\..\lib\eigen3\Eigen\src\Core\CwiseBinaryOp.h \
+		..\..\lib\eigen3\Eigen\src\Core\CwiseUnaryOp.h \
+		..\..\lib\eigen3\Eigen\src\Core\CwiseNullaryOp.h \
+		..\..\lib\eigen3\Eigen\src\Core\CwiseUnaryView.h \
+		..\..\lib\eigen3\Eigen\src\Core\SelfCwiseBinaryOp.h \
+		..\..\lib\eigen3\Eigen\src\Core\Dot.h \
+		..\..\lib\eigen3\Eigen\src\Core\StableNorm.h \
+		..\..\lib\eigen3\Eigen\src\Core\Stride.h \
+		..\..\lib\eigen3\Eigen\src\Core\MapBase.h \
+		..\..\lib\eigen3\Eigen\src\Core\Map.h \
+		..\..\lib\eigen3\Eigen\src\Core\Ref.h \
+		..\..\lib\eigen3\Eigen\src\Core\Block.h \
+		..\..\lib\eigen3\Eigen\src\Core\VectorBlock.h \
+		..\..\lib\eigen3\Eigen\src\Core\Transpose.h \
+		..\..\lib\eigen3\Eigen\src\Core\DiagonalMatrix.h \
+		..\..\lib\eigen3\Eigen\src\Core\Diagonal.h \
+		..\..\lib\eigen3\Eigen\src\Core\DiagonalProduct.h \
+		..\..\lib\eigen3\Eigen\src\Core\Redux.h \
+		..\..\lib\eigen3\Eigen\src\Core\Visitor.h \
+		..\..\lib\eigen3\Eigen\src\Core\Fuzzy.h \
+		..\..\lib\eigen3\Eigen\src\Core\Swap.h \
+		..\..\lib\eigen3\Eigen\src\Core\CommaInitializer.h \
+		..\..\lib\eigen3\Eigen\src\Core\GeneralProduct.h \
+		..\..\lib\eigen3\Eigen\src\Core\Solve.h \
+		..\..\lib\eigen3\Eigen\src\Core\Inverse.h \
+		..\..\lib\eigen3\Eigen\src\Core\SolverBase.h \
+		..\..\lib\eigen3\Eigen\src\Core\PermutationMatrix.h \
+		..\..\lib\eigen3\Eigen\src\Core\Transpositions.h \
+		..\..\lib\eigen3\Eigen\src\Core\TriangularMatrix.h \
+		..\..\lib\eigen3\Eigen\src\Core\SelfAdjointView.h \
+		..\..\lib\eigen3\Eigen\src\Core\products\GeneralBlockPanelKernel.h \
+		..\..\lib\eigen3\Eigen\src\Core\products\Parallelizer.h \
+		..\..\lib\eigen3\Eigen\src\Core\ProductEvaluators.h \
+		..\..\lib\eigen3\Eigen\src\Core\products\GeneralMatrixVector.h \
+		..\..\lib\eigen3\Eigen\src\Core\products\GeneralMatrixMatrix.h \
+		..\..\lib\eigen3\Eigen\src\Core\SolveTriangular.h \
+		..\..\lib\eigen3\Eigen\src\Core\products\GeneralMatrixMatrixTriangular.h \
+		..\..\lib\eigen3\Eigen\src\Core\products\SelfadjointMatrixVector.h \
+		..\..\lib\eigen3\Eigen\src\Core\products\SelfadjointMatrixMatrix.h \
+		..\..\lib\eigen3\Eigen\src\Core\products\SelfadjointProduct.h \
+		..\..\lib\eigen3\Eigen\src\Core\products\SelfadjointRank2Update.h \
+		..\..\lib\eigen3\Eigen\src\Core\products\TriangularMatrixVector.h \
+		..\..\lib\eigen3\Eigen\src\Core\products\TriangularMatrixMatrix.h \
+		..\..\lib\eigen3\Eigen\src\Core\products\TriangularSolverMatrix.h \
+		..\..\lib\eigen3\Eigen\src\Core\products\TriangularSolverVector.h \
+		..\..\lib\eigen3\Eigen\src\Core\BandMatrix.h \
+		..\..\lib\eigen3\Eigen\src\Core\CoreIterators.h \
+		..\..\lib\eigen3\Eigen\src\Core\ConditionEstimator.h \
+		..\..\lib\eigen3\Eigen\src\Core\BooleanRedux.h \
+		..\..\lib\eigen3\Eigen\src\Core\Select.h \
+		..\..\lib\eigen3\Eigen\src\Core\VectorwiseOp.h \
+		..\..\lib\eigen3\Eigen\src\Core\Random.h \
+		..\..\lib\eigen3\Eigen\src\Core\Replicate.h \
+		..\..\lib\eigen3\Eigen\src\Core\Reverse.h \
+		..\..\lib\eigen3\Eigen\src\Core\ArrayWrapper.h \
+		..\..\lib\eigen3\Eigen\src\Core\products\GeneralMatrixMatrix_BLAS.h \
+		..\..\lib\eigen3\Eigen\src\Core\products\GeneralMatrixVector_BLAS.h \
+		..\..\lib\eigen3\Eigen\src\Core\products\GeneralMatrixMatrixTriangular_BLAS.h \
+		..\..\lib\eigen3\Eigen\src\Core\products\SelfadjointMatrixMatrix_BLAS.h \
+		..\..\lib\eigen3\Eigen\src\Core\products\SelfadjointMatrixVector_BLAS.h \
+		..\..\lib\eigen3\Eigen\src\Core\products\TriangularMatrixMatrix_BLAS.h \
+		..\..\lib\eigen3\Eigen\src\Core\products\TriangularMatrixVector_BLAS.h \
+		..\..\lib\eigen3\Eigen\src\Core\products\TriangularSolverMatrix_BLAS.h \
+		..\..\lib\eigen3\Eigen\src\Core\Assign_MKL.h \
+		..\..\lib\eigen3\Eigen\src\Core\GlobalFunctions.h \
+		..\..\lib\eigen3\Eigen\src\Core\util\ReenableStupidWarnings.h \
+		..\..\lib\eigen3\Eigen\SVD \
+		..\..\lib\eigen3\Eigen\QR \
+		..\..\lib\eigen3\Eigen\Cholesky \
+		..\..\lib\eigen3\Eigen\Jacobi \
+		..\..\lib\eigen3\Eigen\src\Jacobi\Jacobi.h \
+		..\..\lib\eigen3\Eigen\src\Cholesky\LLT.h \
+		..\..\lib\eigen3\Eigen\src\Cholesky\LDLT.h \
+		..\..\lib\eigen3\Eigen\src\misc\lapacke.h \
+		..\..\lib\eigen3\Eigen\src\misc\lapacke_mangling.h \
+		..\..\lib\eigen3\Eigen\src\Cholesky\LLT_LAPACKE.h \
+		..\..\lib\eigen3\Eigen\Householder \
+		..\..\lib\eigen3\Eigen\src\Householder\Householder.h \
+		..\..\lib\eigen3\Eigen\src\Householder\HouseholderSequence.h \
+		..\..\lib\eigen3\Eigen\src\Householder\BlockHouseholder.h \
+		..\..\lib\eigen3\Eigen\src\QR\HouseholderQR.h \
+		..\..\lib\eigen3\Eigen\src\QR\FullPivHouseholderQR.h \
+		..\..\lib\eigen3\Eigen\src\QR\ColPivHouseholderQR.h \
+		..\..\lib\eigen3\Eigen\src\QR\CompleteOrthogonalDecomposition.h \
+		..\..\lib\eigen3\Eigen\src\QR\HouseholderQR_LAPACKE.h \
+		..\..\lib\eigen3\Eigen\src\QR\ColPivHouseholderQR_LAPACKE.h \
+		..\..\lib\eigen3\Eigen\src\misc\RealSvd2x2.h \
+		..\..\lib\eigen3\Eigen\src\SVD\UpperBidiagonalization.h \
+		..\..\lib\eigen3\Eigen\src\SVD\SVDBase.h \
+		..\..\lib\eigen3\Eigen\src\SVD\JacobiSVD.h \
+		..\..\lib\eigen3\Eigen\src\SVD\BDCSVD.h \
+		..\..\lib\eigen3\Eigen\src\SVD\JacobiSVD_LAPACKE.h \
+		..\..\lib\eigen3\Eigen\LU \
+		..\..\lib\eigen3\Eigen\src\misc\Kernel.h \
+		..\..\lib\eigen3\Eigen\src\misc\Image.h \
+		..\..\lib\eigen3\Eigen\src\LU\FullPivLU.h \
+		..\..\lib\eigen3\Eigen\src\LU\PartialPivLU.h \
+		..\..\lib\eigen3\Eigen\src\LU\PartialPivLU_LAPACKE.h \
+		..\..\lib\eigen3\Eigen\src\LU\Determinant.h \
+		..\..\lib\eigen3\Eigen\src\LU\InverseImpl.h \
+		..\..\lib\eigen3\Eigen\src\LU\arch\Inverse_SSE.h \
+		..\..\lib\eigen3\Eigen\src\Geometry\OrthoMethods.h \
+		..\..\lib\eigen3\Eigen\src\Geometry\EulerAngles.h \
+		..\..\lib\eigen3\Eigen\src\Geometry\Homogeneous.h \
+		..\..\lib\eigen3\Eigen\src\Geometry\RotationBase.h \
+		..\..\lib\eigen3\Eigen\src\Geometry\Rotation2D.h \
+		..\..\lib\eigen3\Eigen\src\Geometry\Quaternion.h \
+		..\..\lib\eigen3\Eigen\src\Geometry\AngleAxis.h \
+		..\..\lib\eigen3\Eigen\src\Geometry\Transform.h \
+		..\..\lib\eigen3\Eigen\src\Geometry\Translation.h \
+		..\..\lib\eigen3\Eigen\src\Geometry\Scaling.h \
+		..\..\lib\eigen3\Eigen\src\Geometry\Hyperplane.h \
+		..\..\lib\eigen3\Eigen\src\Geometry\ParametrizedLine.h \
+		..\..\lib\eigen3\Eigen\src\Geometry\AlignedBox.h \
+		..\..\lib\eigen3\Eigen\src\Geometry\Umeyama.h \
+		..\..\lib\eigen3\Eigen\src\Geometry\arch\Geometry_SSE.h \
+		utils\rotations.h \
+		..\..\lib\eigen3\Eigen\Dense \
+		..\..\lib\eigen3\Eigen\Eigenvalues \
+		..\..\lib\eigen3\Eigen\src\Eigenvalues\Tridiagonalization.h \
+		..\..\lib\eigen3\Eigen\src\Eigenvalues\RealSchur.h \
+		..\..\lib\eigen3\Eigen\src\Eigenvalues\HessenbergDecomposition.h \
+		..\..\lib\eigen3\Eigen\src\Eigenvalues\EigenSolver.h \
+		..\..\lib\eigen3\Eigen\src\Eigenvalues\SelfAdjointEigenSolver.h \
+		..\..\lib\eigen3\Eigen\src\Eigenvalues\GeneralizedSelfAdjointEigenSolver.h \
+		..\..\lib\eigen3\Eigen\src\Eigenvalues\ComplexSchur.h \
+		..\..\lib\eigen3\Eigen\src\Eigenvalues\ComplexEigenSolver.h \
+		..\..\lib\eigen3\Eigen\src\Eigenvalues\RealQZ.h \
+		..\..\lib\eigen3\Eigen\src\Eigenvalues\GeneralizedEigenSolver.h \
+		..\..\lib\eigen3\Eigen\src\Eigenvalues\MatrixBaseEigenvalues.h \
+		..\..\lib\eigen3\Eigen\src\Eigenvalues\RealSchur_LAPACKE.h \
+		..\..\lib\eigen3\Eigen\src\Eigenvalues\ComplexSchur_LAPACKE.h \
+		..\..\lib\eigen3\Eigen\src\Eigenvalues\SelfAdjointEigenSolver_LAPACKE.h \
 		release\PCReconstruct_pch.obj
 
 release\qrc_PCReconstruct.obj: release\qrc_PCReconstruct.cpp release\PCReconstruct_pch.obj

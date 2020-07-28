@@ -2,8 +2,6 @@
 #define BOUNDBOX_H
 
 //#include <qopengl.h>
-//#include <QVector>
-//#include <QVector3D>
 //#include <Eigen/Dense>
 //#include <array>
 #include "pt_to_pt_distsq.h"
