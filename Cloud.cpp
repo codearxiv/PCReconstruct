@@ -9,6 +9,7 @@
 #include "OrthogonalPursuit.h"
 #include "ksvd_dct2D.h"
 
+
 //---------------------------------------------------------
 
 Cloud::Cloud(MessageLogger* msgLogger)
@@ -261,22 +262,25 @@ void Cloud::reconstruct(
 	assert(m_CT != nullptr);
 
 	size_t npoints = m_cloud.size();
-	vector<CoverTreePoint<Vector3f>> neighs;
+
+        vector<CoverTreePoint<Vector3f>> neighs;
 	vector<Vector3f> vneighs;
 	vector<Vector3f> vneighsXY;
-	Vector3f zaxis(0.0f, 0.0f, 1.0f);
+
+        Vector3f zaxis(0.0f, 0.0f, 1.0f);
 	Matrix3f M;
 
 	int nfreq = std::ceil(sqrt(float(kNN)));
 	MatrixXi gridXY(nfreq, nfreq);
 
+        queue<size_t> qfront();
 	//--------
 	auto fit_gridXY = [](
 			const vector<Vector3f>& vs, float SD,
 			float& sizeX, float& sizeY)
 	{
 		sizeX = sizeY = 0.0f;
-		for(uint i=0; i<=vs.size(); ++i){
+                for(size_t i=0; i<=vs.size(); ++i){
 			Vector3f v = vs[i];
 			sizeX += v(0);
 			sizeY += v(1);
@@ -285,40 +289,69 @@ void Cloud::reconstruct(
 		sizeY = SD*(sizeY/vs.size());
 	};
 	//--------
-	auto get_gridXY_occupancy = [=](
+        struct gridLocation {
+            bool inGrid;
+            int cellX;
+            int cellY;
+            float u;
+            float v;
+        };
+
+        auto get_gridXY_occupancy = [=](
 			const vector<Vector3f>& vs,
-			float sizeX, float sizeY, MatrixXi& grid)
-	{
+                        float sizeX, float sizeY,
+                        MatrixXi& grid,
+                        vector<gridLocation>& gridLoc)
+	{            
 		grid.setZero(nfreq, nfreq);
-		for(uint i=0; i<=vs.size(); ++i){
-			Vector3f v = vs[i];
-			if( std::abs(v(0)) >= sizeX ) continue;
-			if( std::abs(v(1)) >= sizeY ) continue;
-			int cellX = nfreq*std::floor((v(0)+sizeX)/(2*sizeX));
-			int cellY = nfreq*std::floor((v(1)+sizeY)/(2*sizeY));
-			++grid(cellX, cellY);
-		}
+                mapToGrid.resize(vs.size());
+                for(size_t i=0; i<=vs.size(); ++i){
+                        gridLocation& loc = gridLoc[i];
+                        Vector3f v = vs[i];
+                        loc.inGrid = false;
+                        if( std::abs(v(0)) > sizeX ) continue;
+                        if( std::abs(v(1)) > sizeY ) continue;
+                        loc.u = (v(0)+sizeX)/(2*sizeX);
+                        loc.v = (v(1)+sizeY)/(2*sizeY);
+                        loc.cellX = nfreq*std::floor(loc.u);
+                        loc.cellY = nfreq*std::floor(loc.v);
+                        ++grid(loc.cellX, loc.cellY);
+                        loc.inGrid = true;
+                }
 	};
 	//--------
 
+        for(size_t i = 0; i < npoints; ++i){
+            Vector3f p = m_cloud[i];
+            Vector3f n = approxNorm(p, 10, kNN, neighs, vneighs);
+            m_norms[i] = n;
 
-	for(size_t i = 0; i < npoints; ++i){
-		Vector3f p = m_cloud[i];
-		Vector3f n = approxNorm(p, 10, kNN, neighs, vneighs);
-		m_norms[i] = n;
+            vector_to_vector_rotation_matrix(n, zaxis, true, M);
+            vneighsXY.resize(vneighs.size());
+            for(size_t j=0; j<vneighs.size(); ++j){
+                    vneighsXY[j] = M*vneighs[j];
+            }
+            float sizeX, sizeY;
+            fit_gridXY(vneighsXY, 2.0f, sizeX, sizeY);
+            if(std::min(sizeX,sizeY) <= 1e-5*std::max(sizeX,sizeY)) continue;
+            if(sizeX <= float_tiny || sizeY <= float_tiny) continue;
+            get_gridXY_occupancy(vneighsXY, sizeX, sizeY, gridXY);
+            bool hasEmptyCell = false;
+            for(size_t j=0; j<nfreq; ++j){
+                for(size_t k=0; k<nfreq; ++k){
+                    if(gridXY(k,j) == 0){
+                        hasEmptyCell = true;
+                        goto loopEnd0;
+                    }
+                }
+            }
+            loopEnd0:
+            if( hasEmptyCell ) qfront.push(i);
 
-		vector_to_vector_rotation_matrix(n, zaxis, true, M);
-		vneighsXY.resize(vneighs.size());
-		for(size_t j = 0; j < vneighs.size(); ++j){
-			vneighsXY[j] = M*vneighs[j];
-		}
+        }
 
-		float sizeX, sizeY;
-		fit_gridXY(vneighsXY, 2.0f, sizeX, sizeY);
-		if( sizeX <= float_tiny ) continue;
-		if( sizeY <= float_tiny ) continue;
-		get_gridXY_occupancy(vneighsXY, sizeX, sizeY, gridXY);
-	}
+        vector<int> napprox(npoints, -1);
+
 
 }
 
