@@ -263,6 +263,7 @@ void Cloud::reconstruct(
 	size_t npoints = m_cloud.size();
 	vector<CoverTreePoint<Vector3f>> neighs;
 	vector<Vector3f> vneighs;
+	vector<Vector3f> vneighsXY;
 	Vector3f zaxis(0.0f, 0.0f, 1.0f);
 	Matrix3f M;
 
@@ -305,13 +306,18 @@ void Cloud::reconstruct(
 		Vector3f p = m_cloud[i];
 		Vector3f n = approxNorm(p, 10, kNN, neighs, vneighs);
 		m_norms[i] = n;
+
 		vector_to_vector_rotation_matrix(n, zaxis, true, M);
+		vneighsXY.resize(vneighs.size());
+		for(size_t j = 0; j < vneighs.size(); ++j){
+			vneighsXY[j] = M*vneighs[j];
+		}
 
 		float sizeX, sizeY;
-		fit_gridXY(vneighs, 2.0f, sizeX, sizeY);
+		fit_gridXY(vneighsXY, 2.0f, sizeX, sizeY);
 		if( sizeX <= float_tiny ) continue;
 		if( sizeY <= float_tiny ) continue;
-		get_gridXY_occupancy(vneighs, sizeX, sizeY, gridXY);
+		get_gridXY_occupancy(vneighsXY, sizeX, sizeY, gridXY);
 	}
 
 }
