@@ -16,6 +16,9 @@
 #include "CoverTreePoint.h"
 #include "MessageLogger.h"
 
+
+enum class SparseApprox { MatchingPursuit = 0, OrthogonalPursuit = 1 };
+
 class Cloud : public QObject
 {
 	Q_OBJECT
@@ -24,7 +27,6 @@ class Cloud : public QObject
 	using Index = Eigen::Index;
 	using Vector3f = Eigen::Vector3f;
 	using Matrix3f = Eigen::Matrix3f;
-	using MatrixXi = Eigen::MatrixXi;
 	typedef pcl::PointCloud<pcl::PointXYZ>::Ptr CloudPtr;
 	
 public:
@@ -42,7 +44,8 @@ public:
 	void buildSpatialIndex();
 	void approxCloudNorms(int iters=10, int kNN=25);
 	void reconstruct(
-			int kSVDIters, int kNN, int natm, int latm);
+			int kSVDIters, int kNN, int natm, int latm,
+			SparseApprox method = SparseApprox::OrthogonalPursuit);
 
 	void addPoint(const Vector3f& v, const Vector3f &n,
 				  bool threadSafe = false);

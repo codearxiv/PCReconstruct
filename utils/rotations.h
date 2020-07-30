@@ -4,8 +4,8 @@
 #include <Eigen/Dense>
 
 void vector_to_vector_rotation_matrix(
-		const Eigen::Vector3f& v, const Eigen::Vector3f& w, bool normalized,
-		Eigen::Matrix3f& M);
+		const Eigen::Vector3f& v, const Eigen::Vector3f& w,
+		bool normalized, bool lineThruW, Eigen::Matrix3f& M);
 
 void angle_vector_rotation_matrix(
 		float angle, const Eigen::Vector3f& u,
