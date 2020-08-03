@@ -2,9 +2,9 @@
 //     See LICENSE included.
 
 
-//#include <pcl/io/pcd_io.h>
-//#include <pcl/point_cloud.h>
-//#include <pcl/point_types.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
 //#include <QDockWidget>
 //#include <QPlainTextEdit>
 //#include <QMenuBar>

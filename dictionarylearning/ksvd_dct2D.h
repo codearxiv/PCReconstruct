@@ -45,4 +45,7 @@ void print_error_dct2D(
 		Eigen::Index nfreq);
 
 
+void column_normalize(Eigen::Ref<Eigen::MatrixXf, ALIGNEDX> M,
+					  Eigen::Ref<Eigen::VectorXf, ALIGNEDX> NrmInv);
+
 #endif // KSVD_DCT2D_H

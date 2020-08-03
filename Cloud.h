@@ -8,8 +8,8 @@
 //#include <vector>
 //#include <Eigen/Dense>
 //#include <QObject>
-#include <QRecursiveMutex>
-#include <QMutexLocker>
+//#include <QRecursiveMutex>
+//#include <QMutexLocker>
 //#include <pcl/point_types.h>
 //#include <pcl/point_cloud.h>
 #include "Cover_Tree.h"
@@ -28,7 +28,7 @@ class Cloud : public QObject
 	using Vector3f = Eigen::Vector3f;
 	using Matrix3f = Eigen::Matrix3f;
 	typedef pcl::PointCloud<pcl::PointXYZ>::Ptr CloudPtr;
-	
+
 public:
 	Cloud(MessageLogger* msgLogger = nullptr);
 	~Cloud();
@@ -42,19 +42,19 @@ public:
 	void toPCL(CloudPtr& cloud);
 
 	void buildSpatialIndex();
-	void approxCloudNorms(int iters=10, int kNN=25);
+	void approxCloudNorms(int iters=10, size_t kNN=25);
 	void reconstruct(
-			int kSVDIters, int kNN, int natm, int latm,
+			int kSVDIters, size_t kNN, size_t nfreq, size_t natm, size_t latm,
 			SparseApprox method = SparseApprox::OrthogonalPursuit);
 
 	void addPoint(const Vector3f& v, const Vector3f &n,
 				  bool threadSafe = false);
 	Vector3f approxNorm(
-			const Vector3f& p, int iters, int kNN,
-			vector<CoverTreePoint<Vector3f>>& neighs,
+			const Vector3f& p, int iters,
+			const vector<CoverTreePoint<Vector3f>>& neighs,
 			vector<Vector3f>& vneighs);
 	void pointKNN(
-			const Vector3f& p, int k,
+			const Vector3f& p, size_t kNN,
 			vector<CoverTreePoint<Vector3f>>& neighs);
 
 signals:
@@ -63,6 +63,10 @@ signals:
 					 size_t i, size_t n, int infreq, int& threshold);
 
 private:
+	void getNeighVects(const Vector3f& p,
+					   const vector<CoverTreePoint<Vector3f>>& neighs,
+					   vector<Vector3f>& vneighs);
+
 	vector<Vector3f> m_cloud;
 	vector<Vector3f> m_norms;
 	vector<GLfloat> m_vertGL;

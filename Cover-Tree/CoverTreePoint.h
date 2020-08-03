@@ -6,8 +6,8 @@
 //  Brief description
 //     Point on a cover tree stored as a vector in Eigen.
 
-#ifndef _UNIT_SPHERE_POINT_H
-#define _UNIT_SPHERE_POINT_H
+#ifndef _COVERTREEPOINT_H
+#define _COVERTREEPOINT_H
 
 #include "pt_to_pt_distsq.h"
 //#include <Eigen/Dense>
@@ -17,13 +17,13 @@ template<class T>
 class CoverTreePoint {
 private:
 	T _vec;
-	int _id;
+	size_t _id;
 public:
-	CoverTreePoint(T v, int id) : _vec(v), _id(id) {}
+	CoverTreePoint(T v, size_t id) : _vec(v), _id(id) {}
 	double distance(const CoverTreePoint<T>& p) const;
 	const T& getVec() const;
-	int getId() const;
-	void set(const T& v, int id);
+	size_t getId() const;
+	void set(const T& v, size_t id);
     void print() const;
 	bool operator==(const CoverTreePoint<T>&) const;
 };
@@ -45,12 +45,12 @@ const T& CoverTreePoint<T>::getVec() const {
 }
 
 template<class T>
-int CoverTreePoint<T>::getId() const {
+size_t CoverTreePoint<T>::getId() const {
 	return _id;
 }
 
 template<class T>
-void CoverTreePoint<T>::set(const T& v, int id) {
+void CoverTreePoint<T>::set(const T& v, size_t id) {
 	_vec = v;
 	_id = id;
 }
@@ -66,7 +66,7 @@ bool CoverTreePoint<T>::operator==(const CoverTreePoint<T>& p) const {
 }
 
 
-#endif // _UNIT_SPHERE_POINT_H
+#endif // _COVERTREEPOINT_H
 
 
 

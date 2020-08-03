@@ -12,10 +12,10 @@
 #include <cmath>
 #include <vector>
 #include <queue>
+#include <numeric>
+#include <algorithm>
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
-#include <pcl/io/pcd_io.h>
-#include <pcl/point_types.h>
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QCommandLineOption>
@@ -58,6 +58,9 @@
 #include <QRecursiveMutex>
 #include <QMutexLocker>
 #include <QThread>
-#include <window.h>
+//#include <pcl/io/pcd_io.h>
+#include <pcl/point_types.h>
+#include <pcl/point_cloud.h>
+
 
 #endif

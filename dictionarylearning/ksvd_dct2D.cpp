@@ -39,9 +39,6 @@ using MapMtrxf = Map<MatrixXf, ALIGNEDX>;
 using MapVectf = Map<VectorXf, ALIGNEDX>;
 
 
-void column_normalize(Ref<MatrixXf> M, Ref<VectorXf> NrmInv);
-
-
 //-----------------------------------------------------------
 
 /**
@@ -55,9 +52,6 @@ void column_normalize(Ref<MatrixXf> M, Ref<VectorXf> NrmInv);
 
    C.f. "Cloud Dictionary: Coding and Modeling for Point Clouds",
    https://arxiv.org/abs/1612.04956
-
-   Note: accuracy seems to drop of considerably as signals exceed
-   nfreq^2 number of samples.
 
    @param[in]  useOpenMP: Whether to parallelize using OpenMP.
    @param[in]  Y: array of signal vectors (possibly of variable length).

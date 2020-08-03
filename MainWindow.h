@@ -5,6 +5,7 @@
 #define MAINWINDOW_H
 
 //#include <QMainWindow>
+#include <pcl/io/pcd_io.h>
 //#include <pcl/point_types.h>
 //#include <pcl/point_cloud.h>
 #include "MessageLogger.h"
