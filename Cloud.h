@@ -49,6 +49,10 @@ public:
 
 	void addPoint(const Vector3f& v, const Vector3f &n,
 				  bool threadSafe = false);
+	void replacePoint(
+			size_t idx, const Vector3f& v, const Vector3f &n,
+			bool threadSafe = false);
+
 	Vector3f approxNorm(
 			const Vector3f& p, int iters,
 			const vector<CoverTreePoint<Vector3f>>& neighs,

@@ -186,6 +186,27 @@ void Cloud::addPoint(const Vector3f& v, const Vector3f& n, bool threadSafe)
 
 //---------------------------------------------------------
 
+void Cloud::replacePoint(
+		size_t idx, const Vector3f& v, const Vector3f& n, bool threadSafe)
+{
+	if ( threadSafe ) m_recMutex.lock();
+	assert(idx < m_cloud.size());
+
+	m_cloud[idx] = v;
+	m_norms[idx] = n;
+
+	if( m_CT != nullptr ) {
+		CoverTreePoint<Vector3f> cp(v, m_cloud.size());
+		m_CT->remove(cp);
+		m_CT->insert(cp);
+	}
+
+	if ( threadSafe ) m_recMutex.unlock();
+
+}
+
+//---------------------------------------------------------
+
 void Cloud::buildSpatialIndex()
 {
 	QMutexLocker locker(&m_recMutex);
@@ -291,6 +312,7 @@ void Cloud::reconstruct(
 {
 	QMutexLocker locker(&m_recMutex);
 	assert(m_CT != nullptr);
+	assert(kNN >= 1 && nfreq >= 1 && natm >= 1 && latm >= 1 && latm <= natm);
 
 	size_t npoints_orig = m_cloud.size();
 	//size_t nfreq = std::ceil(sqrt(float(kNN)));
@@ -298,6 +320,8 @@ void Cloud::reconstruct(
 
 	//--------
 	struct gridLocation {
+		size_t idx = -1;
+		bool inCloud = true;
 		bool inGrid = false;
 		int cellX;
 		int cellY;
@@ -309,13 +333,13 @@ void Cloud::reconstruct(
 
 	//--------
 	auto fit_gridXY = [](
-			const vector<Vector3f>& vs, float SD,
+			const vector<Vector3f>& vneighsXY, float SD,
 			float& sizeX, float& sizeY, size_t& gridDim)
 	{
 		sizeX = sizeY = 0.0f;
-		size_t n = vs.size();
+		size_t n = vneighsXY.size();
 		for(size_t i=0; i<=n; ++i){
-			Vector3f v = vs[i];
+			Vector3f v = vneighsXY[i];
 			sizeX += v(0);
 			sizeY += v(1);
 		}
@@ -325,21 +349,24 @@ void Cloud::reconstruct(
 	};
 	//--------
 	auto get_gridXY_occupancy = [=](
-			const vector<Vector3f>& vs,
+			const vector<CoverTreePoint<Vector3f>>& neighs,
+			const vector<Vector3f>& vneighsXY,
 			float sizeX, float sizeY, size_t gridDim,
 			MatrixXi& gridXY, vector<gridLocation>& gridLoc)
 	{
 		gridXY.setZero(nfreq, nfreq);
-		gridLoc.resize(vs.size());
-		for(size_t i=0; i<=vs.size(); ++i){
-			const Vector3f& v = vs[i];
+		gridLoc.resize(neighs.size());
+		for(size_t i=0; i<=neighs.size(); ++i){
 			gridLocation& loc = gridLoc[i];
+			loc.idx = neighs[i].getId();
+			loc.inCloud = true;
 			loc.inGrid = false;
-			if( abs(v(0)) > sizeX ) continue;
-			if( abs(v(1)) > sizeY ) continue;
-			loc.u = (v(0)+sizeX)/(2*sizeX);
-			loc.v = (v(1)+sizeY)/(2*sizeY);
-			loc.w = v(3);
+			const Vector3f& q = vneighsXY[i];
+			if( abs(q(0)) > sizeX ) continue;
+			if( abs(q(1)) > sizeY ) continue;
+			loc.u = (q(0)+sizeX)/(2*sizeX);
+			loc.v = (q(1)+sizeY)/(2*sizeY);
+			loc.w = q(2);
 			loc.cellX = gridDim*floor(loc.u);
 			loc.cellY = gridDim*floor(loc.v);
 			++gridXY(loc.cellX, loc.cellY);
@@ -349,7 +376,9 @@ void Cloud::reconstruct(
 	//--------
 
 	auto setup_grid = [&](
-			Vector3f norm, const vector<Vector3f>& vneighs,
+			Vector3f norm,
+			const vector<CoverTreePoint<Vector3f>>& neighs,
+			const vector<Vector3f>& vneighs,
 			vector<Vector3f>& vneighsXY, Matrix3f& rotXY,
 			MatrixXi& gridXY, float& sizeX, float& sizeY,
 			size_t& gridDim, vector<gridLocation>& gridLoc)
@@ -366,7 +395,8 @@ void Cloud::reconstruct(
 		if(min(sizeX,sizeY) <= 1e-5*max(sizeX,sizeY)) return false;
 		if(sizeX <= float_tiny || sizeY <= float_tiny) return false;
 		get_gridXY_occupancy(
-					vneighsXY, sizeX, sizeY, gridDim, gridXY, gridLoc);
+					neighs, vneighsXY, sizeX, sizeY,
+					gridDim, gridXY, gridLoc);
 
 		return true;
 	};
@@ -403,7 +433,7 @@ void Cloud::reconstruct(
 	vector<Vector3f> vneighs;
 	vector<Vector3f> vneighsXY;
 	MatrixXi gridXY(nfreq, nfreq);
-	Matrix3f rotXY;
+	Matrix3f rotXY, rotXYInv;
 	vector<gridLocation> gridLoc;
 
 	VectorXf Wsig, Usig, Vsig;
@@ -424,7 +454,7 @@ void Cloud::reconstruct(
 		float sizeX, sizeY;
 		size_t gridDim;
 		bool success = setup_grid(
-					norm, vneighs, vneighsXY, rotXY,
+					norm, neighs, vneighs, vneighsXY, rotXY,
 					gridXY, sizeX, sizeY, gridDim, gridLoc);
 
 		if( !success ) continue;
@@ -500,9 +530,6 @@ loopEnd0:
 	//vectorfa dworkDctA0(paddedA0[0] + paddedA0[1]);
 	vectorfa dworkDctB;
 
-	vector<int> napprox(npoints_orig, -1);
-	vector<int> nband(npoints_orig, 0);
-
 
 	while( !qfront.empty() ){
 		size_t i = qfront.front();
@@ -510,7 +537,7 @@ loopEnd0:
 
 		Vector3f p = m_cloud[i];
 		Vector3f norm;
-		if( napprox[i] == -1 ){
+		if( i < npoints_orig ){
 			norm = m_norms[i];
 		}
 		else{
@@ -523,9 +550,9 @@ loopEnd0:
 		getNeighVects(p, neighs, vneighs);
 
 		float sizeX, sizeY;
-		size_t gridDim, numInGrid;
+		size_t gridDim;
 		bool success = setup_grid(
-					norm, vneighs, vneighsXY, rotXY,
+					norm, neighs, vneighs, vneighsXY, rotXY,
 					gridXY, sizeX, sizeY, gridDim, gridLoc);
 
 		if( !success ) continue;
@@ -548,70 +575,76 @@ loopEnd0:
 		size_t nsmpl0a = 0;
 		for(size_t j=0; j<gridLoc.size(); ++j){
 			if( !gridLoc[j].inGrid ) continue;
-			if(neighs[j].getId() <= npoints_orig){
+			if(gridLoc[j].idx <= npoints_orig){
 				gridLoc[j].inGrid = false;
 			}
 			else{
-				gridLoc[j].sigIdx = nsmpl0a;
 				++nsmpl0a;
 			}
 		}
 
+		size_t npoints = m_cloud.size();
 		size_t nsmpl0b = 0;
 		for(size_t j=0; j<gridDim; ++j){
 			for(size_t k=0; k<gridDim; ++k){
 				if(gridXY(k,j) > 0) continue;
 				gridLocation loc;
+				loc.idx = npoints;
+				loc.inCloud = false;
 				loc.inGrid = true;
 				loc.u = (k+0.5f)/gridDim;
 				loc.v = (j+0.5f)/gridDim;
 				loc.w = 0.0f;
 				loc.cellX = k;
 				loc.cellY = j;
-				loc.sigIdx = nsmpl0a + nsmpl0b;
 				gridLoc.push_back(loc);
 				++nsmpl0b;
+				++npoints;
 			}
 		}
 
 		setup_grid_signal(gridLoc, U0sig, V0sig, W0sig);
-		size_t nsmpl0 = W0sig.size();
 
+		size_t nsmpl0 = W0sig.size();
 		new (&T0D) MapMtrxf(&dworkDctA[paddedA[2]], nsmpl0, natm);
-		new (&T0b) MapMtrxf(&dworkDctA[0], nsmpl0b, ndim);
-		U0bsig.resize(nsmpl0b);
-		V0bsig.resize(nsmpl0b);
 
 		for(size_t j=0, k=0; j<gridLoc.size(); ++j){
+			if( !gridLoc[j].inCloud ) break;
 			if( !gridLoc[j].inGrid ) continue;
-			if( k > nsmpl0a ) break;
 			T0D.row(k) = TD.row(j);
 			++k;
 		}
 
+		new (&T0b) MapMtrxf(&dworkDctA[0], nsmpl0b, ndim);
+		U0bsig.resize(nsmpl0b);
+		V0bsig.resize(nsmpl0b);
+		U0bsig.segment(0,nsmpl0b) = U0sig.segment(nsmpl0a,nsmpl0b);
+		V0bsig.segment(0,nsmpl0b) = V0sig.segment(nsmpl0a,nsmpl0b);
 		cosine_transform(U0bsig, V0bsig, nfreq, dworkDctB, T0b);
 		T0D.block(nsmpl0a,0,nsmpl0b,natm).noalias() = T0b*D;
 
 		W0sig = T0D*Csig;
 
-		for(size_t j=0, k=0; j<gridLoc.size(); ++j){
+		for(size_t j=0; j<gridLoc.size(); ++j){
 			if( !gridLoc[j].inGrid ) continue;
-			gridLoc[j].w = W0sig(k);
-			++k;
+			gridLoc[j].w = W0sig(gridLoc[j].sigIdx);
 		}
 
-		size_t npoints = m_cloud.size() + nsmpl0b;
-		size_t nneighs = neighs.size() + nsmpl0b;
-
-		m_cloud.resize(npoints);
-		neighs.resize(nneighs);
-		vneighs.resize(nneighs);
-		vneighsXY.resize(nneighs);
-
-		for(size_t j=0, k=0; j<gridLoc.size(); ++j){
-			if( !gridLoc[j].inGrid ) continue;
-			gridLoc[j].w = W0sig(k);
-			++k;
+		rotXYInv = rotXY.transpose();
+		for(size_t j=0; j<gridLoc.size(); ++j){
+			gridLocation& loc = gridLoc[i];
+			if( !loc.inGrid ) continue;
+			Vector3f qXY, q;
+			qXY(0) = (2*loc.u - 1.0f)*sizeX;
+			qXY(1) = (2*loc.v - 1.0f)*sizeY;
+			qXY(2) = loc.w;
+			q = rotXYInv*q;
+			if( loc.inCloud ){
+				replacePoint(loc.idx, q, m_norms[loc.idx]);
+			}
+			else{
+				addPoint(q, norm);
+			}
 		}
 
 
