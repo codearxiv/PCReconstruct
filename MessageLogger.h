@@ -1,10 +1,11 @@
 #ifndef MESSAGELOGGER_H
 #define MESSAGELOGGER_H
 
-//#include <QPlainTextEdit>
-//#include <QObject>
-//#include <QMutex>
+#include <QObject>
 
+QT_BEGIN_NAMESPACE
+class QPlainTextEdit;
+QT_END_NAMESPACE
 
 class MessageLogger : public QObject
 {
@@ -18,20 +19,10 @@ public:
 	void set(QPlainTextEdit *logText) { m_logText = logText; }
 
 public slots:
-	void logMessage(const QString& text) {
-		m_logText->appendPlainText(text);
-	}
+	void logMessage(const QString& text);
 
 	void logProgress(const QString& msgPrefix,
-					 size_t i, size_t n, int infreq, int& threshold) {
-		float percent = (100.0f*i)/n;
-		if(percent >= threshold) {
-			if(threshold > 0) { m_logText->undo(); }
-			logMessage(msgPrefix + ": " + QString::number(int(percent)) + "%...");
-			threshold += infreq;
-		}
-	}
-
+					 size_t i, size_t n, int infreq, int& threshold);
 private:
 	QPlainTextEdit *m_logText;
 

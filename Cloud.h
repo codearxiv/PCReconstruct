@@ -4,18 +4,21 @@
 #ifndef CLOUD_H
 #define CLOUD_H
 
-//#include <qopengl.h>
-//#include <vector>
-//#include <Eigen/Dense>
-//#include <QObject>
-//#include <QRecursiveMutex>
-//#include <QMutexLocker>
-//#include <pcl/point_types.h>
-//#include <pcl/point_cloud.h>
 #include "Cover_Tree.h"
 #include "CoverTreePoint.h"
-#include "MessageLogger.h"
+//#include "MessageLogger.h"
 
+#include <Eigen/Dense>
+#include <pcl/point_types.h>
+#include <pcl/point_cloud.h>
+#include <qopengl.h>
+#include <QObject>
+#include <QRecursiveMutex>
+//#include <QMutexLocker>
+#include <vector>
+
+class MessageLogger;
+class BoundBox;
 
 enum class SparseApprox { MatchingPursuit = 0, OrthogonalPursuit = 1 };
 
@@ -45,6 +48,7 @@ public:
 	void approxCloudNorms(int iters=10, size_t kNN=25);
 	void reconstruct(
 			int kSVDIters, size_t kNN, size_t nfreq, size_t natm, size_t latm,
+			size_t maxNewPoints, BoundBox* BBox = nullptr,
 			SparseApprox method = SparseApprox::OrthogonalPursuit);
 
 	void addPoint(const Vector3f& v, const Vector3f &n,

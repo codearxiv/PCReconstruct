@@ -5,7 +5,7 @@
 #ifndef ENSURE_BUFFER_SIZE_H
 #define ENSURE_BUFFER_SIZE_H
 
-//#include <vector>
+#include <vector>
 
 //-----------------------------------------------------------
 

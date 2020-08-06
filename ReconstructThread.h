@@ -1,12 +1,13 @@
 #ifndef RECONSTRUCTTHREAD_H
 #define RECONSTRUCTTHREAD_H
 
-//#include <QMutex>
-//#include <QThread>
-//#include <vector>
-//#include <Eigen/Dense>
 #include "Cover_Tree.h"
 #include "CoverTreePoint.h"
+
+#include <Eigen/Dense>
+#include <QMutex>
+#include <QThread>
+#include <vector>
 
 class ReconstructThread : public QThread
 {

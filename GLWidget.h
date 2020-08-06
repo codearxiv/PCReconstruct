@@ -56,16 +56,21 @@
 #ifndef GLWIDGET_H
 #define GLWIDGET_H
 
-//#include <QOpenGLWidget>
-//#include <QOpenGLFunctions>
-//#include <QOpenGLVertexArrayObject>
-//#include <QOpenGLBuffer>
-//#include <QMatrix4x4>
-//#include <pcl/point_types.h>
-//#include <pcl/point_cloud.h>
 #include "BoundBox.h"
 #include "Cloud.h"
-#include "MessageLogger.h"
+//#include "MessageLogger.h"
+
+#include <pcl/point_types.h>
+#include <pcl/point_cloud.h>
+
+#include <QOpenGLWidget>
+#include <QOpenGLFunctions>
+#include <QOpenGLVertexArrayObject>
+#include <QOpenGLBuffer>
+#include <QMatrix4x4>
+
+
+class MessageLogger;
 
 QT_FORWARD_DECLARE_CLASS(QOpenGLShaderProgram)
 

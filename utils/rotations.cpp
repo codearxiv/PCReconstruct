@@ -3,6 +3,7 @@
 #include "rotations.h"
 #include "constants.h"
 
+#include <Eigen/Dense>
 
 using Eigen::Vector3f;
 using Eigen::Matrix3f;
@@ -75,16 +76,16 @@ void cos_sin_angle_vector_rotation_matrix(
 	Vector3f tu = (1.0f-cosa)*u;
 	Vector3f su = sina*u;
 
+	M(0,0) = tu(0)*u(0) + cosa;
+	M(1,0) = tu(0)*u(1) + su(2);
+	M(2,0) = tu(0)*u(2) - su(1);
+
+	M(0,1) = tu(1)*u(0) - su(2);
 	M(1,1) = tu(1)*u(1) + cosa;
-	M(2,1) = tu(1)*u(2) + su(3);
-	M(3,1) = tu(1)*u(3) - su(2);
+	M(2,1) = tu(1)*u(2) + su(0);
 
-	M(1,2) = tu(2)*u(1) - su(3);
+	M(0,2) = tu(2)*u(0) + su(1);
+	M(1,2) = tu(2)*u(1) - su(0);
 	M(2,2) = tu(2)*u(2) + cosa;
-	M(3,2) = tu(2)*u(3) + su(1);
-
-	M(1,3) = tu(3)*u(1) + su(2);
-	M(2,3) = tu(3)*u(2) - su(1);
-	M(3,3) = tu(3)*u(3) + cosa;
 }
 //-----------------------------------------------------------

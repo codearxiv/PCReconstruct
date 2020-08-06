@@ -6,13 +6,11 @@
 #ifndef KSVD_DCT2D_H
 #define KSVD_DCT2D_H
 
-#include "constants.h"
-//#include <Eigen/Dense>
-//#include <functional>
+#include "alignment.h"
 
-namespace std {
-template<class T> class function;
-}
+#include <Eigen/Dense>
+#include <vector>
+#include <functional>
 
 
 void ksvd_dct2D(

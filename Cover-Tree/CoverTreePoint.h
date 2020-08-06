@@ -10,7 +10,7 @@
 #define _COVERTREEPOINT_H
 
 #include "pt_to_pt_distsq.h"
-//#include <Eigen/Dense>
+#include <iostream>
 
 
 template<class T>
@@ -33,7 +33,8 @@ double CoverTreePoint<T>::distance(const CoverTreePoint<T>& p) const {
 	const T& vec2 = p.getVec();
 	assert(vec2.size() == _vec.size());
 	double distsq = 0.0;
-	for(size_t i=0; i < _vec.size(); ++i) {
+	size_t n = size_t(_vec.size());
+	for(size_t i=0; i < n; ++i) {
 		distsq += (_vec[i]-vec2[i])*(_vec[i]-vec2[i]);
 	}
 	return distsq;

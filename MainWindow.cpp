@@ -2,20 +2,24 @@
 //     See LICENSE included.
 
 
-#include <pcl/io/pcd_io.h>
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
-//#include <QDockWidget>
-//#include <QPlainTextEdit>
-//#include <QMenuBar>
-//#include <QMenu>
-//#include <QMessageBox>
-//#include <QMainWindow>
-
 #include "MainWindow.h"
 #include "Window.h"
 #include "MessageLogger.h"
 
+#include <pcl/io/pcd_io.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+
+#include <QApplication>
+#include <QCoreApplication>
+#include <QToolBar>
+#include <QDockWidget>
+#include <QPlainTextEdit>
+#include <QFileDialog>
+#include <QMenuBar>
+#include <QMenu>
+#include <QMessageBox>
+#include <QMainWindow>
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent), msgLogger()
@@ -86,10 +90,10 @@ void MainWindow::open()
 {
 
 	QString q_pcdPath = QFileDialog::getOpenFileName(
-	  this, tr("Open File"), "", tr("PCD (*.pcd)")
-	);
-	std::string pcdPath = q_pcdPath.toStdString();
+				this, tr("Open File"), "", tr("PCD (*.pcd)")
+				);
 
+	std::string pcdPath = q_pcdPath.toStdString();
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
 	if (pcl::io::loadPCDFile<pcl::PointXYZ>(pcdPath, *cloud) == -1) //* load the file
 	{

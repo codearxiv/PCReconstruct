@@ -6,8 +6,10 @@
 #define ORTHOGONALPURSUIT_H
 
 
-#include "constants.h"
-//#include <vector>
+#include "alignment.h"
+
+#include <Eigen/Dense>
+#include <vector>
 
 
 class OrthogonalPursuit

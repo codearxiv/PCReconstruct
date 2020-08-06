@@ -6,7 +6,8 @@
 #include "OrthogonalPursuit.h"
 #include "ensure_buffer_size.h"
 #include "constants.h"
-//#include <functional>
+
+#include <functional>
 
 using Eigen::Matrix;
 using Eigen::Map;

@@ -1,17 +1,17 @@
 #ifndef BOUNDBOX_H
 #define BOUNDBOX_H
 
-//#include <qopengl.h>
-//#include <Eigen/Dense>
-//#include <array>
 #include "pt_to_pt_distsq.h"
+
+#include <qopengl.h>
+#include <Eigen/Dense>
+#include <array>
 
 
 class Cloud;
 
 class BoundBox
 {
-	template<typename T> using vector = std::vector<T>;
 	using Index = Eigen::Index;
 	using Vector3f = Eigen::Vector3f;
 

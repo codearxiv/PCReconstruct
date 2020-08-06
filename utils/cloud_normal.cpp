@@ -2,9 +2,11 @@
 //     Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
 //     See LICENSE included.
 
-//#include <math.h>
 #include "cloud_normal.h"
 #include "ensure_buffer_size.h"
+
+#include <math.h>
+#include <vector>
 
 using Eigen::Vector3f;
 //using Eigen::Matrix;

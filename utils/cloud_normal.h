@@ -5,7 +5,9 @@
 #ifndef CLOUD_NORMAL_H
 #define CLOUD_NORMAL_H
 
-//#include <Eigen/Dense>
+#include <Eigen/Dense>
+#include <vector>
+
 
 Eigen::Vector3f cloud_normal(
 		const Eigen::Vector3f& p0, const std::vector<Eigen::Vector3f>& cloud,

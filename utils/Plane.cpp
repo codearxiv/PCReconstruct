@@ -4,6 +4,8 @@
 
 #include "Plane.h"
 
+#include <Eigen/Dense>
+
 //-----------------------------------------------------------
 
 void Plane::set(const Vector3f p0, const Vector3f norm)

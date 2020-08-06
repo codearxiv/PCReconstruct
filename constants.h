@@ -5,23 +5,11 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-//#include <Eigen/Dense>
-//#include <limits>
-
-#define __ALIGNED_MEMORY
-
-#ifdef __ALIGNED_MEMORY
-const size_t ALIGNEDX = Eigen::Aligned16;
-inline size_t align_padded(size_t n) {
-	return ALIGNEDX > 0 ? ALIGNEDX*(1+((n-1)/ALIGNEDX)) : n;
-}
-#else
-const size_t ALIGNEDX = Eigen::Unaligned;
-inline size_t align_padded(size_t n) { return n; }
-#endif
+#include <limits>
 
 const float float_infinity = std::numeric_limits<float>::infinity();
 const float float_tiny = std::numeric_limits<float>::min();
 const double double_infinity = std::numeric_limits<double>::infinity();
+
 
 #endif // CONSTANTS_H

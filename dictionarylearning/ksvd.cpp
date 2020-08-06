@@ -3,16 +3,19 @@
 
 
 #define EIGEN_NO_MALLOC
-//#define __DEBUG_KSVD
+//#define DEBUG_KSVD
 
 #include "ksvd.h"
 #include "constants.h"
-//#include "Cover_Tree.h"
-//#include <functional>
-//#include <math.h>
-//#include <vector>
-//#include <Eigen/Dense>
-//#include <omp.h>
+#include "alignment.h"
+
+#include <Eigen/Dense>
+
+#include <functional>
+#include <math.h>
+#include <vector>
+#include <omp.h>
+#include <iostream>
 
 
 using std::cout;
@@ -121,7 +124,7 @@ void ksvd(
 //***
 #pragma omp single
 {
-#ifdef __DEBUG_KSVD
+#ifdef DEBUG_KSVD
 		if(iter == 1) cout << "\nAverge error (coordinate difference):\n" ;
 		cout << (Y-(D*X)).cwiseAbs().sum()/(ndim*nsig) << endl;
 #endif

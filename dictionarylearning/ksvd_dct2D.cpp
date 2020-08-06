@@ -2,18 +2,22 @@
 //     See LICENSE included.
 
 #define EIGEN_NO_MALLOC
-//#define __DEBUG_KSVDDCT
+
+#define DEBUG_KSVDDCT
 
 #include "ksvd_dct2D.h"
 #include "cosine_transform.h"
 #include "ensure_buffer_size.h"
 #include "constants.h"
+#include "alignment.h"
 
-//#include <functional>
-//#include <math.h>
-//#include <Eigen/Dense>
-//#include <omp.h>
+#include <Eigen/Dense>
 
+#include <functional>
+#include <omp.h>
+#include <math.h>
+#include <iostream>
+#include <vector>
 
 using std::cout;
 using std::endl;
@@ -172,10 +176,10 @@ void ksvd_dct2D(
 
 	for(int iter = 1; iter <= maxIters; ++iter){
 
-#ifdef __DEBUG_KSVDDCT
+#ifdef DEBUG_KSVDDCT
 #pragma omp single
 {
-		if(iter == 1) cout << "\nAverge error (coord. diff., cosine angle, length vect. diff.)\n" ;
+		if(iter == 1) cout << "\nAverage error (coord. diff., cosine angle, vect. diff.)\n" ;
 		print_error_dct2D(Y, U, V, D, X, nfreq);
 		cout << endl;
 }
@@ -216,6 +220,15 @@ void ksvd_dct2D(
 
 			if( smallError ) break;
 		}
+
+//***
+#ifdef DEBUG_KSVDDCT
+#pragma omp single
+{
+		print_error_dct2D(Y, U, V, D, X, nfreq);
+		cout << endl;
+}
+#endif
 
 #pragma omp single
 {
@@ -317,7 +330,27 @@ void ksvd_dct2D(
 
 
 		}
+
+//***
+#ifdef DEBUG_KSVDDCT
+#pragma omp single
+{
+		print_error_dct2D(Y, U, V, D, X, nfreq);
+		cout << endl;
+}
+#endif
+
+
 	}
+
+#ifdef DEBUG_KSVDDCT
+#pragma omp single
+{
+		print_error_dct2D(Y, U, V, D, X, nfreq);
+		cout << endl;
+}
+#endif
+
 
 
 } //parallel

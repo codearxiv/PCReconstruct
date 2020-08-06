@@ -55,6 +55,7 @@ HEADERS += \
 	MessageLogger.h \
 	ReconstructThread.h \
 	Window.h \
+	alignment.h \
 	constants.h \
 	dictionarylearning/MatchingPursuit.h \
 	dictionarylearning/OrthogonalPursuit.h \

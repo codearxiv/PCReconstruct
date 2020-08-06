@@ -6,7 +6,7 @@
 #ifndef PLANE_H
 #define PLANE_H
 
-//#include <Eigen/Dense>
+#include <Eigen/Dense>
 
 class Plane
 {

@@ -6,7 +6,10 @@
 #ifndef MATCHINGPURSUIT_H
 #define MATCHINGPURSUIT_H
 
-#include "constants.h"
+#include "alignment.h"
+
+#include <Eigen/Dense>
+
 
 class MatchingPursuit
 {

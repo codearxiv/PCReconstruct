@@ -54,16 +54,19 @@
 ****************************************************************************/
 
 #include "GLWidget.h"
-//#include <QMouseEvent>
-//#include <QOpenGLShaderProgram>
-//#include <QCoreApplication>
-//#include <QDebug>
-//#include <math.h>
 #include "BoundBox.h"
 #include "Cloud.h"
 #include "MessageLogger.h"
+#include "constants.h"
 
-#define DBUG_CLOUD_NORMS_H
+#include <QMouseEvent>
+#include <QOpenGLShaderProgram>
+#include <QCoreApplication>
+#include <QDebug>
+
+#include <math.h>
+
+//#define DBUG_CLOUD_NORMS_H
 
 bool GLWidget::m_transparent = false;
 
@@ -368,8 +371,10 @@ void GLWidget::wheelEvent(QWheelEvent *event)
 void GLWidget::setCloud(CloudPtr cloud)
 {
 	m_cloud.fromPCL(cloud);
-	m_cloud.buildSpatialIndex();
+	m_cloudBBox.set(m_cloud);
+	//m_cloud.buildSpatialIndex();
 	//m_cloud.approxCloudNorms(10, 25);
+	m_cloud.reconstruct(1, 50, 5, 100, 25, 10000, &m_cloudBBox);
 
 	m_cloudVbo.create();
 	m_cloudVbo.bind();
@@ -378,9 +383,7 @@ void GLWidget::setCloud(CloudPtr cloud)
 				6*m_cloud.pointCount()*sizeof(GLfloat));
 	setupVertexAttribs(m_cloudVbo);
 
-	m_cloudBBox.set(m_cloud);
 	setGLBBox(m_cloudBBox, m_cloudBBoxVbo, m_cloudBBoxEbo);
-
 
 #ifdef DBUG_CLOUD_NORMS_H
 	m_cloud.approxCloudNorms(10, 25);

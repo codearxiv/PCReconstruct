@@ -4,12 +4,15 @@
 
 #include "pt_to_pt_distsq.h"
 
+#include <Eigen/Dense>
+#include <vector>
+
 //-----------------------------------------------------------
 
 double pt_to_pt_distsq(const Eigen::VectorXf& v, const Eigen::VectorXf& w)
 {
 	double distsq = 0.0;
-	for(size_t i=0; i < v.size(); ++i) {
+	for(Eigen::Index i=0; i < v.size(); ++i) {
 		distsq += (v[i]-w[i])*(v[i]-w[i]);
 	}
 	return distsq;

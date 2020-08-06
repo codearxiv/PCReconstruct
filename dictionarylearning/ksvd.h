@@ -5,12 +5,9 @@
 #ifndef KSVD_H
 #define KSVD_H
 
-//#include <Eigen/Dense>
-//#include <functional>
+#include <Eigen/Dense>
+#include <functional>
 
-namespace std {
-template<class T> class function;
-}
 
 
 void ksvd(

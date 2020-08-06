@@ -1,14 +1,14 @@
 //     Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
 //     See LICENSE included.
 
-//#include <QApplication>
-//#include <QDesktopWidget>
-//#include <QSurfaceFormat>
-//#include <QCommandLineParser>
-//#include <QCommandLineOption>
-
 #include "GLWidget.h"
 #include "MainWindow.h"
+
+#include <QApplication>
+#include <QDesktopWidget>
+#include <QSurfaceFormat>
+#include <QCommandLineParser>
+#include <QCommandLineOption>
 
 int main(int argc, char *argv[])
 {

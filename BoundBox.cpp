@@ -2,7 +2,6 @@
 #include "Cloud.h"
 #include "constants.h"
 
-
 using Vector3f = Eigen::Vector3f;
 
 

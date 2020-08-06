@@ -7,11 +7,13 @@
 #include "cosine_transform.h"
 #include "ensure_buffer_size.h"
 #include "constants.h"
+#include "alignment.h"
+
+#include <Eigen/Dense>
 
 #include <math.h>
-//#include <vector>
-//#include <cmath>
-//#include <Eigen/Dense>
+#include <vector>
+#include <cmath>
 
 
 
@@ -83,8 +85,8 @@ void cosine_transform(
 
 	//----
 
-	float scaleu = (maxu > 0.0 ? M_PI/maxu : M_PI);
-	float scalev = (maxv > 0.0 ? M_PI/maxv : M_PI);
+	float scaleu = float(maxu > 0.0 ? M_PI/maxu : M_PI);
+	float scalev = float(maxv > 0.0 ? M_PI/maxv : M_PI);
 
 //	for(Index i=0; i<nfreq; ++i){
 //		float scaleui = scaleu*i;

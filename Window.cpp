@@ -48,18 +48,20 @@
 **
 ****************************************************************************/
 
+#include "MainWindow.h"
 #include "Window.h"
 #include "GLWidget.h"
-//#include "mainwindow.h"
-//#include <QVBoxLayout>
-//#include <QHBoxLayout>
-//#include <QKeyEvent>
-//#include <QPushButton>
-//#include <QDesktopWidget>
-//#include <QApplication>
-//#include <QMessageBox>
-//#include <QMainWindow>
 #include "MessageLogger.h"
+
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QKeyEvent>
+#include <QPushButton>
+#include <QDesktopWidget>
+#include <QApplication>
+#include <QMessageBox>
+#include <QMainWindow>
+
 
 Window::Window(QMainWindow *mw, MessageLogger* msgLogger)
 	: mainWindow(mw), m_msgLogger(msgLogger)
