@@ -95,8 +95,16 @@ void MainWindow::open()
 
 	std::string pcdPath = q_pcdPath.toStdString();
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-	if (pcl::io::loadPCDFile<pcl::PointXYZ>(pcdPath, *cloud) == -1) //* load the file
-	{
+
+	int success = 0;
+	try{
+		success = pcl::io::loadPCDFile<pcl::PointXYZ>(pcdPath, *cloud);
+	}
+	catch (...){
+		success = -1;
+	}
+
+	if (success == -1) {
 		//PCL_ERROR ("Couldn't read PCD file\n");
 		appendLogText("Couldn't read PCD file\n");
 		return;
@@ -121,8 +129,15 @@ void MainWindow::saveAs()
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
 	emit cloudQueried(cloud);
 
-	if (pcl::io::savePCDFile<pcl::PointXYZ>(pcdPath, *cloud) == -1) //* save the file
-	{
+	int success = 0;
+	try{
+		success = pcl::io::savePCDFile<pcl::PointXYZ>(pcdPath, *cloud);
+	}
+	catch (...){
+		success = -1;
+	}
+
+	if (success == -1) {
 		//PCL_ERROR ("Couldn't save PCD file\n");
 		appendLogText("Couldn't save PCD file\n");
 		return;

@@ -12,7 +12,7 @@
 
 int main(int argc, char *argv[])
 {
-
+	srand(2);
 	QCoreApplication::setApplicationName("PCReconstruct");
 	QCoreApplication::setOrganizationName("Peter Beben");
 	QCoreApplication::setApplicationVersion(QT_VERSION_STR);

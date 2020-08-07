@@ -21,7 +21,7 @@ public:
 	void set(const Vector3f p0, const Vector3f norm);
 	Vector2f project_uv(const Vector3f q);
 	Vector3f project(const Vector3f q, Vector2f& puv);
-
+	void getUVAxes(Vector3f& u, Vector3f& v) {u = m_u; v = m_v;}
 
 private:
 	Vector3f m_p0;

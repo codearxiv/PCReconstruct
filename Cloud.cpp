@@ -8,6 +8,7 @@
 #include "cloud_normal.h"
 #include "cosine_transform.h"
 #include "rotations.h"
+#include "Plane.h"
 #include "MatchingPursuit.h"
 #include "OrthogonalPursuit.h"
 #include "ksvd_dct2D.h"
@@ -19,19 +20,25 @@
 #include <functional>
 #include <iostream>
 
-template<typename T> using queue = std::queue<T>;
 using std::max;
 using std::min;
 using std::abs;
 using std::floor;
-using VectorXf = Eigen::VectorXf;
-using MatrixXf = Eigen::MatrixXf;
-using MatrixXi = Eigen::MatrixXi;
+using Eigen::Index;
+using Eigen::Vector2f;
+using Eigen::Vector3f;
+using Eigen::VectorXf;
+using Eigen::Matrix3f;
+using Eigen::MatrixXf;
+using Eigen::MatrixXi;
 using MapMtrxf = Eigen::Map<MatrixXf, ALIGNEDX>;
 using MapMtrxi = Eigen::Map<MatrixXi, ALIGNEDX>;
 template<typename T> using aligned = Eigen::aligned_allocator<T>;
+template<typename T> using vector = std::vector<T>;
+template<typename T> using queue = std::queue<T>;
 using vectorfa = std::vector<float, aligned<float>>;
 using vectoria = std::vector<int, aligned<int>>;
+typedef pcl::PointCloud<pcl::PointXYZ>::Ptr CloudPtr;
 
 //---------------------------------------------------------
 
@@ -119,7 +126,7 @@ void Cloud::fromPCL(CloudPtr cloud)
 	Vector3f n(0.0f, 0.0f, 1.0f);
 
 	//***
-	size_t npoints = cloud->points.size()/250;
+	size_t npoints = cloud->points.size()/400;
 
 	float centx = 0.0f;
 	float centy = 0.0f;
@@ -139,9 +146,9 @@ void Cloud::fromPCL(CloudPtr cloud)
 		v(0) = cloud->points[i].x - centx;
 		v(1) = cloud->points[i].y - centy;
 		v(2) = cloud->points[i].z - centz;
-		//addPoint(v, n);
-		m_cloud.push_back(v);
-		m_norms.push_back(n);
+		addPoint(v, n);
+		//m_cloud.push_back(v);
+		//m_norms.push_back(n);
 	}
 
 	if(m_msgLogger != nullptr) {
@@ -166,6 +173,29 @@ void Cloud::toPCL(CloudPtr& cloud)
 
 }
 
+//---------------------------------------------------------
+
+void Cloud::fromRandomPlanePoints(Vector3f norm, size_t npoints)
+{
+	QMutexLocker locker(&m_recMutex);
+
+	clear();
+
+	Plane plane(Vector3f(0.0f,0.0f,0.0f), norm);
+	Vector3f u, v;
+	plane.getUVAxes(u,v);
+
+	for(size_t i = 0; i < npoints; ++i){
+		Vector2f uvScale = Vector2f::Random();
+		Vector3f q = uvScale(0)*u + uvScale(1)*v;
+		addPoint(q, norm);
+	}
+
+	if(m_msgLogger != nullptr) {
+		emit logMessage(QString::number(npoints) + " points created.");
+	}
+
+}
 
 //---------------------------------------------------------
 
@@ -198,7 +228,7 @@ void Cloud::replacePoint(
 	m_norms[idx] = n;
 
 	if( m_CT != nullptr ) {
-		CoverTreePoint<Vector3f> cp(v, m_cloud.size());
+		CoverTreePoint<Vector3f> cp(v, idx);
 		m_CT->remove(cp);
 		m_CT->insert(cp);
 	}
@@ -314,7 +344,6 @@ void Cloud::reconstruct(
 	QMutexLocker locker(&m_recMutex);
 	//assert(m_CT != nullptr);
 	assert(kNN >= 1 && nfreq >= 1 && natm >= 1 && latm >= 1 && latm <= natm);
-	srand(2);
 	static const Vector3f zaxis(0.0f, 0.0f, 1.0f);
 
 	size_t npoints_orig = m_cloud.size();
@@ -441,9 +470,9 @@ void Cloud::reconstruct(
 			size_t idx, const vector<CoverTreePoint<Vector3f>>& neighs)
 	{
 		neighsNrm.clear();
-		size_t kNNNrm = min(size_t(25), neighs.size());
+		size_t kNNNrm = min(size_t(100), neighs.size());
 		for(size_t j=0;j<kNNNrm;++j){ neighsNrm.push_back(neighs[j]); }
-		m_norms[idx] = approxNorm(m_cloud[idx], 10, neighsNrm, vneighsNrm);
+		m_norms[idx] = approxNorm(m_cloud[idx], 25, neighsNrm, vneighsNrm);
 		return m_norms[idx];
 	};
 
@@ -720,8 +749,8 @@ MatrixXf D = MatrixXf::Random(ndim, natm);
 				// cover tree. Instead we treat the cover tree as a
 				// good approximation since the change in coordinates
 				// should be modest.
-				//replacePoint(loc.idx, q, m_norms[loc.idx]);
-				m_cloud[loc.idx] = q;
+				replacePoint(loc.idx, q, m_norms[loc.idx]);//***
+				//m_cloud[loc.idx] = q;
 			}
 			else{
 				addPoint(q, norm);

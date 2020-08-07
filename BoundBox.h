@@ -22,6 +22,8 @@ public:
 
 	void set(const float minBBox[3], const float maxBBox[3]);
 	void set(const Cloud& cloud);
+	void pad(float padX, float padY, float padZ);
+	void rescale(float frac);
 
 	int vertCount() const { return m_vertCount; }
 	float diagonalSize() const {
@@ -33,9 +35,9 @@ public:
 	{ return static_cast<const GLuint*>(m_elemGL.data()); }
 
 	bool pointInBBox(const Vector3f& v) {
-		return  v[0] > m_minBBox[0] && v[0] < m_maxBBox[0] &&
-				v[1] > m_minBBox[1] && v[1] < m_maxBBox[1] &&
-				v[2] > m_minBBox[2] && v[2] < m_maxBBox[2];
+		return  v(0) >= m_minBBox[0] && v(0) <= m_maxBBox[0] &&
+				v(1) >= m_minBBox[1] && v(1) <= m_maxBBox[1] &&
+				v(2) >= m_minBBox[2] && v(2) <= m_maxBBox[2];
 	}
 private:
 	float m_minBBox[3];

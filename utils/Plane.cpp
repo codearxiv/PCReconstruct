@@ -6,6 +6,11 @@
 
 #include <Eigen/Dense>
 
+using Eigen::Index;
+using Eigen::Matrix3f;
+using Eigen::Vector3f;
+using Eigen::Vector2f;
+
 //-----------------------------------------------------------
 
 void Plane::set(const Vector3f p0, const Vector3f norm)

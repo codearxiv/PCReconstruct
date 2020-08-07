@@ -187,7 +187,7 @@ static const char *fragmentShaderSourceCore =
 		"   highp vec3 L = normalize(lightPos - vert);\n"
 		"   highp float NL = max(dot(normalize(vertNormal), L), 0.0);\n"
 		"   highp vec3 color = vertColor;\n"
-		"   highp vec3 col = clamp(color * 0.2 + color * 0.8 * NL, 0.0, 1.0);\n"
+		"   highp vec3 col = clamp(color * 0.5 + color * 0.8 * NL, 0.0, 1.0);\n"
 //		"   highp vec3 col = color;\n"
 		"   fragColor = vec4(col, 1.0);\n"
 		"}\n";
@@ -217,7 +217,7 @@ static const char *fragmentShaderSource =
 		"   highp vec3 L = normalize(lightPos - vert);\n"
 		"   highp float NL = max(dot(normalize(vertNormal), L), 0.0);\n"
 		"   highp vec3 color = vertColor;\n"
-		"   highp vec3 col = clamp(color * 0.2 + color * 0.8 * NL, 0.0, 1.0);\n"
+		"   highp vec3 col = clamp(color * 0.5 + color * 0.8 * NL, 0.0, 1.0);\n"
 //		"   highp vec3 col = color;\n"
 		"   gl_FragColor = vec4(col, 1.0);\n"
 		"}\n";
@@ -251,17 +251,9 @@ void GLWidget::initializeGL()
 	m_lightPosLoc = m_program->uniformLocation("lightPos");
 	m_colorLoc = m_program->uniformLocation("vertColor");
 
-
 	m_cloudVao.create();
 	QOpenGLVertexArrayObject::Binder vaoBinderCloud(&m_cloudVao);
-	// Setup our vertex buffer object for point cloud.
-	m_cloudVbo.create();
-	m_cloudVbo.bind();
-	m_cloudVbo.allocate(
-				m_cloud.vertGLData(), 6*m_cloud.pointCount()*sizeof(GLfloat));
-	// Store the vertex attribute bindings for the program.
-	setupVertexAttribs(m_cloudVbo);
-
+	setGLCloud();
 	m_cloudBBoxVao.create();
 	QOpenGLVertexArrayObject::Binder vaoBinderCloudBBox(&m_cloudBBoxVao);
 	setGLBBox(m_cloudBBox, m_cloudBBoxVbo, m_cloudBBoxEbo);
@@ -269,13 +261,8 @@ void GLWidget::initializeGL()
 #ifdef DBUG_CLOUD_NORMS_H
 	m_cloudNormsVao.create();
 	QOpenGLVertexArrayObject::Binder vaoBinderCloudNorms(&m_cloudNormsVao);
-	m_cloudNormsVbo.create();
-	m_cloudNormsVbo.bind();
-	m_cloudNormsVbo.allocate(
-				m_cloud.normGLData(1.0f), 12*m_cloud.pointCount()*sizeof(GLfloat));
-	setupVertexAttribs(m_cloudNormsVbo);
+	setGLCloudNorms(1.0f);
 #endif
-
 
 	m_rotVect = QVector3D(0.0f,0.0f,0.0f);
 	m_movVect = QVector3D(0.0f,0.0f,0.0f);
@@ -288,6 +275,8 @@ void GLWidget::initializeGL()
 	m_program->setUniformValue(m_lightPosLoc, QVector3D(0, 0, 70));
 
 	m_program->release();
+
+	//setRandomCloud();//***
 }
 
 //---------------------------------------------------------
@@ -307,9 +296,17 @@ void GLWidget::paintGL()
 	QMatrix3x3 normalMatrix = m_world.normalMatrix();
 	m_program->setUniformValue(m_normalMatrixLoc, normalMatrix);
 
+	size_t npoints = m_cloud.pointCount();
+	size_t npoints_new = npoints - m_npoints_orig;
+
 	m_program->setUniformValue(m_colorLoc, QVector3D(0.39f, 1.0f, 0.0f));
 	QOpenGLVertexArrayObject::Binder vaoBinder(&m_cloudVao);
-	glDrawArrays(GL_POINTS, 0, m_cloud.pointCount());
+	glDrawArrays(GL_POINTS, 0, m_npoints_orig);
+
+	if( npoints_new > 0 ){
+		m_program->setUniformValue(m_colorLoc, QVector3D(0.5f, 0.0f, 1.0f));
+		glDrawArrays(GL_POINTS, m_npoints_orig-1, npoints_new);
+	}
 
 	m_program->setUniformValue(m_colorLoc, QVector3D(0.5f, 0.5f, 0.0f));
 	QOpenGLVertexArrayObject::Binder vaoBinder2(&m_cloudBBoxVao);
@@ -320,7 +317,7 @@ void GLWidget::paintGL()
 #ifdef DBUG_CLOUD_NORMS_H
 	m_program->setUniformValue(m_colorLoc, QVector3D(1.0f, 0.0f, 1.0f));
 	QOpenGLVertexArrayObject::Binder vaoBinder3(&m_cloudNormsVao);
-	glDrawArrays(GL_LINES, 0, 2*m_cloud.pointCount());
+	glDrawArrays(GL_LINES, 0, 2*npoints);
 #endif
 
 	m_program->release();
@@ -370,32 +367,25 @@ void GLWidget::wheelEvent(QWheelEvent *event)
 
 void GLWidget::setCloud(CloudPtr cloud)
 {
-	m_cloud.fromPCL(cloud);
+
+	//m_cloud.fromPCL(cloud);
+	Eigen::Vector3f norm(0.0f,0.0f,1.0f);
+	m_cloud.fromRandomPlanePoints(norm, 1000);
 	m_cloudBBox.set(m_cloud);
-	//m_cloud.buildSpatialIndex();
-	//m_cloud.approxCloudNorms(10, 25);
-	m_cloud.reconstruct(1, 50, 5, 100, 25, 10000, &m_cloudBBox);
+	m_cloudBBox.pad(0.0f, 0.0f, 0.1f);
 
-	m_cloudVbo.create();
-	m_cloudVbo.bind();
-	m_cloudVbo.allocate(
-				m_cloud.vertGLData(),
-				6*m_cloud.pointCount()*sizeof(GLfloat));
-	setupVertexAttribs(m_cloudVbo);
+	m_npoints_orig = m_cloud.pointCount();
+	m_cloud.reconstruct(1, 50, 5, 100, 25, 1000, &m_cloudBBox);
 
+	setGLCloud();
 	setGLBBox(m_cloudBBox, m_cloudBBoxVbo, m_cloudBBoxEbo);
 
 #ifdef DBUG_CLOUD_NORMS_H
-	m_cloud.approxCloudNorms(10, 25);
-	m_cloudNormsVbo.create();
-	m_cloudNormsVbo.bind();
+	m_cloud.buildSpatialIndex();
+	m_cloud.approxCloudNorms(25, 200);
 	float scale = 2e-2*m_cloudBBox.diagonalSize();
-	m_cloudNormsVbo.allocate(
-				m_cloud.normGLData(scale),
-				12*m_cloud.pointCount()*sizeof(GLfloat));
-	setupVertexAttribs(m_cloudNormsVbo);
+	setGLCloudNorms(scale);
 #endif
-
 
 	update();
 }
@@ -405,6 +395,62 @@ void GLWidget::setCloud(CloudPtr cloud)
 void GLWidget::getCloud(CloudPtr& cloud)
 {
 	m_cloud.toPCL(cloud);
+}
+
+//---------------------------------------------------------
+
+void GLWidget::setRandomCloud()
+{
+
+	Eigen::Vector3f norm(0.0f,0.0f,1.0f);
+	m_cloud.fromRandomPlanePoints(norm, 1000);
+	m_cloudBBox.set(m_cloud);
+
+	m_npoints_orig = m_cloud.pointCount();
+	m_cloud.reconstruct(1, 50, 5, 100, 25, 10, &m_cloudBBox);
+
+	setGLCloud();
+	setGLBBox(m_cloudBBox, m_cloudBBoxVbo, m_cloudBBoxEbo);
+
+#ifdef DBUG_CLOUD_NORMS_H
+	m_cloud.buildSpatialIndex();
+	m_cloud.approxCloudNorms(25, 200);
+	float scale = 2e-2*m_cloudBBox.diagonalSize();
+	setGLCloudNorms(scale);
+#endif
+
+	update();
+}
+
+//---------------------------------------------------------
+
+void GLWidget::setGLCloud()
+{
+	size_t npoints = m_cloud.pointCount();
+
+	// Setup our vertex buffer object for point cloud.
+	m_cloudVbo.create();
+	m_cloudVbo.bind();
+	m_cloudVbo.allocate(
+				m_cloud.vertGLData(), 6*npoints*sizeof(GLfloat));
+	// Store the vertex attribute bindings for the program.
+	setupVertexAttribs(m_cloudVbo);
+
+}
+
+//---------------------------------------------------------
+
+void GLWidget::setGLCloudNorms(float scale)
+{
+	size_t npoints = m_cloud.pointCount();
+
+	m_cloudNormsVbo.create();
+	m_cloudNormsVbo.bind();
+	m_cloudNormsVbo.allocate(
+				m_cloud.normGLData(scale),
+				12*npoints*sizeof(GLfloat));
+	setupVertexAttribs(m_cloudNormsVbo);
+
 }
 
 //---------------------------------------------------------

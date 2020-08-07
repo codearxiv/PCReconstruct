@@ -8603,10 +8603,12 @@ release\Cloud.obj: Cloud.cpp Cloud.h \
 		C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\include\QtCore\QRecursiveMutex \
 		constants.h \
 		MessageLogger.h \
+		BoundBox.h \
 		utils\cloud_normal.h \
 		dictionarylearning\cosine_transform.h \
 		alignment.h \
 		utils\rotations.h \
+		utils\Plane.h \
 		dictionarylearning\MatchingPursuit.h \
 		dictionarylearning\OrthogonalPursuit.h \
 		dictionarylearning\ksvd_dct2D.h \
@@ -9649,6 +9651,7 @@ release\GLWidget.obj: GLWidget.cpp GLWidget.h \
 		C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\include\QtGui\qquaternion.h \
 		C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\include\QtGui\qgenericmatrix.h \
 		MessageLogger.h \
+		constants.h \
 		C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\include\QtGui\QMouseEvent \
 		C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\include\QtGui\QOpenGLShaderProgram \
 		C:\Qt\Qt5.14.2\5.14.2\msvc2015_64\include\QtGui\qopenglshaderprogram.h \

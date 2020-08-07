@@ -47,9 +47,36 @@ void BoundBox::set(const Cloud& cloud)
 			m_maxBBox[j] = std::max(v[j], m_maxBBox[j]);
 		}
 	}
+
 	m_vertCount = 8;
 
 }
+
+
+//---------------------------------------------------------
+
+void BoundBox::pad(float padX, float padY, float padZ)
+{
+	float padding[3] = {padX, padY, padZ};
+	for(int j=0; j<3; ++j) {
+		m_minBBox[j] -= padding[j];
+		m_maxBBox[j] += padding[j];
+	}
+
+}
+
+//---------------------------------------------------------
+
+void BoundBox::rescale(float frac)
+{
+
+	for(int j=0; j<3; ++j) {
+		float padding = frac*(m_maxBBox[j] - m_minBBox[j]);
+		m_minBBox[j] -= padding;
+		m_maxBBox[j] += padding;
+	}
+}
+
 
 //---------------------------------------------------------
 

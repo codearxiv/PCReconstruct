@@ -96,6 +96,7 @@ public slots:
 	void cleanup();
 	void setCloud(CloudPtr cloud);
 	void getCloud(CloudPtr& cloud);
+	void setRandomCloud();
 
 signals:
 	void vectRotationChanged(int angle, QVector3D v);
@@ -111,7 +112,9 @@ protected:
 	void wheelEvent(QWheelEvent *event) override;
 
 private:
-	void setupVertexAttribs(QOpenGLBuffer vbo) ;
+	void setupVertexAttribs(QOpenGLBuffer vbo);
+	void setGLCloud();
+	void setGLCloudNorms(float scale);
 	void setGLBBox(
 			BoundBox bBox, QOpenGLBuffer vbo, QOpenGLBuffer ebo);
 
@@ -141,6 +144,7 @@ private:
 	QVector3D m_movVect;
 	static bool m_transparent;
 	MessageLogger* m_msgLogger;
+	size_t m_npoints_orig = 0;
 
 };
 

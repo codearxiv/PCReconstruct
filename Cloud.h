@@ -43,6 +43,7 @@ public:
 	void clear();
 	void fromPCL(CloudPtr cloud);
 	void toPCL(CloudPtr& cloud);
+	void fromRandomPlanePoints(Vector3f norm, size_t npoints);
 
 	void buildSpatialIndex();
 	void approxCloudNorms(int iters=10, size_t kNN=25);
@@ -82,7 +83,6 @@ private:
 	CoverTree<CoverTreePoint<Vector3f>> *m_CT;
 	MessageLogger* m_msgLogger;
 	QRecursiveMutex m_recMutex;
-
 };
 
 
