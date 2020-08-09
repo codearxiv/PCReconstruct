@@ -4,15 +4,23 @@
 #include "GLWidget.h"
 #include "MainWindow.h"
 
+#include <Eigen/Dense>
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QSurfaceFormat>
 #include <QCommandLineParser>
 #include <QCommandLineOption>
+#include <cstdlib>
+#include <iostream>
+
+void out_of_mem_handler();
 
 int main(int argc, char *argv[])
 {
 	srand(2);
+	std::set_new_handler(out_of_mem_handler);
+	Eigen::initParallel();
+
 	QCoreApplication::setApplicationName("PCReconstruct");
 	QCoreApplication::setOrganizationName("Peter Beben");
 	QCoreApplication::setApplicationVersion(QT_VERSION_STR);
@@ -62,5 +70,11 @@ int main(int argc, char *argv[])
 
 	return app.exec();
 
+}
 
+
+void out_of_mem_handler()
+{
+	std::cerr << "Unable to allocate memory.\n";
+	std::abort();
 }

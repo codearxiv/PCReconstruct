@@ -63,10 +63,9 @@
 #include <QOpenGLShaderProgram>
 #include <QCoreApplication>
 #include <QDebug>
-
 #include <math.h>
 
-//#define DBUG_CLOUD_NORMS_H
+#define DBUG_CLOUD_NORMS_H
 
 bool GLWidget::m_transparent = false;
 
@@ -304,7 +303,7 @@ void GLWidget::paintGL()
 	glDrawArrays(GL_POINTS, 0, m_npoints_orig);
 
 	if( npoints_new > 0 ){
-		m_program->setUniformValue(m_colorLoc, QVector3D(0.5f, 0.0f, 1.0f));
+		m_program->setUniformValue(m_colorLoc, QVector3D(0.9f, 0.0f, 1.0f));
 		glDrawArrays(GL_POINTS, m_npoints_orig-1, npoints_new);
 	}
 
@@ -367,22 +366,23 @@ void GLWidget::wheelEvent(QWheelEvent *event)
 
 void GLWidget::setCloud(CloudPtr cloud)
 {
+	auto heightFun = [](float xu, float xv){ return cos(xu)*cos(xv); };
 
-	//m_cloud.fromPCL(cloud);
+	m_cloud.fromPCL(cloud);
 	Eigen::Vector3f norm(0.0f,0.0f,1.0f);
-	m_cloud.fromRandomPlanePoints(norm, 1000);
+	m_cloud.fromRandomPlanePoints(norm, 1000, heightFun);
 	m_cloudBBox.set(m_cloud);
 	m_cloudBBox.pad(0.0f, 0.0f, 0.1f);
 
 	m_npoints_orig = m_cloud.pointCount();
-	m_cloud.reconstruct(1, 50, 5, 100, 25, 1000, &m_cloudBBox);
+	//m_cloud.reconstruct(25, 50, 5, 10, 2, 10000, &m_cloudBBox);
 
 	setGLCloud();
 	setGLBBox(m_cloudBBox, m_cloudBBoxVbo, m_cloudBBoxEbo);
 
 #ifdef DBUG_CLOUD_NORMS_H
 	m_cloud.buildSpatialIndex();
-	m_cloud.approxCloudNorms(25, 200);
+	m_cloud.approxCloudNorms(10, 10);
 	float scale = 2e-2*m_cloudBBox.diagonalSize();
 	setGLCloudNorms(scale);
 #endif
@@ -414,7 +414,7 @@ void GLWidget::setRandomCloud()
 
 #ifdef DBUG_CLOUD_NORMS_H
 	m_cloud.buildSpatialIndex();
-	m_cloud.approxCloudNorms(25, 200);
+	m_cloud.approxCloudNorms(150, 50);
 	float scale = 2e-2*m_cloudBBox.diagonalSize();
 	setGLCloudNorms(scale);
 #endif

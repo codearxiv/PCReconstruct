@@ -1,6 +1,7 @@
-//-------------------------------------------------------------------------
-//     Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
-//     See LICENSE included.
+//-----------------------------------------------------------
+//  Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
+//  See LICENSE included.
+
 
 #include "cloud_normal.h"
 #include "ensure_buffer_size.h"
@@ -49,7 +50,7 @@ Vector3f cloud_normal(const Vector3f& p0, const vector<Vector3f>& cloud,
 	size_t npoints = cloud.size();
 
 	Vector3f N(ONE_OVER_SQRT3, ONE_OVER_SQRT3, ONE_OVER_SQRT3);
-	double rate = 0.5;
+	const double s = 0.5/niters;
 
 	for(int iter=0; iter < niters; ++iter) {
 		Vector3f G(0.0f, 0.0f, 0.0f);
@@ -62,10 +63,10 @@ Vector3f cloud_normal(const Vector3f& p0, const vector<Vector3f>& cloud,
 			//E += t*(N.dot(V));
 		}
 
+		double rate = s*double(niters-iter);
 		Vector3f N1 = N - rate*G.normalized();
 		if(N1.dot(N1) <= zeroTol) break;
 		N = N1.normalized();//
-		rate = 0.9*rate;
 
 	}
 

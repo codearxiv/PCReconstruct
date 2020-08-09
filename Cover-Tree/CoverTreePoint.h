@@ -1,8 +1,9 @@
 //-----------------------------------------------------------
-//     Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
-//     See LICENSE included.
+//  Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
+//  See LICENSE included.
 
-//
+
+
 //  Brief description
 //     Point on a cover tree stored as a vector in Eigen.
 
@@ -20,6 +21,8 @@ private:
 	size_t _id;
 public:
 	CoverTreePoint(T v, size_t id) : _vec(v), _id(id) {}
+	CoverTreePoint(){}
+	~CoverTreePoint(){}
 	double distance(const CoverTreePoint<T>& p) const;
 	const T& getVec() const;
 	size_t getId() const;

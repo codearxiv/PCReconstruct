@@ -1,3 +1,7 @@
+//-----------------------------------------------------------
+//  Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
+//  See LICENSE included.
+
 #ifndef BOUNDBOX_H
 #define BOUNDBOX_H
 

@@ -1,5 +1,10 @@
-//#include <Eigen/Geometry>
-//#include <math.h>
+//-----------------------------------------------------------
+//  Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
+//  See LICENSE included.
+
+
+#include <Eigen/Geometry>
+#include <math.h>
 #include "rotations.h"
 #include "constants.h"
 

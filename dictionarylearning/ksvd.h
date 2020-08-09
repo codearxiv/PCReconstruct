@@ -1,6 +1,7 @@
 //-----------------------------------------------------------
-//     Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
-//     See LICENSE included.
+//  Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
+//  See LICENSE included.
+
 
 #ifndef KSVD_H
 #define KSVD_H

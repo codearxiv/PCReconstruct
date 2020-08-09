@@ -1,5 +1,6 @@
-//     Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
-//     See LICENSE included.
+//-----------------------------------------------------------
+//  Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
+//  See LICENSE included.
 
 #ifndef CLOUD_H
 #define CLOUD_H
@@ -16,6 +17,7 @@
 #include <QRecursiveMutex>
 //#include <QMutexLocker>
 #include <vector>
+#include <functional>
 
 class MessageLogger;
 class BoundBox;
@@ -43,16 +45,18 @@ public:
 	void clear();
 	void fromPCL(CloudPtr cloud);
 	void toPCL(CloudPtr& cloud);
-	void fromRandomPlanePoints(Vector3f norm, size_t npoints);
+	void fromRandomPlanePoints(
+			Vector3f norm, size_t npoints,
+			const std::function<float(float xu, float xv)> heightFun = nullptr);
 
 	void buildSpatialIndex();
-	void approxCloudNorms(int iters=10, size_t kNN=25);
+	void approxCloudNorms(int iters=100, size_t kNN=50);
 	void reconstruct(
 			int kSVDIters, size_t kNN, size_t nfreq, size_t natm, size_t latm,
 			size_t maxNewPoints, BoundBox* BBox = nullptr,
 			SparseApprox method = SparseApprox::OrthogonalPursuit);
 
-	void addPoint(const Vector3f& v, const Vector3f &n,
+	size_t addPoint(const Vector3f& v, const Vector3f &n,
 				  bool threadSafe = false);
 	void replacePoint(
 			size_t idx, const Vector3f& v, const Vector3f &n,

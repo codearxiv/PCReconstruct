@@ -1,6 +1,7 @@
 //-----------------------------------------------------------
-//     Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
-//     See LICENSE included.
+//  Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
+//  See LICENSE included.
+
 
 #ifndef ORTHOGONALPURSUIT_H
 #define ORTHOGONALPURSUIT_H

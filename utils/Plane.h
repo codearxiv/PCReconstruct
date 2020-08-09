@@ -1,6 +1,6 @@
 //-----------------------------------------------------------
-//     Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
-//     See LICENSE included.
+//  Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
+//  See LICENSE included.
 
 
 #ifndef PLANE_H

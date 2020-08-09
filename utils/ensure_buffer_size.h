@@ -1,6 +1,7 @@
 //-----------------------------------------------------------
-//     Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
-//     See LICENSE included.
+//  Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
+//  See LICENSE included.
+
 
 #ifndef ENSURE_BUFFER_SIZE_H
 #define ENSURE_BUFFER_SIZE_H

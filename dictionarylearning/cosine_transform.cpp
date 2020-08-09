@@ -1,5 +1,6 @@
-//     Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
-//     See LICENSE included.
+//-----------------------------------------------------------
+//  Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
+//  See LICENSE included.
 
 #define _USE_MATH_DEFINES
 #define EIGEN_NO_MALLOC
@@ -57,12 +58,11 @@ void cosine_transform(
 		)
 {
 	Index nsmpl = U.size();
-	Index nfreqsq = nfreq*nfreq;
 	size_t nf = nsmpl*nfreq;
 
 	assert(nsmpl == V.size());
 	assert(nsmpl == T.rows());
-	assert(nfreqsq == T.cols());
+	assert(nfreq*nfreq == T.cols());
 
 	Map<MatrixXf> CU(nullptr, nsmpl, nfreq);
 	Map<MatrixXf> SU(nullptr, nsmpl, nfreq);

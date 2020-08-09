@@ -114,3 +114,4 @@ LIBS += -L$$PWD/'../../lib/OpenNI2/Lib/' -lOpenNI2
 RESOURCES += \
 	PCReconstruct.qrc
 
+QMAKE_CXXFLAGS += -openmp
