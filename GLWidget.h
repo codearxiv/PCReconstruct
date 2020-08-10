@@ -115,6 +115,7 @@ private:
 	void setupVertexAttribs(QOpenGLBuffer vbo);
 	void setGLCloud();
 	void setGLCloudNorms(float scale);
+	void setGLCloudDebug();
 	void setGLBBox(
 			BoundBox bBox, QOpenGLBuffer vbo, QOpenGLBuffer ebo);
 
@@ -127,10 +128,12 @@ private:
 	QOpenGLVertexArrayObject m_cloudVao;
 	QOpenGLVertexArrayObject m_cloudBBoxVao;
 	QOpenGLVertexArrayObject m_cloudNormsVao;
+	QOpenGLVertexArrayObject m_cloudDebugVao;
 	QOpenGLBuffer m_cloudVbo;
 	QOpenGLBuffer m_cloudBBoxVbo;
 	QOpenGLBuffer m_cloudBBoxEbo;
 	QOpenGLBuffer m_cloudNormsVbo;
+	QOpenGLBuffer m_cloudDebugVbo;
 	QOpenGLShaderProgram *m_program;
 	int m_projMatrixLoc;
 	int m_mvMatrixLoc;
@@ -145,7 +148,6 @@ private:
 	static bool m_transparent;
 	MessageLogger* m_msgLogger;
 	size_t m_npoints_orig = 0;
-
 };
 
 #endif

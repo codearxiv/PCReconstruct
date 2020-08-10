@@ -12,7 +12,7 @@
 
 Eigen::Vector3f cloud_normal(
 		const Eigen::Vector3f& p0, const std::vector<Eigen::Vector3f>& cloud,
-		int niters = 10, double zeroTol = 0.0);
+		int niters, std::vector<Eigen::Vector3f>& vwork);
 
 
 #endif // CLOUD_NORMAL_H

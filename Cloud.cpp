@@ -66,10 +66,10 @@ Cloud::~Cloud()
 //---------------------------------------------------------
 
 
-const GLfloat *Cloud::vertGLData()
+const GLfloat* Cloud::vertGLData()
 {
 	m_vertGL.resize(6 * m_cloud.size());
-	for(size_t i = 0, j = 0; i < m_cloud.size(); ++i){
+	for(size_t i=0, j=0; i < m_cloud.size(); ++i){
 		m_vertGL[j] = m_cloud[i][0];
 		m_vertGL[j+1] = m_cloud[i][1];
 		m_vertGL[j+2] = m_cloud[i][2];
@@ -84,10 +84,10 @@ const GLfloat *Cloud::vertGLData()
 
 //---------------------------------------------------------
 
-const GLfloat *Cloud::normGLData(float scale)
+const GLfloat* Cloud::normGLData(float scale)
 {
 	m_normGL.resize(12 * m_cloud.size());
-	for(size_t i = 0, j = 0; i < m_cloud.size(); ++i){
+	for(size_t i=0, j=0; i < m_cloud.size(); ++i){
 		m_normGL[j] = m_cloud[i][0];
 		m_normGL[j+1] = m_cloud[i][1];
 		m_normGL[j+2] = m_cloud[i][2];
@@ -104,6 +104,35 @@ const GLfloat *Cloud::normGLData(float scale)
 	}
 
 	return static_cast<const GLfloat*>(m_normGL.data());
+}
+
+//---------------------------------------------------------
+
+const GLfloat* Cloud::debugGLData()
+{
+	Vector3f norm(0.0f, 0.0f, 1.0f);
+
+	m_debugGL.resize(12 * m_debug.size());
+
+	for(size_t i=0, j=0; i < m_debug.size(); ++i){
+		Vector3f p = m_debug[i].first;
+		Vector3f q = m_debug[i].second;
+		m_debugGL[j] = p(0);
+		m_debugGL[j+1] = p(1);
+		m_debugGL[j+2] = p(2);
+		m_debugGL[j+3] = norm(0);
+		m_debugGL[j+4] = norm(1);
+		m_debugGL[j+5] = norm(2);
+		m_debugGL[j+6] = q(0);
+		m_debugGL[j+7] = q(1);
+		m_debugGL[j+8] = q(2);
+		m_debugGL[j+9] = norm(0);
+		m_debugGL[j+10] = norm(1);
+		m_debugGL[j+11] = norm(2);
+		j += 12;
+	}
+
+	return static_cast<const GLfloat*>(m_debugGL.data());
 }
 
 //---------------------------------------------------------
@@ -248,6 +277,44 @@ void Cloud::replacePoint(
 }
 
 //---------------------------------------------------------
+void Cloud::pointKNN(
+		const Vector3f& p, size_t kNN,
+		vector<CoverTreePoint<Vector3f>>& neighs)
+{
+	assert(m_CT != nullptr);
+	CoverTreePoint<Vector3f> cp(p, 0);
+	neighs = m_CT->kNearestNeighbors(cp, kNN);
+}
+
+//---------------------------------------------------------
+Eigen::Vector3f Cloud::approxNorm(
+	const Vector3f& p, int iters,
+	const vector<CoverTreePoint<Vector3f>>& neighs,
+	vector<Vector3f>& vneighs, vector<Vector3f>& vwork)
+{
+	static const Vector3f origin(0.0f,0.0f,0.0f);
+	assert(m_CT != nullptr);
+	getNeighVects(p, neighs, vneighs);
+	return cloud_normal(origin, vneighs, iters, vwork);
+}
+
+//---------------------------------------------------------
+void Cloud::getNeighVects(
+	const Vector3f& p,
+	const vector<CoverTreePoint<Vector3f>>& neighs,
+	vector<Vector3f>& vneighs)
+{
+	vneighs.reserve(neighs.size());
+	vneighs.resize(0);
+	typename vector<CoverTreePoint<Vector3f>>::const_iterator it;
+	for(it=neighs.begin(); it!=neighs.end(); ++it){
+		size_t idx = it->getId();
+		Vector3f v = m_cloud[idx] - p;
+		vneighs.push_back(v);
+	}
+}
+
+//---------------------------------------------------------
 
 void Cloud::buildSpatialIndex()
 {
@@ -277,31 +344,6 @@ void Cloud::buildSpatialIndex()
 		m_CT->insert(cp);
 	}
 }
-//---------------------------------------------------------
-Eigen::Vector3f Cloud::approxNorm(
-	const Vector3f& p, int iters,
-	const vector<CoverTreePoint<Vector3f>>& neighs,
-	vector<Vector3f>& vneighs)
-{
-	assert(m_CT != nullptr);
-	getNeighVects(p, neighs, vneighs);
-	return cloud_normal(p, vneighs, iters);
-}
-//---------------------------------------------------------
-void Cloud::getNeighVects(
-	const Vector3f& p,
-	const vector<CoverTreePoint<Vector3f>>& neighs,
-	vector<Vector3f>& vneighs)
-{
-	vneighs.reserve(neighs.size());
-	vneighs.resize(0);
-	typename vector<CoverTreePoint<Vector3f>>::const_iterator it;
-	for(it=neighs.begin(); it!=neighs.end(); ++it){
-		size_t idx = it->getId();
-		Vector3f v = m_cloud[idx] - p;
-		vneighs.push_back(v);
-	}
-}
 
 //---------------------------------------------------------
 
@@ -315,8 +357,9 @@ void Cloud::approxCloudNorms(int iters, size_t kNN)
 	int threshold = 0;
 	vector<CoverTreePoint<Vector3f>> neighs;
 	vector<Vector3f> vneighs;
+	vector<Vector3f> vwork;
 
-	for(size_t i = 0; i < npoints; ++i){
+	for(size_t i=0; i < npoints; ++i){
 		// Log progress
 		if(m_msgLogger != nullptr) {
 			//***
@@ -329,20 +372,16 @@ void Cloud::approxCloudNorms(int iters, size_t kNN)
 		Vector3f p = m_cloud[i];
 		CoverTreePoint<Vector3f> cp(p, 0);
 		neighs = m_CT->kNearestNeighbors(cp, kNN);
-		m_norms[i] = approxNorm(p, iters, neighs, vneighs);
+		m_norms[i] = approxNorm(p, iters, neighs, vneighs, vwork);
+//***
+//		if( i == 0 ){
+//			for(size_t j=0; j < neighs.size(); ++j){
+//				Vector3f q = m_cloud[neighs[j].getId()];
+//				m_debug.push_back(std::make_pair(p,q));
+//			}
+//		}
 	}
 
-}
-
-//---------------------------------------------------------
-
-void Cloud::pointKNN(
-		const Vector3f& p, size_t kNN,
-		vector<CoverTreePoint<Vector3f>>& neighs)
-{
-	assert(m_CT != nullptr);
-	CoverTreePoint<Vector3f> cp(p, 0);
-	neighs = m_CT->kNearestNeighbors(cp, kNN);
 }
 
 //---------------------------------------------------------
@@ -482,14 +521,16 @@ void Cloud::reconstruct(
 
 	vector<CoverTreePoint<Vector3f>> neighsNrm;
 	vector<Vector3f> vneighsNrm;
+	vector<Vector3f> vwork;
 
 	auto update_normal = [&](
 			size_t idx, const vector<CoverTreePoint<Vector3f>>& neighs)
 	{
 		neighsNrm.clear();
-		size_t kNNNrm = min(size_t(100), neighs.size());
+		size_t kNNNrm = min(size_t(50), neighs.size());
 		for(size_t j=0;j<kNNNrm;++j){ neighsNrm.push_back(neighs[j]); }
-		m_norms[idx] = approxNorm(m_cloud[idx], 25, neighsNrm, vneighsNrm);
+		m_norms[idx] =
+				approxNorm(m_cloud[idx], 25, neighsNrm, vneighsNrm, vwork);
 		return m_norms[idx];
 	};
 

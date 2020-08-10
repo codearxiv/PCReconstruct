@@ -19885,6 +19885,7 @@ release\cloud_normal.obj: utils\cloud_normal.cpp utils\cloud_normal.h \
 		..\..\lib\eigen3\Eigen\src\Eigenvalues\ComplexSchur_LAPACKE.h \
 		..\..\lib\eigen3\Eigen\src\Eigenvalues\SelfAdjointEigenSolver_LAPACKE.h \
 		utils\ensure_buffer_size.h \
+		constants.h \
 		release\PCReconstruct_pch.obj
 
 release\pt_to_pt_distsq.obj: utils\pt_to_pt_distsq.cpp utils\pt_to_pt_distsq.h \

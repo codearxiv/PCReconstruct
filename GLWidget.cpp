@@ -65,7 +65,9 @@
 #include <QDebug>
 #include <math.h>
 
-#define DBUG_CLOUD_NORMS_H
+//#define SHOW_CLOUD_NORMS
+//#define SHOW_CLOUD_DBUG
+
 
 bool GLWidget::m_transparent = false;
 
@@ -81,6 +83,8 @@ GLWidget::GLWidget(QWidget *parent, MessageLogger* msgLogger)
 	  m_cloudVbo(QOpenGLBuffer::VertexBuffer),
 	  m_cloudBBoxVbo(QOpenGLBuffer::VertexBuffer),
 	  m_cloudBBoxEbo(QOpenGLBuffer::IndexBuffer),
+	  m_cloudNormsVbo(QOpenGLBuffer::VertexBuffer),
+	  m_cloudDebugVbo(QOpenGLBuffer::VertexBuffer),
 	  m_cloud(msgLogger)
 {
 	m_core = QSurfaceFormat::defaultFormat().profile() == QSurfaceFormat::CoreProfile;
@@ -171,7 +175,7 @@ static const char *vertexShaderSourceCore =
 		"   vert = vertex.xyz;\n"
 		"   vertNormal = normalMatrix * normal;\n"
 		"   gl_Position = projMatrix * mvMatrix * vertex;\n"
-		"   gl_PointSize = 10.0/(0.1+10.0*abs(gl_Position.z));\n"
+		"   gl_PointSize = 20.0/(0.1+10.0*abs(gl_Position.z));\n"
 //		"   gl_PointSize = 50.0;\n"
 		"}\n";
 
@@ -203,7 +207,7 @@ static const char *vertexShaderSource =
 		"   vert = vertex.xyz;\n"
 		"   vertNormal = normalMatrix * normal;\n"
 		"   gl_Position = projMatrix * mvMatrix * vertex;\n"
-		"   gl_PointSize = 10.0/(0.1+10.0*abs(gl_Position.z));\n"
+		"   gl_PointSize = 20.0/(0.1+10.0*abs(gl_Position.z));\n"
 //		"   gl_PointSize = 500.0;\n"
 		"}\n";
 
@@ -253,14 +257,21 @@ void GLWidget::initializeGL()
 	m_cloudVao.create();
 	QOpenGLVertexArrayObject::Binder vaoBinderCloud(&m_cloudVao);
 	setGLCloud();
+
 	m_cloudBBoxVao.create();
 	QOpenGLVertexArrayObject::Binder vaoBinderCloudBBox(&m_cloudBBoxVao);
 	setGLBBox(m_cloudBBox, m_cloudBBoxVbo, m_cloudBBoxEbo);
 
-#ifdef DBUG_CLOUD_NORMS_H
+#ifdef SHOW_CLOUD_NORMS
 	m_cloudNormsVao.create();
 	QOpenGLVertexArrayObject::Binder vaoBinderCloudNorms(&m_cloudNormsVao);
 	setGLCloudNorms(1.0f);
+#endif
+
+#ifdef SHOW_CLOUD_DBUG
+	m_cloudDebugVao.create();
+	QOpenGLVertexArrayObject::Binder vaoBinderCloudDebug(&m_cloudDebugVao);
+	setGLCloudDebug();
 #endif
 
 	m_rotVect = QVector3D(0.0f,0.0f,0.0f);
@@ -275,7 +286,6 @@ void GLWidget::initializeGL()
 
 	m_program->release();
 
-	//setRandomCloud();//***
 }
 
 //---------------------------------------------------------
@@ -298,26 +308,33 @@ void GLWidget::paintGL()
 	size_t npoints = m_cloud.pointCount();
 	size_t npoints_new = npoints - m_npoints_orig;
 
-	m_program->setUniformValue(m_colorLoc, QVector3D(0.39f, 1.0f, 0.0f));
+	m_program->setUniformValue(m_colorLoc, QVector3D(0.4f, 1.0f, 0.0f));
 	QOpenGLVertexArrayObject::Binder vaoBinder(&m_cloudVao);
 	glDrawArrays(GL_POINTS, 0, m_npoints_orig);
 
 	if( npoints_new > 0 ){
-		m_program->setUniformValue(m_colorLoc, QVector3D(0.9f, 0.0f, 1.0f));
+		m_program->setUniformValue(m_colorLoc, QVector3D(1.0f, 0.0f, 1.0f));
 		glDrawArrays(GL_POINTS, m_npoints_orig-1, npoints_new);
 	}
 
-	m_program->setUniformValue(m_colorLoc, QVector3D(0.5f, 0.5f, 0.0f));
+	m_program->setUniformValue(m_colorLoc, QVector3D(1.0f, 0.5f, 0.0f));
 	QOpenGLVertexArrayObject::Binder vaoBinder2(&m_cloudBBoxVao);
 	int idxCount = (m_cloudBBox.vertCount()==0) ? 0 : 24;
 	glDrawElements(GL_LINES, idxCount, GL_UNSIGNED_INT, 0);
 //	glDrawElements(GL_LINES, idxCount, GL_UNSIGNED_INT, m_cloudBBox.elemGLData());
 
-#ifdef DBUG_CLOUD_NORMS_H
+#ifdef SHOW_CLOUD_NORMS
 	m_program->setUniformValue(m_colorLoc, QVector3D(1.0f, 0.0f, 1.0f));
 	QOpenGLVertexArrayObject::Binder vaoBinder3(&m_cloudNormsVao);
 	glDrawArrays(GL_LINES, 0, 2*npoints);
 #endif
+
+#ifdef SHOW_CLOUD_DBUG
+	m_program->setUniformValue(m_colorLoc, QVector3D(0.0f, 0.0f, 0.5f));
+	QOpenGLVertexArrayObject::Binder vaoBinder4(&m_cloudDebugVao);
+	glDrawArrays(GL_LINES, 0, 2*m_cloud.debugCount());
+#endif
+
 
 	m_program->release();
 }
@@ -333,6 +350,11 @@ void GLWidget::resizeGL(int w, int h)
 void GLWidget::mousePressEvent(QMouseEvent *event)
 {
 	m_lastMousePos = event->pos();
+	//***
+	if(event->buttons() & Qt::MidButton){
+		setRandomCloud();
+	}
+
 }
 //---------------------------------------------------------
 
@@ -346,10 +368,12 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
 
 	if ( leftButton && rightButton ) {
 		setVectTranslation(QVector3D(-dx,dy,0.0f));
-	} else if ( leftButton ) {
+	}
+	else if ( leftButton ) {
 		int angle = abs(dx) + abs(dy);
 		setVectRotation(angle, QVector3D(dy,dx,0.0f));
-	} else if ( rightButton ) {
+	}
+	else if ( rightButton ) {
 		int angle = abs(dx) + abs(dy);
 		setVectRotation(angle, QVector3D(dy,0.0f,-dx));
 	}
@@ -366,25 +390,26 @@ void GLWidget::wheelEvent(QWheelEvent *event)
 
 void GLWidget::setCloud(CloudPtr cloud)
 {
-	auto heightFun = [](float xu, float xv){ return cos(xu)*cos(xv); };
 
 	m_cloud.fromPCL(cloud);
-	Eigen::Vector3f norm(0.0f,0.0f,1.0f);
-	m_cloud.fromRandomPlanePoints(norm, 1000, heightFun);
 	m_cloudBBox.set(m_cloud);
 	m_cloudBBox.pad(0.0f, 0.0f, 0.1f);
 
 	m_npoints_orig = m_cloud.pointCount();
-	//m_cloud.reconstruct(25, 50, 5, 10, 2, 10000, &m_cloudBBox);
+	m_cloud.reconstruct(10, 50, 5, 10, 2, 10000, &m_cloudBBox);
 
 	setGLCloud();
 	setGLBBox(m_cloudBBox, m_cloudBBoxVbo, m_cloudBBoxEbo);
 
-#ifdef DBUG_CLOUD_NORMS_H
+#ifdef SHOW_CLOUD_NORMS
 	m_cloud.buildSpatialIndex();
-	m_cloud.approxCloudNorms(10, 10);
+	m_cloud.approxCloudNorms(25, 15);
 	float scale = 2e-2*m_cloudBBox.diagonalSize();
 	setGLCloudNorms(scale);
+#endif
+
+#ifdef SHOW_CLOUD_DBUG
+	setGLCloudDebug();
 #endif
 
 	update();
@@ -401,22 +426,32 @@ void GLWidget::getCloud(CloudPtr& cloud)
 
 void GLWidget::setRandomCloud()
 {
+	auto heightFun = [](float xu, float xv){
+		return 0.1f*cos(10*xu)*cos(10*xv);
+	};
 
 	Eigen::Vector3f norm(0.0f,0.0f,1.0f);
-	m_cloud.fromRandomPlanePoints(norm, 1000);
+	m_cloud.fromRandomPlanePoints(norm, 1000, heightFun);
+	//m_cloud.fromRandomPlanePoints(norm, 10000);
+
 	m_cloudBBox.set(m_cloud);
+	m_cloudBBox.pad(0.0f, 0.0f, 0.1f);
 
 	m_npoints_orig = m_cloud.pointCount();
-	m_cloud.reconstruct(1, 50, 5, 100, 25, 10, &m_cloudBBox);
+	m_cloud.reconstruct(25, 100, 5, 10, 4, 10000, &m_cloudBBox);
 
 	setGLCloud();
 	setGLBBox(m_cloudBBox, m_cloudBBoxVbo, m_cloudBBoxEbo);
 
-#ifdef DBUG_CLOUD_NORMS_H
+#ifdef SHOW_CLOUD_NORMS
 	m_cloud.buildSpatialIndex();
-	m_cloud.approxCloudNorms(150, 50);
+	m_cloud.approxCloudNorms(25, 15);
 	float scale = 2e-2*m_cloudBBox.diagonalSize();
 	setGLCloudNorms(scale);
+#endif
+
+#ifdef SHOW_CLOUD_DBUG
+	setGLCloudDebug();
 #endif
 
 	update();
@@ -450,6 +485,21 @@ void GLWidget::setGLCloudNorms(float scale)
 				m_cloud.normGLData(scale),
 				12*npoints*sizeof(GLfloat));
 	setupVertexAttribs(m_cloudNormsVbo);
+
+}
+
+//---------------------------------------------------------
+
+void GLWidget::setGLCloudDebug()
+{
+	size_t ndebug = m_cloud.debugCount();
+
+	m_cloudDebugVbo.create();
+	m_cloudDebugVbo.bind();
+	m_cloudDebugVbo.allocate(
+				m_cloud.debugGLData(),
+				12*ndebug*sizeof(GLfloat));
+	setupVertexAttribs(m_cloudDebugVbo);
 
 }
 
