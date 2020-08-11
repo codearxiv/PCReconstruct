@@ -9,6 +9,8 @@
 using Vector3f = Eigen::Vector3f;
 
 
+constexpr const std::array<GLuint, 24> BoundBox::m_elemGL;
+
 //---------------------------------------------------------
 
 BoundBox::BoundBox(const float minBBox[3], const float maxBBox[3])

@@ -49,7 +49,7 @@ private:
 	int m_vertCount;
 	std::array<GLfloat, 8*6> m_vertGL;
 
-	constexpr static const std::array<GLuint, 24> m_elemGL = {
+    static constexpr std::array<GLuint, 24> m_elemGL = {
 		0, 1,
 		0, 2,
 		0, 4,

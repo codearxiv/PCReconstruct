@@ -116,4 +116,13 @@ LIBS += -L$$PWD/'../../lib/OpenNI2/Lib/' -lOpenNI2
 RESOURCES += \
 	PCReconstruct.qrc
 
-QMAKE_CXXFLAGS += -openmp
+msvc{
+    QMAKE_CXXFLAGS += -openmp
+}
+
+gcc{
+    QMAKE_CXXFLAGS += -fopenmp -Wno-attributes -Wno-unused-parameter
+    QMAKE_CXXFLAGS += -Wno-ignored-attributes
+    QMAKE_LFLAGS += -fopenmp
+    LIBS += -fopenmp
+}

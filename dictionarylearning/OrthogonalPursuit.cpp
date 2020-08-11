@@ -107,14 +107,12 @@ void OrthogonalPursuit::operator() (
 	for(Index j = 1; j <= latm; ++j){
 		// Find the next 'nearest' atom to current residual R.
 		float absprojmax = -float_infinity;
-		float projmax = 0;
 		Index imax = 0;
 		for(Index i = 0; i < natm; ++i){
 			if( X(i) != 0.0f ) continue;
 			float proj = R.dot(D.col(i));
 			float absproj = abs(proj);
 			if( absproj > absprojmax ){
-				projmax = proj;
 				absprojmax = absproj;
 				imax = i;
 			}
