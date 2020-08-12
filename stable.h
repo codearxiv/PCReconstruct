@@ -1,6 +1,6 @@
 /* Add C includes here */
 
-#if defined __cplusplus
+//#if defined __cplusplus
 /* Add C++ includes here */
 //#include <array>
 //#include <iostream>
@@ -62,6 +62,4 @@
 //#include <pcl/io/pcd_io.h>
 //#include <pcl/point_types.h>
 //#include <pcl/point_cloud.h>
-
-
-#endif
+//#endif

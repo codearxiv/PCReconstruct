@@ -67,6 +67,7 @@ public:
 
 	void buildSpatialIndex();
 	void approxCloudNorms(int iters=25, size_t kNN=25);
+    void decimate(size_t nHoles, size_t kNN);
 	void reconstruct(
 			int kSVDIters, size_t kNN, size_t nfreq, size_t natm, size_t latm,
 			size_t maxNewPoints, BoundBox* BBox = nullptr,

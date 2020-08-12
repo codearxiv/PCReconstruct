@@ -384,6 +384,37 @@ void Cloud::approxCloudNorms(int iters, size_t kNN)
 
 }
 
+
+//---------------------------------------------------------
+
+void Cloud::decimate(size_t nHoles, size_t kNN)
+{
+    QMutexLocker locker(&m_recMutex);
+    assert(m_CT != nullptr && kNN >= 1);
+
+    vector<bool> deletedPoint(m_cloud.size(), false);
+    vector<CoverTreePoint<Vector3f>> neighs;
+
+    int threshold = 0;
+    for(size_t i=0; i < nHoles; ++i){
+        // Log progress
+        if(m_msgLogger != nullptr) {
+            //***
+            QCoreApplication::processEvents();
+            emit logProgress(
+                        "Decimating", idx, nHoles, 10, threshold);
+        }
+        randIdx = std::rand();
+        pointKNN(m_cloud[idx], kNN, neighs);
+        typename vector<CoverTreePoint<Vector3f>>::const_iterator it;
+        for(it=neighs.begin(); it!=neighs.end(); ++it){
+            size_t idx = it->getId();
+            deletedPoint[idx] = true;
+        }
+    }
+
+}
+
 //---------------------------------------------------------
 
 void Cloud::reconstruct(

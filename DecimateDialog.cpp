@@ -24,7 +24,7 @@ DecimateDialog::DecimateDialog(QWidget *parent) : QDialog(parent)
 	//QList<QLineEdit*> fields;
 	//fields << lineEditHoles << lineEditNumPoints;
 
-	// Add some standard buttons (Cancel/Ok) at the bottom of the dialog
+    // Add some standa rd buttons (Cancel/Ok) at the bottom of the dialog
 	buttonBox = new QDialogButtonBox(
 				QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
 				Qt::Horizontal, this);
