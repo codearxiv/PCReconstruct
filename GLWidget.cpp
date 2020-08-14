@@ -345,6 +345,86 @@ void GLWidget::resizeGL(int w, int h)
 	m_proj.setToIdentity();
 	m_proj.perspective(45.0f, GLfloat(w) / h, 0.01f, 100.0f);
 }
+
+
+//---------------------------------------------------------
+
+void GLWidget::setGLCloud()
+{
+	size_t npoints = m_cloud.pointCount();
+
+	// Setup our vertex buffer object for point cloud.
+	m_cloudVbo.create();
+	m_cloudVbo.bind();
+	m_cloudVbo.allocate(
+				m_cloud.vertGLData(), 6*npoints*sizeof(GLfloat));
+	// Store the vertex attribute bindings for the program.
+	setupVertexAttribs(m_cloudVbo);
+
+}
+
+//---------------------------------------------------------
+
+void GLWidget::setGLCloudNorms(float scale)
+{
+	size_t npoints = m_cloud.pointCount();
+
+	m_cloudNormsVbo.create();
+	m_cloudNormsVbo.bind();
+	m_cloudNormsVbo.allocate(
+				m_cloud.normGLData(scale),
+				12*npoints*sizeof(GLfloat));
+	setupVertexAttribs(m_cloudNormsVbo);
+
+}
+
+//---------------------------------------------------------
+
+void GLWidget::setGLCloudDebug()
+{
+	size_t ndebug = m_cloud.debugCount();
+
+	m_cloudDebugVbo.create();
+	m_cloudDebugVbo.bind();
+	m_cloudDebugVbo.allocate(
+				m_cloud.debugGLData(),
+				12*ndebug*sizeof(GLfloat));
+	setupVertexAttribs(m_cloudDebugVbo);
+
+}
+
+//---------------------------------------------------------
+
+void GLWidget::setGLBBox(
+		BoundBox bBox, QOpenGLBuffer vbo, QOpenGLBuffer ebo)
+{
+	vbo.create();
+	vbo.bind();
+	vbo.allocate(bBox.vertGLData(), 6*bBox.vertCount()*sizeof(GLfloat));
+	ebo.create();
+	ebo.bind();
+	int idxCount = (bBox.vertCount()==0) ? 0 : 24;
+	ebo.allocate(bBox.elemGLData(), idxCount*sizeof(GLuint));
+	setupVertexAttribs(vbo);
+
+}
+
+//---------------------------------------------------------
+
+void GLWidget::setupVertexAttribs(QOpenGLBuffer vbo)
+{
+	vbo.bind();
+	QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+	f->glEnableVertexAttribArray(0);
+	f->glEnableVertexAttribArray(1);
+	f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), 0);
+	f->glVertexAttribPointer(
+				1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat),
+				reinterpret_cast<void *>(3 * sizeof(GLfloat)));
+	vbo.release();
+
+}
+
 //---------------------------------------------------------
 
 void GLWidget::mousePressEvent(QMouseEvent *event)
@@ -427,7 +507,10 @@ void GLWidget::getCloud(CloudPtr& cloud)
 void GLWidget::setRandomCloud()
 {
 	auto heightFun = [](float xu, float xv){
-		return 0.1f*cos(10*xu)*cos(10*xv);
+		//return 0.5f*xv + 0.5f*xu + 0.1f*cos(10*xu) + 0.1f*cos(10*xv);
+		//return 0.1f*cos(10*xu)*cos(10*xv);
+		//return xv + xu;
+		return xv*xu;
 	};
 
 	Eigen::Vector3f norm(0.0f,0.0f,1.0f);
@@ -438,7 +521,7 @@ void GLWidget::setRandomCloud()
 	m_cloudBBox.pad(0.0f, 0.0f, 0.1f);
 
 	m_npoints_orig = m_cloud.pointCount();
-	m_cloud.reconstruct(25, 100, 5, 10, 4, 10000, &m_cloudBBox);
+	m_cloud.reconstruct(15, 100, 4, 10, 4, 1000, &m_cloudBBox);
 
 	setGLCloud();
 	setGLBBox(m_cloudBBox, m_cloudBBoxVbo, m_cloudBBoxEbo);
@@ -457,81 +540,13 @@ void GLWidget::setRandomCloud()
 	update();
 }
 
-//---------------------------------------------------------
-
-void GLWidget::setGLCloud()
-{
-	size_t npoints = m_cloud.pointCount();
-
-	// Setup our vertex buffer object for point cloud.
-	m_cloudVbo.create();
-	m_cloudVbo.bind();
-	m_cloudVbo.allocate(
-				m_cloud.vertGLData(), 6*npoints*sizeof(GLfloat));
-	// Store the vertex attribute bindings for the program.
-	setupVertexAttribs(m_cloudVbo);
-
-}
 
 //---------------------------------------------------------
 
-void GLWidget::setGLCloudNorms(float scale)
+void GLWidget::decimateCloud(size_t nHoles, size_t kNN)
 {
-	size_t npoints = m_cloud.pointCount();
 
-	m_cloudNormsVbo.create();
-	m_cloudNormsVbo.bind();
-	m_cloudNormsVbo.allocate(
-				m_cloud.normGLData(scale),
-				12*npoints*sizeof(GLfloat));
-	setupVertexAttribs(m_cloudNormsVbo);
 
 }
 
-//---------------------------------------------------------
-
-void GLWidget::setGLCloudDebug()
-{
-	size_t ndebug = m_cloud.debugCount();
-
-	m_cloudDebugVbo.create();
-	m_cloudDebugVbo.bind();
-	m_cloudDebugVbo.allocate(
-				m_cloud.debugGLData(),
-				12*ndebug*sizeof(GLfloat));
-	setupVertexAttribs(m_cloudDebugVbo);
-
-}
-
-//---------------------------------------------------------
-
-void GLWidget::setGLBBox(
-		BoundBox bBox, QOpenGLBuffer vbo, QOpenGLBuffer ebo)
-{
-	vbo.create();
-	vbo.bind();
-	vbo.allocate(bBox.vertGLData(), 6*bBox.vertCount()*sizeof(GLfloat));
-	ebo.create();
-	ebo.bind();
-	int idxCount = (bBox.vertCount()==0) ? 0 : 24;
-	ebo.allocate(bBox.elemGLData(), idxCount*sizeof(GLuint));
-	setupVertexAttribs(vbo);
-
-}
-
-//---------------------------------------------------------
-
-void GLWidget::setupVertexAttribs(QOpenGLBuffer vbo)
-{
-	vbo.bind();
-	QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-	f->glEnableVertexAttribArray(0);
-	f->glEnableVertexAttribArray(1);
-	f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), 0);
-	f->glVertexAttribPointer(
-				1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat),
-				reinterpret_cast<void *>(3 * sizeof(GLfloat)));
-	vbo.release();
-
-}
 //---------------------------------------------------------

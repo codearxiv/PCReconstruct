@@ -15,10 +15,9 @@ using Eigen::Matrix3f;
 
 
 //-----------------------------------------------------------
-/*
-	 Returns the rotation matrix M that rotates vector v to vector w
-	 (or to line through w if lineThruW is true).
-*/
+// Returns the rotation matrix M that rotates vector v to a
+// vector w (or to a line through w if lineThruW is true).
+
 void vector_to_vector_rotation_matrix(
 		const Vector3f& v, const Vector3f& w,
 		bool normalized, bool lineThruW, Matrix3f& M)

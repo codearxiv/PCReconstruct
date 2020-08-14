@@ -632,8 +632,15 @@ loopEnd0:
 		QCoreApplication::processEvents();
 	}
 
+	c_start = std::clock();//***
+
 	ksvd_dct2D(true, Ws, Us, Vs, nfreq, latm,
 			   kSVDIters, 0.0, sparseFunct, D, C);
+
+	c_end = std::clock();//***
+	time_elapsed_ms = 1000.0 * (c_end-c_start) / CLOCKS_PER_SEC;
+	std::cout << "\nCPU time used: " << time_elapsed_ms << " ms\n" << std::endl;
+
 
 	//--------
 
@@ -670,8 +677,6 @@ loopEnd0:
 		emit logMessage(QString::number(qpoints.size()) + " points in queue...");
 		QCoreApplication::processEvents();
 	}
-
-	c_start = std::clock();//***
 
 	size_t nprocessed = 0;
 	size_t nNewPoints = 0;
@@ -837,9 +842,6 @@ loopEnd0:
 
 	}
 
-	c_end = std::clock();//***
-	time_elapsed_ms = 1000.0 * (c_end-c_start) / CLOCKS_PER_SEC;
-	std::cout << "\nCPU time used: " << time_elapsed_ms << " ms\n" << std::endl;
 
 
 }

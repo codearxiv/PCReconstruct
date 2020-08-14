@@ -5,6 +5,7 @@
 #include "MainWindow.h"
 #include "Window.h"
 #include "MessageLogger.h"
+#include "DecimateDialog.h"
 
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_cloud.h>
@@ -21,8 +22,9 @@
 #include <QMessageBox>
 #include <QMainWindow>
 
+
 MainWindow::MainWindow(QWidget *parent) :
-	QMainWindow(parent), msgLogger()
+	QMainWindow(parent)
 {
 	if (objectName().isEmpty())
 		setObjectName(QString::fromUtf8("MainWindow"));
@@ -30,12 +32,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	setWindowTitle(QCoreApplication::translate("MainWindow", "PCReconstruct", nullptr));
 
+	//------
 	// Add actions
 	QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
 	QMenu *viewMenu = menuBar()->addMenu(tr("&View"));
 	QToolBar *fileToolBar = addToolBar(tr("File"));
 
-	const QIcon openIcon = QIcon::fromTheme("document-open", QIcon(":/images/open.png"));
+	const QIcon openIcon =
+			QIcon::fromTheme("document-open", QIcon(":/images/open.png"));
 	QAction *openAct = new QAction(openIcon, tr("&Open..."), this);
 	openAct->setShortcuts(QKeySequence::Open);
 	openAct->setStatusTip(tr("Open an existing PCD file"));
@@ -43,7 +47,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	fileMenu->addAction(openAct);
 	fileToolBar->addAction(openAct);
 
-	const QIcon saveAsIcon = QIcon::fromTheme("document-save-as", QIcon(":/images/save.png"));
+	const QIcon saveAsIcon =
+			QIcon::fromTheme("document-save-as", QIcon(":/images/save.png"));
 	QAction *saveAsAct = new QAction(saveAsIcon, tr("Save &As..."), this);
 	saveAsAct->setShortcuts(QKeySequence::SaveAs);
 	saveAsAct->setStatusTip(tr("Save PCD to disk"));
@@ -52,17 +57,21 @@ MainWindow::MainWindow(QWidget *parent) :
 	fileToolBar->addAction(saveAsAct);
 
 	const QIcon exitIcon = QIcon::fromTheme("application-exit");
-	QAction *exitAct = fileMenu->addAction(exitIcon, tr("E&xit"), this, &QWidget::close);
+	QAction *exitAct =
+			fileMenu->addAction(exitIcon, tr("E&xit"), this, &QWidget::close);
 	exitAct->setShortcuts(QKeySequence::Quit);
 	exitAct->setStatusTip(tr("Exit PCReconstruct"));
 
 	QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
-	QAction *aboutAct = helpMenu->addAction(tr("&About"), this, &MainWindow::about);
+	QAction *aboutAct =
+			helpMenu->addAction(tr("&About"), this, &MainWindow::about);
 	aboutAct->setStatusTip(tr("About"));
 
-	QAction *aboutQtAct = helpMenu->addAction(tr("About &Qt"), qApp, &QApplication::aboutQt);
+	QAction *aboutQtAct =
+			helpMenu->addAction(tr("About &Qt"), qApp, &QApplication::aboutQt);
 	aboutQtAct->setStatusTip(tr("About Qt"));
 
+	//------
 	// Add docks
 	QDockWidget *dock = new QDockWidget(tr("Log Window"), this);
 	dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
@@ -72,13 +81,21 @@ MainWindow::MainWindow(QWidget *parent) :
 	addDockWidget(Qt::RightDockWidgetArea, dock);
 	viewMenu->addAction(dock->toggleViewAction());
 
+	//------
 	// Central widget
-	msgLogger.set(logText);
-	centralWidget = new Window(this, &msgLogger);
+
+	msgLogger = new MessageLogger(logText);
+	centralWidget = new Window(this, msgLogger);
 	centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
 	setCentralWidget(centralWidget);
 	connect(this, &MainWindow::cloudChanged, centralWidget, &Window::setCloud);
 	connect(this, &MainWindow::cloudQueried, centralWidget, &Window::getCloud);
+	connect(this, &MainWindow::cloudDecimate, centralWidget, &Window::decimateCloud);
+
+
+	//------
+	// Random holes dialog
+
 
 	QMetaObject::connectSlotsByName(this);
 

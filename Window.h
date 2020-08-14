@@ -83,10 +83,13 @@ public slots:
 	void getCloud(CloudPtr& cloud)
 	{ emit cloudQueried(cloud); }
 
+	void decimateCloud(size_t nHoles, size_t kNN)
+	{ emit cloudDecimate(nHoles, kNN); }
 
 signals:
 	void cloudChanged(CloudPtr cloud);
 	void cloudQueried(CloudPtr& cloud);
+	void cloudDecimate(size_t nHoles, size_t kNN);
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;

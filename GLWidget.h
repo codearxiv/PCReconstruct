@@ -97,6 +97,7 @@ public slots:
 	void setCloud(CloudPtr cloud);
 	void getCloud(CloudPtr& cloud);
 	void setRandomCloud();
+	void decimateCloud(size_t nHoles, size_t kNN);
 
 signals:
 	void vectRotationChanged(int angle, QVector3D v);

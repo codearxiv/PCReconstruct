@@ -82,6 +82,7 @@ Window::Window(QMainWindow *mw, MessageLogger* msgLogger)
 
 	connect(this, &Window::cloudChanged, glWidget, &GLWidget::setCloud);
 	connect(this, &Window::cloudQueried, glWidget, &GLWidget::getCloud);
+	connect(this, &Window::cloudDecimate, glWidget, &GLWidget::decimateCloud);
 
 }
 

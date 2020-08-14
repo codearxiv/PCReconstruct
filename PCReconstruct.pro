@@ -29,6 +29,7 @@ PRECOMPILED_HEADER  = stable.h
 SOURCES += \
 	BoundBox.cpp \
 	Cloud.cpp \
+	DecimateDialog.cpp \
 	GLWidget.cpp \
 	MainWindow.cpp \
 	MessageLogger.cpp \
@@ -50,6 +51,7 @@ HEADERS += \
 	Cloud.h \
 	Cover-Tree/CoverTreePoint.h \
 	Cover-Tree/Cover_Tree.h \
+	DecimateDialog.h \
 	GLWidget.h \
 	MainWindow.h \
 	MessageLogger.h \

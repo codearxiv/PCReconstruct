@@ -4,8 +4,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "MessageLogger.h"
-
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
@@ -20,7 +18,8 @@ QT_END_NAMESPACE
 
 class GLWidget;
 class Window;
-
+class MessageLogger;
+class DecimateDialog;
 
 class MainWindow : public QMainWindow
 {
@@ -43,11 +42,15 @@ public slots:
 	void getCloud(CloudPtr& cloud)
 	{ emit cloudQueried(cloud); }
 
+	void decimateCloud(size_t nHoles, size_t kNN)
+	{ emit cloudDecimate(nHoles, kNN); }
+
 	void appendLogText(const QString& text);
 
 signals:
 	void cloudChanged(CloudPtr cloud);
 	void cloudQueried(CloudPtr& cloud);
+	void cloudDecimate(size_t nHoles, size_t kNN);
 
 private:
 	Window *centralWidget;
@@ -56,7 +59,7 @@ private:
 	QToolBar *toolBar;
 	QPlainTextEdit *logText;
 
-	MessageLogger msgLogger;
+	MessageLogger *msgLogger;
 
 };
 
