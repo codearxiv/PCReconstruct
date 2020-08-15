@@ -33,9 +33,21 @@ MainWindow::MainWindow(QWidget *parent) :
 	setWindowTitle(QCoreApplication::translate("MainWindow", "PCReconstruct", nullptr));
 
 	//------
+	// Add docks
+	QDockWidget *dock = new QDockWidget(tr("Log Window"), this);
+	dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+	logText = new QPlainTextEdit;
+	logText->setReadOnly(true);
+	dock->setWidget(logText);
+	addDockWidget(Qt::RightDockWidgetArea, dock);
+
+	//------
 	// Add actions
 	QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
 	QMenu *viewMenu = menuBar()->addMenu(tr("&View"));
+	QMenu *toolsMenu = menuBar()->addMenu(tr("&Tools"));
+	QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
+
 	QToolBar *fileToolBar = addToolBar(tr("File"));
 
 	const QIcon openIcon =
@@ -62,7 +74,13 @@ MainWindow::MainWindow(QWidget *parent) :
 	exitAct->setShortcuts(QKeySequence::Quit);
 	exitAct->setStatusTip(tr("Exit PCReconstruct"));
 
-	QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
+	viewMenu->addAction(dock->toggleViewAction());
+
+	QAction *decimateAct = new QAction(tr("&Decimate"), this);
+	saveAsAct->setStatusTip(tr("Generate random holes in point cloud"));
+	connect(decimateAct, &QAction::triggered, this, &MainWindow::decimate);
+	toolsMenu->addAction(decimateAct);
+
 	QAction *aboutAct =
 			helpMenu->addAction(tr("&About"), this, &MainWindow::about);
 	aboutAct->setStatusTip(tr("About"));
@@ -71,15 +89,6 @@ MainWindow::MainWindow(QWidget *parent) :
 			helpMenu->addAction(tr("About &Qt"), qApp, &QApplication::aboutQt);
 	aboutQtAct->setStatusTip(tr("About Qt"));
 
-	//------
-	// Add docks
-	QDockWidget *dock = new QDockWidget(tr("Log Window"), this);
-	dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-	logText = new QPlainTextEdit;
-	logText->setReadOnly(true);
-	dock->setWidget(logText);
-	addDockWidget(Qt::RightDockWidgetArea, dock);
-	viewMenu->addAction(dock->toggleViewAction());
 
 	//------
 	// Central widget
@@ -130,7 +139,7 @@ void MainWindow::open()
 		appendLogText("Opened: " + q_pcdPath + "\n");
 	}
 
-	emit cloudChanged(cloud);
+	setCloud(cloud);
 
 }
 
@@ -144,7 +153,7 @@ void MainWindow::saveAs()
 	std::string pcdPath = q_pcdPath.toStdString();
 
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-	emit cloudQueried(cloud);
+	getCloud(cloud);
 
 	int success = 0;
 	try{
@@ -163,6 +172,14 @@ void MainWindow::saveAs()
 		appendLogText("Saved: " + q_pcdPath + "\n");
 	}
 
+
+}
+
+//---------------------------------------------------------
+
+void MainWindow::decimate()
+{
+	decimateCloud(10,10);
 
 }
 //---------------------------------------------------------

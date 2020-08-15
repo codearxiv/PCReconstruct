@@ -33,6 +33,7 @@ public:
 private:
 	void open();
 	void saveAs();
+	void decimate();
 	void about();
 
 public slots:
