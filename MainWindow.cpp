@@ -179,7 +179,7 @@ void MainWindow::saveAs()
 
 void MainWindow::decimate()
 {
-	decimateCloud(10,10);
+	decimateCloud(10,100);
 
 }
 //---------------------------------------------------------

@@ -13,14 +13,21 @@
 #include "MatchingPursuit.h"
 #include "OrthogonalPursuit.h"
 #include "ksvd_dct2D.h"
+#include "Cover_Tree.h"
+#include "CoverTreePoint.h"
 
+#include <pcl/point_types.h>
+#include <pcl/point_cloud.h>
+#include <qopengl.h>
 #include <QCoreApplication>
+#include <QRecursiveMutex>
 #include <queue>
 #include <numeric>
 #include <algorithm>
 #include <functional>
 #include <iostream>
 #include <ctime>
+
 
 using std::max;
 using std::min;
@@ -328,21 +335,23 @@ void Cloud::buildSpatialIndex()
 	m_CT = new CoverTree<CoverTreePoint<Vector3f>>();
 
 	size_t npoints = m_cloud.size();
-	int threshold = 0;
+	size_t threshold = 0, lastPos = 0;
 
 	for(size_t i = 0; i < npoints; ++i){
 		// Log progress
-		//***
-		QCoreApplication::processEvents();
 		if(m_msgLogger != nullptr) {
+			//***
+			QCoreApplication::processEvents();
 			emit logProgress(
 						"Building cloud spatial index",
-						i, npoints, 5, threshold);
+						i+1, npoints, 5, threshold, lastPos);
 		}
 
 		CoverTreePoint<Vector3f> cp(m_cloud[i], i);
 		m_CT->insert(cp);
 	}
+
+	m_CTStale = false;
 }
 
 //---------------------------------------------------------
@@ -351,13 +360,13 @@ void Cloud::approxCloudNorms(int iters, size_t kNN)
 {
 	QMutexLocker locker(&m_recMutex);
 
-	assert(m_CT != nullptr);
-
 	size_t npoints = m_cloud.size();
-	int threshold = 0;
+	size_t threshold = 0, lastPos = 0;
 	vector<CoverTreePoint<Vector3f>> neighs;
 	vector<Vector3f> vneighs;
 	vector<Vector3f> vwork;
+
+	if( m_CTStale ) buildSpatialIndex();
 
 	for(size_t i=0; i < npoints; ++i){
 		// Log progress
@@ -366,7 +375,7 @@ void Cloud::approxCloudNorms(int iters, size_t kNN)
 			QCoreApplication::processEvents();
 			emit logProgress(
 						"Building cloud normals",
-						i, npoints, 5, threshold);
+						i+1, npoints, 5, threshold, lastPos);
 		}
 
 		Vector3f p = m_cloud[i];
@@ -390,28 +399,53 @@ void Cloud::approxCloudNorms(int iters, size_t kNN)
 void Cloud::decimate(size_t nHoles, size_t kNN)
 {
     QMutexLocker locker(&m_recMutex);
-    assert(m_CT != nullptr && kNN >= 1);
+	assert(kNN >= 1);
 
-    vector<bool> deletedPoint(m_cloud.size(), false);
-    vector<CoverTreePoint<Vector3f>> neighs;
+	size_t npoints = m_cloud.size();
+	vector<CoverTreePoint<Vector3f>> neighs;
+	vector<bool> deletedPoint(npoints, false);
+	size_t threshold = 0, lastPos = 0;
+	size_t ndeleted = 0;
 
-    int threshold = 0;
-    for(size_t i=0; i < nHoles; ++i){
+	if( m_CTStale ) buildSpatialIndex();
+
+
+	for(size_t i=0; i < nHoles; ++i){
         // Log progress
         if(m_msgLogger != nullptr) {
             //***
             QCoreApplication::processEvents();
-            emit logProgress(
-                        "Decimating", idx, nHoles, 10, threshold);
+            emit logProgress("Decimating", i+1, nHoles, 10,
+							 threshold, lastPos);
         }
-        randIdx = std::rand();
-        pointKNN(m_cloud[idx], kNN, neighs);
+		size_t randIdx = std::rand()%npoints;
+		if( deletedPoint[randIdx] ) continue;
+		pointKNN(m_cloud[randIdx], kNN, neighs);
         typename vector<CoverTreePoint<Vector3f>>::const_iterator it;
         for(it=neighs.begin(); it!=neighs.end(); ++it){
             size_t idx = it->getId();
-            deletedPoint[idx] = true;
-        }
+			if( deletedPoint[idx] ) continue;
+			//m_CT->remove(*it);
+			deletedPoint[idx] = true;
+			++ndeleted;
+		}
     }
+
+	vector<Vector3f> m_cloud2(npoints-ndeleted);
+	vector<Vector3f> m_norms2(npoints-ndeleted);
+
+	for(size_t idx=0, idx2=0; idx < npoints; ++idx){
+		if( deletedPoint[idx] ) continue;
+		m_cloud2[idx2] = m_cloud[idx];
+		m_norms2[idx2] = m_norms[idx];
+		++idx2;
+	}
+//	m_cloud = std::move(m_cloud2);
+//	m_norms = std::move(m_norms2);
+	m_cloud = m_cloud2;
+	m_norms = m_norms2;
+
+	m_CTStale = true;
 
 }
 
@@ -581,13 +615,15 @@ void Cloud::reconstruct(
 	vector<VectorXf> Ws;
 
 	queue<size_t> qpoints;
-	int threshold = 0;
+	size_t threshold = 0, lastPos = 0;
 
 	if(m_msgLogger != nullptr) {
+		//***
+		QCoreApplication::processEvents();
 		emit logMessage("\nPoint cloud reconstruction:");
 	}
 
-	buildSpatialIndex();
+	if( m_CTStale ) buildSpatialIndex();
 
 	for(size_t idx = 0; idx < npoints_orig; ++idx){
 		// Log progress
@@ -596,7 +632,7 @@ void Cloud::reconstruct(
 			QCoreApplication::processEvents();
 			emit logProgress(
 						"Setting up signals",
-						idx, npoints_orig, 5, threshold);
+						idx+1, npoints_orig, 5, threshold, lastPos);
 		}
 
 		Vector3f p = m_cloud[idx];
@@ -873,6 +909,10 @@ loopEnd0:
 
 	}
 
+
+
+
+	m_CTStale = true;
 
 
 }

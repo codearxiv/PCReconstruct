@@ -545,8 +545,10 @@ void GLWidget::setRandomCloud()
 
 void GLWidget::decimateCloud(size_t nHoles, size_t kNN)
 {
+	m_cloud.decimate(nHoles, kNN);
+	m_npoints_orig = m_cloud.pointCount();
 
-
+	update();
 }
 
 //---------------------------------------------------------

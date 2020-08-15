@@ -74,9 +74,10 @@ public:
 			SparseApprox method = SparseApprox::OrthogonalPursuit);
 
 signals:
-	void logMessage(const QString& text);
+	void logMessage(const QString& text, bool append = true);
 	void logProgress(const QString& msgPrefix,
-					 size_t i, size_t n, int infreq, int& threshold);
+					 size_t i, size_t n, int infreq,
+					 size_t& threshold, size_t& lastPos);
 
 private:
 	void getNeighVects(const Vector3f& p,
@@ -90,6 +91,7 @@ private:
 	vector<GLfloat> m_normGL;
 	vector<GLfloat> m_debugGL;
 	CoverTree<CoverTreePoint<Vector3f>> *m_CT;
+	bool m_CTStale = true;
 	MessageLogger* m_msgLogger;
 	QRecursiveMutex m_recMutex;
 };
