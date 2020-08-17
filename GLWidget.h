@@ -107,12 +107,12 @@ public slots:
 	void decimateCloud(size_t nHoles, size_t kNN)
 	{ emit cloudDecimate(nHoles,kNN); }
 	void reconstructCloud(
-			int kSVDIters, size_t kNN, size_t nfreq,
+            int kSVDIters, size_t kNN, size_t nfreq, float densify,
 			size_t natm, size_t latm, size_t maxNewPoints,
 			SparseApprox method)
 	{
 		emit cloudReconstruct(
-					kSVDIters, kNN, nfreq, natm, latm,
+                    kSVDIters, kNN, nfreq, densify, natm, latm,
 					maxNewPoints, method);
 	}
 	void updateCloud();
@@ -123,7 +123,7 @@ signals:
 	//void cloudSetRandom(size_t nPoints);
 	void cloudDecimate(size_t nHoles, size_t kNN);
 	void cloudReconstruct(
-			int kSVDIters, size_t kNN, size_t nfreq,
+            int kSVDIters, size_t kNN, size_t nfreq, float densify,
 			size_t natm, size_t latm, size_t maxNewPoints,
 			SparseApprox method);
 	void logMessage(const QString& text);

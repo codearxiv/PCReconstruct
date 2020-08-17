@@ -61,12 +61,12 @@ public slots:
 	{ emit cloudSparsify(percent); }
 
 	void reconstructCloud(
-			int kSVDIters, size_t kNN, size_t nfreq,
+            int kSVDIters, size_t kNN, size_t nfreq, float densify,
 			size_t natm, size_t latm, size_t maxNewPoints,
 			SparseApprox method)
 	{
 		emit cloudReconstruct(
-					kSVDIters, kNN, nfreq, natm, latm,
+                    kSVDIters, kNN, nfreq, densify, natm, latm,
 					maxNewPoints, method);
 	}
 
@@ -80,7 +80,7 @@ signals:
 	void cloudDecimate(size_t nHoles, size_t kNN);
 	void cloudSparsify(float percent);
 	void cloudReconstruct(
-			int kSVDIters, size_t kNN, size_t nfreq,
+            int kSVDIters, size_t kNN, size_t nfreq, float densify,
 			size_t natm, size_t latm, size_t maxNewPoints,
 			SparseApprox method);
 

@@ -13,17 +13,19 @@
 #include <QObject>
 #include <QWidget>
 #include <QIntValidator>
+#include <QDoubleValidator>
 
 
 ReconstructDialog::ReconstructDialog(QWidget *parent) : QDialog(parent)
 {
-	validator = new QIntValidator(1, int_infinity, this);
+    intValidator = new QIntValidator(1, int_infinity, this);
+    doubleValidator = new QDoubleValidator(0.0, double_infinity, 2, this);
 
 	form = new QFormLayout(this);
 	form->addRow(new QLabel("Fill in surface gaps in current point cloud"));
 
 	nItersLineEdit = new QLineEdit(this);
-	nItersLineEdit->setValidator(validator);
+    nItersLineEdit->setValidator(intValidator);
 	nItersLineEdit->setText("20");
 	nItersLineEdit->setToolTip(
 				QString("This sets the number of training iterations within which\n") +
@@ -32,7 +34,7 @@ ReconstructDialog::ReconstructDialog(QWidget *parent) : QDialog(parent)
 	form->addRow(QString("Number of dictionary learning iterations:"), nItersLineEdit);
 
 	kNNLineEdit = new QLineEdit(this);
-	kNNLineEdit->setValidator(validator);
+    kNNLineEdit->setValidator(intValidator);
 	kNNLineEdit->setText("50");
 	kNNLineEdit->setToolTip(
 				QString("The cloud surface is reconstructed patch-by-patch.\n") +
@@ -43,7 +45,7 @@ ReconstructDialog::ReconstructDialog(QWidget *parent) : QDialog(parent)
 	form->addRow(QString("local patch size:"), kNNLineEdit);
 
 	nFreqLineEdit = new QLineEdit(this);
-	nFreqLineEdit->setValidator(validator);
+    nFreqLineEdit->setValidator(intValidator);
 	nFreqLineEdit->setText("4");
 	nFreqLineEdit->setToolTip(
 				QString("Each local patch has a measure of complexity given by the\n") +
@@ -54,8 +56,17 @@ ReconstructDialog::ReconstructDialog(QWidget *parent) : QDialog(parent)
 				QString("quadratically as this value increases."));
 	form->addRow(QString("Maximum frequency in a patch:"), nFreqLineEdit);
 
+    densifyLineEdit = new QLineEdit(this);
+    densifyLineEdit->setValidator(doubleValidator);
+    densifyLineEdit->setText("1.0");
+    densifyLineEdit->setToolTip(
+                QString("This sets how many times more dense the reconstruction\n") +
+                QString("should be in each region compared to the surrounding\n") +
+                QString("points in the original cloud\n"));
+    form->addRow(QString("Densification factor:"), densifyLineEdit);
+
 	nAtmLineEdit = new QLineEdit(this);
-	nAtmLineEdit->setValidator(validator);
+    nAtmLineEdit->setValidator(intValidator);
 	nAtmLineEdit->setText("10");
 	nAtmLineEdit->setToolTip(
 				QString("Total number of dictionary atoms available.\n\n") +
@@ -64,7 +75,7 @@ ReconstructDialog::ReconstructDialog(QWidget *parent) : QDialog(parent)
 	form->addRow(QString("Number of dictionary atoms:"), nAtmLineEdit);
 
 	lAtmLineEdit = new QLineEdit(this);
-	lAtmLineEdit->setValidator(validator);
+    lAtmLineEdit->setValidator(intValidator);
 	lAtmLineEdit->setText("4");
 	lAtmLineEdit->setToolTip(
 				QString("Maximum dictionary atoms used in patch reconstruction.\n\n") +
@@ -73,7 +84,7 @@ ReconstructDialog::ReconstructDialog(QWidget *parent) : QDialog(parent)
 	form->addRow(QString("Atom sparsity constraint:"), lAtmLineEdit);
 
 	maxNewLineEdit = new QLineEdit(this);
-	maxNewLineEdit->setValidator(validator);
+    maxNewLineEdit->setValidator(intValidator);
 	maxNewLineEdit->setText("25000");
 	maxNewLineEdit->setToolTip(
 				QString("Maximum number of new points to add to the cloud."));
@@ -99,7 +110,7 @@ ReconstructDialog::ReconstructDialog(QWidget *parent) : QDialog(parent)
 
 
 int ReconstructDialog::getFields(
-		int& kSVDIters, size_t& kNN, size_t& nfreq,
+        int& kSVDIters, size_t& kNN, size_t& nfreq, float& densify,
 		size_t& natm, size_t& latm, size_t& maxNewPoints,
 		SparseApprox& method)
 {
@@ -109,7 +120,7 @@ int ReconstructDialog::getFields(
 
 	int pos = 0;
 	QString kSVDItersStr = nItersLineEdit->text();
-	if(validator->validate(kSVDItersStr, pos) != good){ ok = false; }
+    if(intValidator->validate(kSVDItersStr, pos) != good){ ok = false; }
 	else{ kSVDIters = kSVDItersStr.toULongLong(&ok); }
 
 	if(!ok) {
@@ -119,7 +130,7 @@ int ReconstructDialog::getFields(
 
 	pos = 0;
 	QString kNNStr = kNNLineEdit->text();
-	if(validator->validate(kNNStr, pos) != good){ ok = false; }
+    if(intValidator->validate(kNNStr, pos) != good){ ok = false; }
 	else{ kNN = kNNStr.toULongLong(&ok); }
 
 	if(!ok) {
@@ -129,7 +140,7 @@ int ReconstructDialog::getFields(
 
 	pos = 0;
 	QString nfreqStr = nFreqLineEdit->text();
-	if(validator->validate(nfreqStr, pos) != good){ ok = false; }
+    if(intValidator->validate(nfreqStr, pos) != good){ ok = false; }
 	else{ nfreq = nfreqStr.toULongLong(&ok); }
 
 	if(!ok) {
@@ -137,19 +148,29 @@ int ReconstructDialog::getFields(
 		return -3;
 	}
 
+    pos = 0;
+    QString densifyStr = densifyLineEdit->text();
+    if(doubleValidator->validate(densifyStr, pos) != good){ ok = false; }
+    else{ densify = densifyStr.toFloat(&ok); }
+
+    if(!ok) {
+        densifyLineEdit->clear();
+        return -4;
+    }
+
 	pos = 0;
 	QString natmStr = nAtmLineEdit->text();
-	if(validator->validate(natmStr, pos) != good){ ok = false; }
+    if(intValidator->validate(natmStr, pos) != good){ ok = false; }
 	else{ natm = natmStr.toULongLong(&ok); }
 
 	if(!ok) {
 		nAtmLineEdit->clear();
-		return -4;
+        return -5;
 	}
 
 	pos = 0;
 	QString latmStr = lAtmLineEdit->text();
-	if(validator->validate(latmStr, pos) != good){ ok = false; }
+    if(intValidator->validate(latmStr, pos) != good){ ok = false; }
 	else{
 		latm = latmStr.toULongLong(&ok);
 		if(latm > natm) ok = false;
@@ -157,17 +178,17 @@ int ReconstructDialog::getFields(
 
 	if(!ok) {
 		lAtmLineEdit->clear();
-		return -5;
+        return -6;
 	}
 
 	pos = 0;
 	QString maxNewStr = maxNewLineEdit->text();
-	if(validator->validate(maxNewStr, pos) != good){ ok = false; }
+    if(intValidator->validate(maxNewStr, pos) != good){ ok = false; }
 	else{ maxNewPoints = maxNewStr.toULongLong(&ok); }
 
 	if(!ok) {
 		maxNewLineEdit->clear();
-		return -6;
+        return -7;
 	}
 
 	int index = 0;

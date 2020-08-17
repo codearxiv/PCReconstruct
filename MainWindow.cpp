@@ -258,10 +258,11 @@ void MainWindow::reconstruct()
 	if(reconstructDialog->exec() == QDialog::Accepted){
 		int kSVDIters;
 		size_t kNN, nfreq, natm, latm, maxNewPoints;
-		SparseApprox method;
+        float densify;
+        SparseApprox method;
 
 		int ok = reconstructDialog->getFields(
-					kSVDIters, kNN, nfreq, natm, latm,
+                    kSVDIters, kNN, nfreq, densify, natm, latm,
 					maxNewPoints, method);
 		switch( ok ){
 		case -1:
@@ -274,26 +275,30 @@ void MainWindow::reconstruct()
 			break;
 		case -3:
 			badInputMessageBox(
-						"Frequency field must be bigger than zero.");
+                        "Frequency field must be bigger than zero.");
 			break;
-		case -4:
+        case -4:
+            badInputMessageBox(
+                        "Densification field must be bigger than zero.");
+            break;
+        case -5:
 			badInputMessageBox(
 						"Number of atoms field must be bigger than zero.");
 			break;
-		case -5:
+        case -6:
 			badInputMessageBox(
 						QString("Sparsity constraint must be bigger than zero, ") +
 						QString("and no bigger than the number of atoms field.")
 						);
 			break;
-		case -6:
+        case -7:
 			badInputMessageBox(
 						"Max. new points field should be bigger than zero.");
 			break;
 		default:
 			reconstructCloud(
-						kSVDIters, kNN, nfreq, natm, latm,
-						maxNewPoints, method);
+                        kSVDIters, kNN, nfreq, densify, natm, latm,
+                        maxNewPoints, method);
 		}
 	}
 

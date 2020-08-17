@@ -465,8 +465,9 @@ void Cloud::decimate(size_t nHoles, size_t kNN)
 //---------------------------------------------------------
 
 void Cloud::reconstruct(
-		int kSVDIters, size_t kNN, size_t nfreq, size_t natm, size_t latm,
-		size_t maxNewPoints, BoundBox* bBox, SparseApprox method)
+        int kSVDIters, size_t kNN, size_t nfreq, float densify,
+        size_t natm, size_t latm, size_t maxNewPoints, BoundBox* bBox,
+        SparseApprox method)
 {
 	QMutexLocker locker(&m_recMutex);
 	//assert(m_CT != nullptr);
@@ -740,7 +741,7 @@ void Cloud::reconstruct(
 
 //		if( numEmpty > 0 ) qpoints.push(idx);
 		if( numEmpty > 0 ){
-			float weight = -float(numEmpty)/(gridDim*gridDim);
+            float weight = float(numEmpty)/(gridDim*gridDim);
 			pqpoints.push(std::make_pair(weight,idx));
 		}
 

@@ -16,6 +16,7 @@ class QFormLayout;
 class QLineEdit;
 class QDialogButtonBox;
 class QIntValidator;
+class QDoubleValidator;
 class QComboBox;
 QT_END_NAMESPACE
 
@@ -25,18 +26,20 @@ class ReconstructDialog : public QDialog
 
 public:
 	ReconstructDialog(QWidget *parent = nullptr);
-	int getFields(int& kSVDIters, size_t& kNN, size_t& nfreq,
-				  size_t& natm, size_t& latm, size_t& maxNewPoints,
-				  SparseApprox& method);
+    int getFields(
+            int& kSVDIters, size_t& kNN, size_t& nfreq, float& densify,
+            size_t& natm, size_t& latm, size_t& maxNewPoints,
+            SparseApprox& method);
 
 public slots:
-	void reconstructCloud(int kSVDIters, size_t kNN, size_t nfreq,
-						  size_t natm, size_t latm, size_t maxNewPoints,
-						  SparseApprox method)
-	{
-		emit cloudReconstruct(kSVDIters, kNN, nfreq, natm, latm,
-							  maxNewPoints, method);
-	}
+    void reconstructCloud(
+            int kSVDIters, size_t kNN, size_t nfreq, float& densify,
+            size_t natm, size_t latm, size_t maxNewPoints,
+            SparseApprox method)
+    {
+        emit cloudReconstruct(kSVDIters, kNN, nfreq, natm, latm,
+                              maxNewPoints, method);
+    }
 
 signals:
 	void cloudReconstruct(
@@ -49,14 +52,16 @@ private:
 	QLineEdit *nItersLineEdit;
 	QLineEdit *kNNLineEdit;
 	QLineEdit *nFreqLineEdit;
-	QLineEdit *nAtmLineEdit;
+    QLineEdit *densifyLineEdit;
+    QLineEdit *nAtmLineEdit;
 	QLineEdit *lAtmLineEdit;
 	QLineEdit *maxNewLineEdit;
 	QComboBox *methodComboBox;
 
 	QDialogButtonBox *buttonBox;
-	QIntValidator *validator;
-	QMainWindow *mainWindow;
+    QIntValidator *intValidator;
+    QDoubleValidator *doubleValidator;
+    QMainWindow *mainWindow;
 
 };
 
