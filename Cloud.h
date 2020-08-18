@@ -7,6 +7,7 @@
 
 #include "Cover_Tree.h"
 #include "CoverTreePoint.h"
+#include "constants.h"
 //#include "MessageLogger.h"
 
 #include <Eigen/Dense>
@@ -21,8 +22,6 @@
 
 class MessageLogger;
 class BoundBox;
-
-enum class SparseApprox { MatchingPursuit = 0, OrthogonalPursuit = 1 };
 
 class Cloud : public QObject
 {
@@ -43,6 +42,7 @@ public:
 	const GLfloat* debugGLData();
 
 	size_t pointCount() const { return m_cloud.size(); }
+	size_t pointCountOrig() const { return m_npointsOrig; }
 	size_t debugCount() const { return m_debug.size(); }
 	void clear();
 	void fromPCL(CloudPtr cloud);
@@ -73,12 +73,6 @@ public:
 			size_t maxNewPoints, BoundBox* BBox = nullptr,
 			SparseApprox method = SparseApprox::OrthogonalPursuit);
 
-signals:
-	void logMessage(const QString& text, bool append = true);
-	void logProgress(const QString& msgPrefix,
-					 size_t i, size_t n, int infreq,
-					 size_t& threshold, size_t& lastPos);
-
 private:
 	void getNeighVects(const Vector3f& p,
 					   const vector<CoverTreePoint<Vector3f>>& neighs,
@@ -94,6 +88,8 @@ private:
 	bool m_CTStale = true;
 	MessageLogger* m_msgLogger;
 	QRecursiveMutex m_recMutex;
+	size_t m_npointsOrig = 0;
+
 };
 
 

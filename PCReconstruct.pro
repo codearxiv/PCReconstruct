@@ -29,12 +29,14 @@ PRECOMPILED_HEADER  = stable.h
 SOURCES += \
 	BoundBox.cpp \
 	Cloud.cpp \
-	DecimateDialog.cpp \
+	CloudWorker.cpp \
 	GLWidget.cpp \
 	MainWindow.cpp \
 	MessageLogger.cpp \
-	ReconstructThread.cpp \
 	Window.cpp \
+	dialogs/DecimateDialog.cpp \
+	dialogs/ReconstructDialog.cpp \
+	dialogs/SetRandomDialog.cpp \
 	dictionarylearning/MatchingPursuit.cpp \
 	dictionarylearning/OrthogonalPursuit.cpp \
 	dictionarylearning/cosine_transform.cpp \
@@ -49,16 +51,18 @@ SOURCES += \
 HEADERS += \
 	BoundBox.h \
 	Cloud.h \
+	CloudWorker.h \
 	Cover-Tree/CoverTreePoint.h \
 	Cover-Tree/Cover_Tree.h \
-	DecimateDialog.h \
 	GLWidget.h \
 	MainWindow.h \
 	MessageLogger.h \
-	ReconstructThread.h \
 	Window.h \
 	alignment.h \
 	constants.h \
+	dialogs/DecimateDialog.h \
+	dialogs/ReconstructDialog.h \
+	dialogs/SetRandomDialog.h \
 	dictionarylearning/MatchingPursuit.h \
 	dictionarylearning/OrthogonalPursuit.h \
 	dictionarylearning/cosine_transform.h \
@@ -85,6 +89,7 @@ INCLUDEPATH += $$PWD/'../../lib/PCL 1.9.1/include/pcl-1.9' \
 		   $$PWD/'../../lib/OpenNI2/Include' \
 		   $$PWD/'../../lib/FLANN/include' \
 		   $$PWD/'Cover-Tree' \
+		   $$PWD/'dialogs' \
 		   $$PWD/'dictionarylearning' \
 		   $$PWD/'utils'
 

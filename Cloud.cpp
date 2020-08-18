@@ -51,15 +51,12 @@ typedef pcl::PointCloud<pcl::PointXYZ>::Ptr CloudPtr;
 
 //---------------------------------------------------------
 
-Cloud::Cloud(MessageLogger* msgLogger)
-	: QObject(), m_CT(nullptr), m_msgLogger(msgLogger)
+Cloud::Cloud(MessageLogger* m_msgLogger)
+	: QObject(), m_CT(nullptr), m_msgLogger(m_msgLogger)
 {
 	m_cloud.reserve(2500);
 	m_norms.reserve(2500);
 	m_vertGL.reserve(2500 * 6);
-
-	connect(this, &Cloud::logMessage, m_msgLogger, &MessageLogger::logMessage);
-	connect(this, &Cloud::logProgress, m_msgLogger, &MessageLogger::logProgress);
 }
 
 //---------------------------------------------------------
@@ -152,6 +149,8 @@ void Cloud::clear()
 	m_norms.clear();
 	delete m_CT;
 	m_CT = nullptr;
+	m_CTStale = true;
+	m_npointsOrig = 0;
 }
 //---------------------------------------------------------
 
@@ -190,8 +189,11 @@ void Cloud::fromPCL(CloudPtr cloud)
 	}
 
 	if(m_msgLogger != nullptr) {
-		emit logMessage(QString::number(npoints) + " points loaded.");
+		m_msgLogger->logMessage(QString::number(npoints) + " points loaded.\n");
 	}
+
+	m_npointsOrig = npoints;
+
 
 }
 
@@ -236,8 +238,10 @@ void Cloud::fromRandomPlanePoints(
 	}
 
 	if(m_msgLogger != nullptr) {
-		emit logMessage(QString::number(npoints) + " points created.");
+		m_msgLogger->logMessage(QString::number(npoints) + " points created.\n");
 	}
+
+	m_npointsOrig = npoints;
 
 }
 
@@ -342,7 +346,7 @@ void Cloud::buildSpatialIndex()
 		if(m_msgLogger != nullptr) {
 			//***
 			QCoreApplication::processEvents();
-			emit logProgress(
+			m_msgLogger->logProgress(
 						"Building cloud spatial index",
 						i+1, npoints, 5, threshold, lastPos);
 		}
@@ -373,7 +377,7 @@ void Cloud::approxCloudNorms(int iters, size_t kNN)
 		if(m_msgLogger != nullptr) {
 			//***
 			QCoreApplication::processEvents();
-			emit logProgress(
+			m_msgLogger->logProgress(
 						"Building cloud normals",
 						i+1, npoints, 5, threshold, lastPos);
 		}
@@ -399,9 +403,9 @@ void Cloud::approxCloudNorms(int iters, size_t kNN)
 void Cloud::decimate(size_t nHoles, size_t kNN)
 {
     QMutexLocker locker(&m_recMutex);
-	assert(kNN >= 1);
 
 	size_t npoints = m_cloud.size();
+	if(npoints == 0 || nHoles == 0 || kNN == 0) return;
 	vector<CoverTreePoint<Vector3f>> neighs;
 	vector<bool> deletedPoint(npoints, false);
 	size_t threshold = 0, lastPos = 0;
@@ -412,12 +416,12 @@ void Cloud::decimate(size_t nHoles, size_t kNN)
 
 	for(size_t i=0; i < nHoles; ++i){
         // Log progress
-        if(m_msgLogger != nullptr) {
-            //***
-            QCoreApplication::processEvents();
-            emit logProgress("Decimating", i+1, nHoles, 10,
+		if(m_msgLogger != nullptr) {
+			//***
+			//QCoreApplication::processEvents();
+			m_msgLogger->logProgress("Decimating", i+1, nHoles, 10,
 							 threshold, lastPos);
-        }
+		}
 		size_t randIdx = std::rand()%npoints;
 		if( deletedPoint[randIdx] ) continue;
 		pointKNN(m_cloud[randIdx], kNN, neighs);
@@ -429,23 +433,35 @@ void Cloud::decimate(size_t nHoles, size_t kNN)
 			deletedPoint[idx] = true;
 			++ndeleted;
 		}
+		if(ndeleted >= npoints) break;
     }
 
-	vector<Vector3f> m_cloud2(npoints-ndeleted);
-	vector<Vector3f> m_norms2(npoints-ndeleted);
-
-	for(size_t idx=0, idx2=0; idx < npoints; ++idx){
-		if( deletedPoint[idx] ) continue;
-		m_cloud2[idx2] = m_cloud[idx];
-		m_norms2[idx2] = m_norms[idx];
-		++idx2;
+	size_t nremaining = max(size_t(0), npoints-ndeleted);
+	if( nremaining <= 0 ){
+		m_cloud.clear();
+		m_norms.clear();
 	}
-//	m_cloud = std::move(m_cloud2);
-//	m_norms = std::move(m_norms2);
-	m_cloud = m_cloud2;
-	m_norms = m_norms2;
+	else{
+		vector<Vector3f> m_cloud2(nremaining);
+		vector<Vector3f> m_norms2(nremaining);
 
+		for(size_t idx=0, idx2=0; idx < npoints; ++idx){
+			if( deletedPoint[idx] ) continue;
+			m_cloud2[idx2] = m_cloud[idx];
+			m_norms2[idx2] = m_norms[idx];
+			++idx2;
+		}
+		m_cloud = std::move(m_cloud2);
+		m_norms = std::move(m_norms2);
+	}
 	m_CTStale = true;
+	m_npointsOrig = npoints;
+
+	if(m_msgLogger != nullptr) {
+		m_msgLogger->logMessage(
+					QString::number(ndeleted) + " points deleted, " +
+					QString::number(nremaining) + " points remaining.\n");
+	}
 
 }
 
@@ -459,10 +475,11 @@ void Cloud::reconstruct(
 	//assert(m_CT != nullptr);
 	assert(kNN >= 1 && nfreq >= 1 && natm >= 1 && latm >= 1 && latm <= natm);
 	static const Vector3f zaxis(0.0f, 0.0f, 1.0f);
-	double time_elapsed_ms;
-	std::clock_t c_start, c_end;
+	//double time_elapsed_ms;
+	//std::clock_t c_start, c_end;
 
 	size_t npoints_orig = m_cloud.size();
+	if(npoints_orig == 0) return;
 	size_t nfreqsq = nfreq*nfreq;
 	size_t maxGridDim = max(1, int(floor(sqrt(float(kNN)))));
 	bool useBBox = (BBox != nullptr);
@@ -620,7 +637,7 @@ void Cloud::reconstruct(
 	if(m_msgLogger != nullptr) {
 		//***
 		QCoreApplication::processEvents();
-		emit logMessage("\nPoint cloud reconstruction:");
+		m_msgLogger->logMessage("** Point cloud reconstruction **");
 	}
 
 	if( m_CTStale ) buildSpatialIndex();
@@ -630,7 +647,7 @@ void Cloud::reconstruct(
 		if(m_msgLogger != nullptr) {
 			//***
 			QCoreApplication::processEvents();
-			emit logProgress(
+			m_msgLogger->logProgress(
 						"Setting up signals",
 						idx+1, npoints_orig, 5, threshold, lastPos);
 		}
@@ -695,18 +712,18 @@ loopEnd0:
 	}
 
 	if(m_msgLogger != nullptr) {
-		emit logMessage("Training dictionary...");
+		m_msgLogger->logMessage("Training dictionary...");
 		QCoreApplication::processEvents();
 	}
 
-	c_start = std::clock();//***
+	//c_start = std::clock();//***
 
-	ksvd_dct2D(true, Ws, Us, Vs, nfreq, latm,
-			   kSVDIters, 0.0, sparseFunct, D, C);
+	ksvd_dct2D(true, Ws, Us, Vs, nfreq, latm, kSVDIters, 0.0,
+			   sparseFunct, D, C, m_msgLogger);
 
-	c_end = std::clock();//***
-	time_elapsed_ms = 1000.0 * (c_end-c_start) / CLOCKS_PER_SEC;
-	std::cout << "\nCPU time used: " << time_elapsed_ms << " ms\n" << std::endl;
+	//c_end = std::clock();//***
+	//time_elapsed_ms = 1000.0 * (c_end-c_start) / CLOCKS_PER_SEC;
+	//std::cout << "\nCPU time used: " << time_elapsed_ms << " ms\n" << std::endl;
 
 
 	//--------
@@ -738,10 +755,11 @@ loopEnd0:
 	vectorfa dworkDctB;
 
 	if(m_msgLogger != nullptr) {
-		emit logMessage("Reconstructing point cloud...");
+		m_msgLogger->logMessage("Reconstructing point cloud...");
 		QCoreApplication::processEvents();
 		//***
-		emit logMessage(QString::number(qpoints.size()) + " points in queue...");
+		m_msgLogger->logMessage(
+					QString::number(qpoints.size()) + " points in queue...");
 		QCoreApplication::processEvents();
 	}
 
@@ -753,7 +771,8 @@ loopEnd0:
 		if(m_msgLogger != nullptr) {
 			if( nprocessed%1000 == 0 ){
 				//***
-				emit logMessage(QString::number(nprocessed) + " points processed...");
+				m_msgLogger->logMessage(
+							QString::number(nprocessed) + " points processed...");
 				QCoreApplication::processEvents();
 			}
 			++nprocessed;
@@ -910,9 +929,12 @@ loopEnd0:
 	}
 
 
-
-
 	m_CTStale = true;
+
+	if(m_msgLogger != nullptr) {
+		m_msgLogger->logMessage(
+					QString::number(nNewPoints) + " points added to cloud.\n");
+	}
 
 
 }

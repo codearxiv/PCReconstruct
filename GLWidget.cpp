@@ -48,14 +48,16 @@
 **
 ****************************************************************************/
 /****************************************************************************
-**     Peter Beben: modified this file for the purposes of this project.
-**     Views ALL points in the point cloud without any pruning (thus it
+**     Peter Beben: modified this file for the purpose of point cloud
+**     visualization.
+**     Views ALL points in the point cloud without any pruning (so it
 **     must be small enough to fit into video memory!!).
 ****************************************************************************/
 
 #include "GLWidget.h"
 #include "BoundBox.h"
 #include "Cloud.h"
+#include "CloudWorker.h"
 #include "MessageLogger.h"
 #include "constants.h"
 
@@ -63,6 +65,8 @@
 #include <QOpenGLShaderProgram>
 #include <QCoreApplication>
 #include <QDebug>
+#include <QThread>
+#include <QRecursiveMutex>
 #include <math.h>
 
 //#define SHOW_CLOUD_NORMS
@@ -96,12 +100,28 @@ GLWidget::GLWidget(QWidget *parent, MessageLogger* msgLogger)
 		setFormat(fmt);
 	}
 
-	//connect(this, &GLWidget::logMessage, m_msgLogger, &MessageLogger::logMessage);
+	m_cloudThread = new QThread(this);
+	m_cloudWorker = new CloudWorker(m_cloud);
+	m_cloudWorker->moveToThread(m_cloudThread);
+
+	connect(this, &GLWidget::cloudDecimate,
+			m_cloudWorker, &CloudWorker::decimateCloud);
+
+	connect(m_cloudWorker, &CloudWorker::finished,
+			this, &GLWidget::updateCloud);
+
+	connect(m_cloudThread, &QThread::finished,
+			m_cloudWorker, &QObject::deleteLater);
+
+	m_cloudThread->start();
+
 }
 //---------------------------------------------------------
 
 GLWidget::~GLWidget()
 {
+	m_cloudThread->quit();
+	m_cloudThread->wait();
 	cleanup();
 }
 //---------------------------------------------------------
@@ -306,15 +326,16 @@ void GLWidget::paintGL()
 	m_program->setUniformValue(m_normalMatrixLoc, normalMatrix);
 
 	size_t npoints = m_cloud.pointCount();
-	size_t npoints_new = npoints - m_npoints_orig;
+	size_t npointsOrig = m_cloud.pointCountOrig();
+	size_t npointsNew = npoints - npointsOrig;
 
 	m_program->setUniformValue(m_colorLoc, QVector3D(0.4f, 1.0f, 0.0f));
 	QOpenGLVertexArrayObject::Binder vaoBinder(&m_cloudVao);
-	glDrawArrays(GL_POINTS, 0, m_npoints_orig);
+	glDrawArrays(GL_POINTS, 0, npointsOrig);
 
-	if( npoints_new > 0 ){
+	if( npointsNew > 0 ){
 		m_program->setUniformValue(m_colorLoc, QVector3D(1.0f, 0.0f, 1.0f));
-		glDrawArrays(GL_POINTS, m_npoints_orig-1, npoints_new);
+		glDrawArrays(GL_POINTS, npointsOrig-1, npointsNew);
 	}
 
 	m_program->setUniformValue(m_colorLoc, QVector3D(1.0f, 0.5f, 0.0f));
@@ -432,7 +453,7 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
 	m_lastMousePos = event->pos();
 	//***
 	if(event->buttons() & Qt::MidButton){
-		setRandomCloud();
+		setRandomCloud(1000);
 	}
 
 }
@@ -470,29 +491,15 @@ void GLWidget::wheelEvent(QWheelEvent *event)
 
 void GLWidget::setCloud(CloudPtr cloud)
 {
+	QMutexLocker locker(&m_recMutex);
 
 	m_cloud.fromPCL(cloud);
 	m_cloudBBox.set(m_cloud);
 	m_cloudBBox.pad(0.0f, 0.0f, 0.1f);
 
-	m_npoints_orig = m_cloud.pointCount();
 	m_cloud.reconstruct(10, 50, 5, 10, 2, 10000, &m_cloudBBox);
 
-	setGLCloud();
-	setGLBBox(m_cloudBBox, m_cloudBBoxVbo, m_cloudBBoxEbo);
-
-#ifdef SHOW_CLOUD_NORMS
-	m_cloud.buildSpatialIndex();
-	m_cloud.approxCloudNorms(25, 15);
-	float scale = 2e-2*m_cloudBBox.diagonalSize();
-	setGLCloudNorms(scale);
-#endif
-
-#ifdef SHOW_CLOUD_DBUG
-	setGLCloudDebug();
-#endif
-
-	update();
+	updateCloud();
 }
 
 //---------------------------------------------------------
@@ -504,8 +511,10 @@ void GLWidget::getCloud(CloudPtr& cloud)
 
 //---------------------------------------------------------
 
-void GLWidget::setRandomCloud()
+void GLWidget::setRandomCloud(size_t nPoints)
 {
+	QMutexLocker locker(&m_recMutex);
+
 	auto heightFun = [](float xu, float xv){
 		//return 0.5f*xv + 0.5f*xu + 0.1f*cos(10*xu) + 0.1f*cos(10*xv);
 		//return 0.1f*cos(10*xu)*cos(10*xv);
@@ -514,20 +523,28 @@ void GLWidget::setRandomCloud()
 	};
 
 	Eigen::Vector3f norm(0.0f,0.0f,1.0f);
-	m_cloud.fromRandomPlanePoints(norm, 1000, heightFun);
+	m_cloud.fromRandomPlanePoints(norm, nPoints, heightFun);
 	//m_cloud.fromRandomPlanePoints(norm, 10000);
 
 	m_cloudBBox.set(m_cloud);
 	m_cloudBBox.pad(0.0f, 0.0f, 0.1f);
 
-	m_npoints_orig = m_cloud.pointCount();
 	m_cloud.reconstruct(15, 100, 4, 10, 4, 1000, &m_cloudBBox);
+
+	updateCloud();
+}
+
+
+//---------------------------------------------------------
+
+void GLWidget::updateCloud()
+{
+	QMutexLocker locker(&m_recMutex);
 
 	setGLCloud();
 	setGLBBox(m_cloudBBox, m_cloudBBoxVbo, m_cloudBBoxEbo);
 
 #ifdef SHOW_CLOUD_NORMS
-	m_cloud.buildSpatialIndex();
 	m_cloud.approxCloudNorms(25, 15);
 	float scale = 2e-2*m_cloudBBox.diagonalSize();
 	setGLCloudNorms(scale);
@@ -536,17 +553,6 @@ void GLWidget::setRandomCloud()
 #ifdef SHOW_CLOUD_DBUG
 	setGLCloudDebug();
 #endif
-
-	update();
-}
-
-
-//---------------------------------------------------------
-
-void GLWidget::decimateCloud(size_t nHoles, size_t kNN)
-{
-	m_cloud.decimate(nHoles, kNN);
-	m_npoints_orig = m_cloud.pointCount();
 
 	update();
 }

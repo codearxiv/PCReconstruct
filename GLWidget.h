@@ -48,8 +48,9 @@
 **
 ****************************************************************************/
 /****************************************************************************
-**     Peter Beben: modified this file for the purposes of this project.
-**     Views ALL points in the point cloud without any pruning (thus it
+**     Peter Beben: modified this file for the purpose of point cloud
+**     visualization.
+**     Views ALL points in the point cloud without any pruning (so it
 **     must be small enough to fit into video memory!!).
 ****************************************************************************/
 
@@ -58,6 +59,7 @@
 
 #include "BoundBox.h"
 #include "Cloud.h"
+#include "CloudWorker.h"
 //#include "MessageLogger.h"
 
 #include <pcl/point_types.h>
@@ -68,9 +70,14 @@
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLBuffer>
 #include <QMatrix4x4>
-
+#include <QRecursiveMutex>
 
 class MessageLogger;
+class CloudWorker;
+
+QT_BEGIN_NAMESPACE
+class QThread;
+QT_END_NAMESPACE
 
 QT_FORWARD_DECLARE_CLASS(QOpenGLShaderProgram)
 
@@ -96,12 +103,16 @@ public slots:
 	void cleanup();
 	void setCloud(CloudPtr cloud);
 	void getCloud(CloudPtr& cloud);
-	void setRandomCloud();
-	void decimateCloud(size_t nHoles, size_t kNN);
+	void setRandomCloud(size_t nPoints);
+	void decimateCloud(size_t nHoles, size_t kNN)
+	{ emit cloudDecimate(nHoles,kNN); }
+	void updateCloud();
 
 signals:
 	void vectRotationChanged(int angle, QVector3D v);
 	void vectTranslationChanged(QVector3D v);
+	//void cloudSetRandom(size_t nPoints);
+	void cloudDecimate(size_t nHoles, size_t kNN);
 	void logMessage(const QString& text);
 
 protected:
@@ -148,7 +159,10 @@ private:
 	QVector3D m_movVect;
 	static bool m_transparent;
 	MessageLogger* m_msgLogger;
-	size_t m_npoints_orig = 0;
+	QThread* m_cloudThread;
+	CloudWorker* m_cloudWorker;
+	QRecursiveMutex m_recMutex;
+
 };
 
 #endif

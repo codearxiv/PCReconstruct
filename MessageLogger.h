@@ -13,8 +13,7 @@ class MessageLogger : public QObject
 	Q_OBJECT
 
 public:
-	explicit MessageLogger(QPlainTextEdit *logText = nullptr) :
-		QObject(), m_logText(logText) {}
+	explicit MessageLogger(QPlainTextEdit *logText = nullptr);
 	~MessageLogger();
 
 	void set(QPlainTextEdit *logText) {
@@ -22,11 +21,15 @@ public:
 		m_lastPos = 0;
 	}
 
-public slots:
 	void logMessage(const QString& text, bool append = true);
 
 	void logProgress(const QString& msgPrefix, size_t i, size_t n,
 					 int infreq, size_t& threshold, size_t& lastPos);
+
+signals:
+	void undo();
+	void appendPlainText(const QString& text);
+
 private:
 	QPlainTextEdit *m_logText;
 	size_t m_lastPos = 0;

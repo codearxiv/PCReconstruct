@@ -53,7 +53,7 @@
 
 #include "MessageLogger.h"
 
-#include <pcl/io/pcd_io.h>
+//#include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 #include <QWidget>
@@ -83,12 +83,16 @@ public slots:
 	void getCloud(CloudPtr& cloud)
 	{ emit cloudQueried(cloud); }
 
+	void setRandomCloud(size_t nPoints)
+	{ emit cloudSetRandom(nPoints); }
+
 	void decimateCloud(size_t nHoles, size_t kNN)
 	{ emit cloudDecimate(nHoles, kNN); }
 
 signals:
 	void cloudChanged(CloudPtr cloud);
 	void cloudQueried(CloudPtr& cloud);
+	void cloudSetRandom(size_t nPoints);
 	void cloudDecimate(size_t nHoles, size_t kNN);
 
 protected:

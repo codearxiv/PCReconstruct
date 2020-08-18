@@ -4,13 +4,12 @@
 
 #define EIGEN_NO_MALLOC
 
-#define DEBUG_KSVDDCT
-
 #include "ksvd_dct2D.h"
 #include "cosine_transform.h"
 #include "ensure_buffer_size.h"
 #include "constants.h"
 #include "alignment.h"
+#include "MessageLogger.h"
 
 #include <Eigen/Dense>
 
@@ -95,7 +94,8 @@ void ksvd_dct2D(
 			VectorXf&,
 			VectorXf&)> sparseFunct,
 		MatrixXf& D,
-		MatrixXf& X
+		MatrixXf& X,
+		MessageLogger* msgLogger
 		)
 {
 
@@ -110,6 +110,7 @@ void ksvd_dct2D(
 	assert(maxIters >= 1);
 	assert(latm <= natm);
 	Index maxThreads = omp_get_max_threads();
+	Index lastIter = 0;
 
 	bool stopAtMaxError = (maxError >= 0.0f);
 	float maxErrorSq = 0.0f;
@@ -151,10 +152,8 @@ void ksvd_dct2D(
 
 #pragma omp parallel if(useOpenMP) default(shared) firstprivate(sparseFunct)
 {
-
-
-	int numThreads = omp_get_num_threads();
-	int iThread = omp_get_thread_num();
+	Index numThreads = omp_get_num_threads();
+	Index iThread = omp_get_thread_num();
 
 	VectorXf TDatm(maxSamples);
 	VectorXf TA(maxSamples);
@@ -176,16 +175,18 @@ void ksvd_dct2D(
 	VectorXf TY(nfreqsq);
 
 	for(int iter = 1; iter <= maxIters; ++iter){
-
-#ifdef DEBUG_KSVDDCT
+		if(msgLogger != nullptr) {
 #pragma omp single
 {
-		if(iter == 1) cout << "\nAverage error (coord. diff., cosine angle, vect. diff.)\n" ;
-		print_error_dct2D(Y, U, V, D, X, nfreq);
-		cout << endl;
+			lastIter = iter;
+			if(iter == 1){
+				msgLogger->logMessage(
+							"Avg. error (coord. diff., cos angle, vect. diff.)");
+				print_error_dct2D(
+							useOpenMP, Y, U, V, D, X, nfreq, iter-1, msgLogger);
+			}
 }
-#endif
-
+		}
 		// Fix dictionary D and optimize code matrix X.
 #pragma omp for schedule(dynamic)
 		for(Index isig = 0; isig < nsig; ++isig){
@@ -221,15 +222,6 @@ void ksvd_dct2D(
 
 			if( smallError ) break;
 		}
-
-//***
-#ifdef DEBUG_KSVDDCT
-#pragma omp single
-{
-		print_error_dct2D(Y, U, V, D, X, nfreq);
-		cout << endl;
-}
-#endif
 
 #pragma omp single
 {
@@ -332,26 +324,15 @@ void ksvd_dct2D(
 
 		}
 
-//***
-#ifdef DEBUG_KSVDDCT
-#pragma omp single
-{
-		print_error_dct2D(Y, U, V, D, X, nfreq);
-		cout << endl;
-}
-#endif
-
-
 	}
 
-#ifdef DEBUG_KSVDDCT
+	if(msgLogger != nullptr) {
 #pragma omp single
 {
-		print_error_dct2D(Y, U, V, D, X, nfreq);
-		cout << endl;
+		print_error_dct2D(
+					useOpenMP, Y, U, V, D, X, nfreq, lastIter, msgLogger);
 }
-#endif
-
+	}
 
 
 } //parallel
@@ -369,43 +350,81 @@ void ksvd_dct2D(
 //-----------------------------------------------------------
 
 void print_error_dct2D(
+		bool useOpenMP,
 		const vector<VectorXf>& Y,
 		const vector<VectorXf>& U,
 		const vector<VectorXf>& V,
 		const MatrixXf& D,
 		const MatrixXf& X,
-		Index nfreq)
+		Index nfreq,
+		Index iter,
+		MessageLogger* msgLogger
+		)
 {
 	Index nsig = Y.size();
+	Index natm = D.cols();
 	Index nfreqsq = nfreq*nfreq;
+	Index maxThreads = omp_get_max_threads();
+	Index numThreads;
+
+	vector<float> threadError1(maxThreads, 0.0f);
+	vector<float> threadError2(maxThreads, 0.0f);
+	vector<float> threadError3(maxThreads, 0.0f);
+	vector<Index> threadTotalSmpl(maxThreads, 0);
+
+#pragma omp parallel if(useOpenMP) default(shared)
+{
+	numThreads = omp_get_num_threads();
+	Index iThread = omp_get_thread_num();
+
 	MapMtrxf T(nullptr, 0, 0);
+	MapMtrxf TD(nullptr, 0, 0);
 	MapVectf TDX(nullptr, 0);
-//	VectorXf TDX;
 
 	vectorfa dworkA;
 	vectorfa dworkB;
-	size_t paddedA[2];
+	size_t paddedA[3];
 
-	float error = 0.0f;
-	float error2 = 0.0f;
-	float error3 = 0.0f;
-	Index totalsmpl = 0;
-
+#pragma omp for schedule(static)
 	for(Index isig = 0; isig < nsig; ++isig){
 		Index nsmpl = Y[isig].size();
 		paddedA[0] = align_padded(nsmpl*nfreqsq);
-		paddedA[1] = align_padded(nsmpl);
-		ensure_buffer_size(paddedA[0]+paddedA[1], dworkA);
+		paddedA[1] = align_padded(nsmpl*natm);
+		paddedA[2] = align_padded(nsmpl);
+		ensure_buffer_size(paddedA[0]+paddedA[1]+paddedA[2], dworkA);
 		new (&T) MapMtrxf(&dworkA[0], nsmpl, nfreqsq);
-		new (&TDX) MapVectf(&dworkA[paddedA[0]], nsmpl);
+		new (&TD) MapMtrxf(&dworkA[paddedA[0]], nsmpl, natm);
+		new (&TDX) MapVectf(&dworkA[paddedA[1]], nsmpl);
 		cosine_transform(U[isig], V[isig], nfreq, dworkB, T);
-		TDX.noalias() = T*D*(X.col(isig));
-		error += (Y[isig] - TDX).cwiseAbs().sum();
-		error2 +=  Y[isig].dot(TDX)/(Y[isig].norm() * TDX.norm());
-		error3 += (Y[isig] - TDX).norm()/Y[isig].norm();
-		totalsmpl = totalsmpl + nsmpl;
+		TD.noalias() = T*D;
+		TDX.noalias() = TD*(X.col(isig));
+		float normY = Y[isig].norm();
+		threadError1[iThread] += (Y[isig] - TDX).cwiseAbs().sum();
+		threadError2[iThread] +=  Y[isig].dot(TDX)/(normY*TDX.norm());
+		threadError3[iThread] += (Y[isig] - TDX).norm()/normY;
+		threadTotalSmpl[iThread] += nsmpl;
 	}
-	cout << error/totalsmpl << ", " << error2/nsig  << ", " << error3/nsig;
+
+} //parallel
+
+	float error1 = 0.0f;
+	float error2 = 0.0f;
+	float error3 = 0.0f;
+	Index totalsmpl = 0;
+	for(Index iThread = 0; iThread < numThreads; ++iThread){
+		error1 += threadError1[iThread];
+		error2 += threadError2[iThread];
+		error3 += threadError3[iThread];
+		totalsmpl += threadTotalSmpl[iThread];
+	}
+
+	QString errorStr =
+			"Iteration " + QString::number(iter) + ": " +
+			QString::number(error1/totalsmpl) + ", " +
+			QString::number(error2/nsig) + ", " +
+			QString::number(error3/nsig);
+	msgLogger->logMessage(errorStr);
+
 
 
 }

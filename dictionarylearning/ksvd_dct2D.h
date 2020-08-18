@@ -12,6 +12,7 @@
 #include <vector>
 #include <functional>
 
+class MessageLogger;
 
 void ksvd_dct2D(
 		bool useOpenMP,
@@ -30,17 +31,22 @@ void ksvd_dct2D(
 			Eigen::VectorXf&
 			)> sparseFunct,
 		Eigen::MatrixXf& D,
-		Eigen::MatrixXf& X
+		Eigen::MatrixXf& X,
+		MessageLogger* msgLogger = nullptr
 		);
 
 
 void print_error_dct2D(
+		bool useOpenMP,
 		const std::vector<Eigen::VectorXf>& Y,
 		const std::vector<Eigen::VectorXf>& U,
 		const std::vector<Eigen::VectorXf>& V,
 		const Eigen::MatrixXf& D,
 		const Eigen::MatrixXf& X,
-		Eigen::Index nfreq);
+		Eigen::Index nfreq,
+		Eigen::Index iter,
+		MessageLogger* msgLogger
+		);
 
 
 void column_normalize(Eigen::Ref<Eigen::MatrixXf, ALIGNEDX> M,

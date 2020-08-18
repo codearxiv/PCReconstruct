@@ -2,6 +2,20 @@
 
 #include <QPlainTextEdit>
 #include <QRecursiveMutex>
+#include <QScrollBar>
+
+
+MessageLogger::MessageLogger(QPlainTextEdit *logText) :
+	QObject(), m_logText(logText)
+{
+	connect(this, &MessageLogger::appendPlainText,
+			m_logText, &QPlainTextEdit::appendPlainText);
+
+	connect(this, &MessageLogger::undo,
+			m_logText, &QPlainTextEdit::undo);
+
+}
+
 
 MessageLogger::~MessageLogger()
 {
@@ -9,16 +23,19 @@ MessageLogger::~MessageLogger()
 }
 
 void MessageLogger::logMessage(const QString& text, bool append) {
+
 	QMutexLocker locker(&m_recMutex);
 
 	if( append ){
-		m_logText->appendPlainText(text);
+		emit appendPlainText(text);
 		++m_lastPos;
 	}
 	else{
-		m_logText->undo();
-		m_logText->appendPlainText(text);
+		emit undo();
+		emit appendPlainText(text);
 	}
+	m_logText->verticalScrollBar()->setValue(
+				m_logText->verticalScrollBar()->maximum());
 }
 
 void MessageLogger::logProgress(

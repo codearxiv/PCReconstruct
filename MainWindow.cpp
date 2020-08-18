@@ -5,6 +5,7 @@
 #include "MainWindow.h"
 #include "Window.h"
 #include "MessageLogger.h"
+#include "SetRandomDialog.h"
 #include "DecimateDialog.h"
 
 #include <pcl/io/pcd_io.h>
@@ -16,6 +17,7 @@
 #include <QToolBar>
 #include <QDockWidget>
 #include <QPlainTextEdit>
+#include <QScrollBar>
 #include <QFileDialog>
 #include <QMenuBar>
 #include <QMenu>
@@ -76,6 +78,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	viewMenu->addAction(dock->toggleViewAction());
 
+	QAction *setRandomAct = new QAction(tr("&Set Random"), this);
+	saveAsAct->setStatusTip(tr("Sample a point cloud randomly from a random surface"));
+	connect(setRandomAct, &QAction::triggered, this, &MainWindow::setRandom);
+	toolsMenu->addAction(setRandomAct);
+
 	QAction *decimateAct = new QAction(tr("&Decimate"), this);
 	saveAsAct->setStatusTip(tr("Generate random holes in point cloud"));
 	connect(decimateAct, &QAction::triggered, this, &MainWindow::decimate);
@@ -97,14 +104,29 @@ MainWindow::MainWindow(QWidget *parent) :
 	centralWidget = new Window(this, msgLogger);
 	centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
 	setCentralWidget(centralWidget);
-	connect(this, &MainWindow::cloudChanged, centralWidget, &Window::setCloud);
-	connect(this, &MainWindow::cloudQueried, centralWidget, &Window::getCloud);
-	connect(this, &MainWindow::cloudDecimate, centralWidget, &Window::decimateCloud);
+
+	connect(this, &MainWindow::cloudChanged,
+			centralWidget, &Window::setCloud);
+
+	connect(this, &MainWindow::cloudQueried,
+			centralWidget, &Window::getCloud);
+
+	connect(this, &MainWindow::cloudSetRandom,
+			centralWidget, &Window::setRandomCloud);
+
+	connect(this, &MainWindow::cloudDecimate,
+			centralWidget, &Window::decimateCloud);
 
 
 	//------
-	// Random holes dialog
+	// Dialogs
 
+	setRandomDialog = new SetRandomDialog(this);
+	decimateDialog = new DecimateDialog(this);
+	//sparsityDialog = new sparsifyDialog(this);
+
+
+	//------
 
 	QMetaObject::connectSlotsByName(this);
 
@@ -175,13 +197,41 @@ void MainWindow::saveAs()
 
 }
 
+
+//---------------------------------------------------------
+
+void MainWindow::setRandom()
+{
+	// Show the dialog as modal
+	if(setRandomDialog->exec() == QDialog::Accepted){
+		size_t nPoints;
+		bool ok = setRandomDialog->getFields(nPoints);
+		if(!ok){
+			badInputMessageBox("All fields should be integers bigger than zero.");
+			return;
+		}
+		setRandomCloud(nPoints);
+	}
+
+}
+
 //---------------------------------------------------------
 
 void MainWindow::decimate()
 {
-	decimateCloud(10,100);
+	// Show the dialog as modal
+	if(decimateDialog->exec() == QDialog::Accepted){
+		size_t nHoles, kNN;
+		bool ok = decimateDialog->getFields(nHoles, kNN);
+		if(!ok){
+			badInputMessageBox("All fields should be integers bigger than zero.");
+			return;
+		}
+		decimateCloud(nHoles,kNN);
+	}
 
 }
+
 //---------------------------------------------------------
 
 void MainWindow::about()
@@ -192,11 +242,25 @@ void MainWindow::about()
 
 //---------------------------------------------------------
 
+void MainWindow::badInputMessageBox(const QString& info)
+{
+	QMessageBox msgBox;
+	msgBox.setText("Invalid input.");
+	msgBox.setInformativeText(info);
+	msgBox.setStandardButtons(QMessageBox::Ok);
+	msgBox.setDefaultButton(QMessageBox::Ok);
+	msgBox.setIcon(QMessageBox::Information);
+	msgBox.exec();
+}
+
+//---------------------------------------------------------
+
 void MainWindow::appendLogText(const QString& text)
 {
 	logText->appendPlainText(text);
-	//logText->verticalScrollBar()->setValue(logText->verticalScrollBar()->maximum());
-	//QCoreApplication::processEvents();
+	logText->verticalScrollBar()->setValue(
+				logText->verticalScrollBar()->maximum());
 }
+
 
 //---------------------------------------------------------

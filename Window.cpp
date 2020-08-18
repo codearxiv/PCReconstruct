@@ -80,9 +80,17 @@ Window::Window(QMainWindow *mw, MessageLogger* msgLogger)
 
 	setWindowTitle(tr("PCReconstruct"));
 
-	connect(this, &Window::cloudChanged, glWidget, &GLWidget::setCloud);
-	connect(this, &Window::cloudQueried, glWidget, &GLWidget::getCloud);
-	connect(this, &Window::cloudDecimate, glWidget, &GLWidget::decimateCloud);
+	connect(this, &Window::cloudChanged,
+			glWidget, &GLWidget::setCloud);
+
+	connect(this, &Window::cloudQueried,
+			glWidget, &GLWidget::getCloud);
+
+	connect(this, &Window::cloudSetRandom,
+			glWidget, &GLWidget::setRandomCloud);
+
+	connect(this, &Window::cloudDecimate,
+			glWidget, &GLWidget::decimateCloud);
 
 }
 

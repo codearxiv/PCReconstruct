@@ -10,6 +10,8 @@
 #include <QSurfaceFormat>
 #include <QCommandLineParser>
 #include <QCommandLineOption>
+#include <QTextBlock>
+#include <QTextCursor>
 #include <cstdlib>
 #include <iostream>
 
@@ -20,6 +22,10 @@ int main(int argc, char *argv[])
 	srand(2);
 	std::set_new_handler(out_of_mem_handler);
 	Eigen::initParallel();
+
+	qRegisterMetaType<size_t>("size_t");
+	qRegisterMetaType<QTextBlock>("QTextBlock");
+	qRegisterMetaType<QTextCursor>("QTextCursor");
 
 	QCoreApplication::setApplicationName("PCReconstruct");
 	QCoreApplication::setOrganizationName("Peter Beben");
