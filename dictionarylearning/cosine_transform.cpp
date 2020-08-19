@@ -10,7 +10,7 @@
 #include "constants.h"
 #include "alignment.h"
 
-#include <Eigen/Dense>
+#include <Eigen/Core>
 
 #include <math.h>
 #include <vector>

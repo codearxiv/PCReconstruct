@@ -5,14 +5,9 @@
 #include <QScrollBar>
 
 
-MessageLogger::MessageLogger(QPlainTextEdit *logText) :
-	QObject(), m_logText(logText)
+MessageLogger::MessageLogger(QObject *parent) :
+	QObject(parent)
 {
-	connect(this, &MessageLogger::appendPlainText,
-			m_logText, &QPlainTextEdit::appendPlainText);
-
-	connect(this, &MessageLogger::undo,
-			m_logText, &QPlainTextEdit::undo);
 
 }
 
@@ -27,15 +22,13 @@ void MessageLogger::logMessage(const QString& text, bool append) {
 	QMutexLocker locker(&m_recMutex);
 
 	if( append ){
-		emit appendPlainText(text);
+		emit logTextAppend(text);
 		++m_lastPos;
 	}
 	else{
-		emit undo();
-		emit appendPlainText(text);
+		emit logTextInsert(text);
 	}
-	m_logText->verticalScrollBar()->setValue(
-				m_logText->verticalScrollBar()->maximum());
+
 }
 
 void MessageLogger::logProgress(

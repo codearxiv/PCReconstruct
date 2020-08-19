@@ -20,7 +20,7 @@ SetRandomDialog::SetRandomDialog(QWidget *parent) : QDialog(parent)
 
 	form = new QFormLayout(this);
 	form->addRow(new QLabel(
-					 "Create a point cloud sampled randomly from a random surface"));
+					 "Create a new point cloud sampled randomly from a random surface"));
 	nPointsLineEdit = new QLineEdit(this);
 	nPointsLineEdit->setValidator(validator);
 	nPointsLineEdit->setText("1000");

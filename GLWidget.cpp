@@ -61,6 +61,7 @@
 #include "MessageLogger.h"
 #include "constants.h"
 
+#include <Eigen/Core>
 #include <QMouseEvent>
 #include <QOpenGLShaderProgram>
 #include <QCoreApplication>
@@ -89,7 +90,7 @@ GLWidget::GLWidget(QWidget *parent, MessageLogger* msgLogger)
 	  m_cloudBBoxEbo(QOpenGLBuffer::IndexBuffer),
 	  m_cloudNormsVbo(QOpenGLBuffer::VertexBuffer),
 	  m_cloudDebugVbo(QOpenGLBuffer::VertexBuffer),
-	  m_cloud(msgLogger)
+	  m_cloud(msgLogger, parent)
 {
 	m_core = QSurfaceFormat::defaultFormat().profile() == QSurfaceFormat::CoreProfile;
 	// --transparent causes the clear color to be transparent. Therefore, on systems that
@@ -101,11 +102,14 @@ GLWidget::GLWidget(QWidget *parent, MessageLogger* msgLogger)
 	}
 
 	m_cloudThread = new QThread(this);
-	m_cloudWorker = new CloudWorker(m_cloud);
+	m_cloudWorker = new CloudWorker(m_cloud, m_cloudBBox);
 	m_cloudWorker->moveToThread(m_cloudThread);
 
 	connect(this, &GLWidget::cloudDecimate,
 			m_cloudWorker, &CloudWorker::decimateCloud);
+
+	connect(this, &GLWidget::cloudReconstruct,
+			m_cloudWorker, &CloudWorker::reconstructCloud);
 
 	connect(m_cloudWorker, &CloudWorker::finished,
 			this, &GLWidget::updateCloud);
@@ -453,7 +457,7 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
 	m_lastMousePos = event->pos();
 	//***
 	if(event->buttons() & Qt::MidButton){
-		setRandomCloud(1000);
+		setRandomCloud(10000);
 	}
 
 }
@@ -497,8 +501,6 @@ void GLWidget::setCloud(CloudPtr cloud)
 	m_cloudBBox.set(m_cloud);
 	m_cloudBBox.pad(0.0f, 0.0f, 0.1f);
 
-	m_cloud.reconstruct(10, 50, 5, 10, 2, 10000, &m_cloudBBox);
-
 	updateCloud();
 }
 
@@ -515,21 +517,25 @@ void GLWidget::setRandomCloud(size_t nPoints)
 {
 	QMutexLocker locker(&m_recMutex);
 
-	auto heightFun = [](float xu, float xv){
-		//return 0.5f*xv + 0.5f*xu + 0.1f*cos(10*xu) + 0.1f*cos(10*xv);
-		//return 0.1f*cos(10*xu)*cos(10*xv);
-		//return xv + xu;
-		return xv*xu;
+	Eigen::VectorXf C = Eigen::VectorXf::Random(5);
+	Eigen::VectorXf D = Eigen::VectorXf::Random(8);
+
+	auto heightFun = [&C, &D](float xu, float xv){
+		float pu = 15*xu, pv = 15*xv;
+		float height =
+				C(0)*cos(D(0)*pu) +
+				C(1)*cos(D(1)*pv) +
+				C(2)*cos(D(2)*pu)*cos(D(3)*pu) +
+				C(3)*cos(D(4)*pu)*cos(D(5)*pv) +
+				C(4)*cos(D(6)*pv)*cos(D(7)*pv);
+		return 0.1f*height;
 	};
 
-	Eigen::Vector3f norm(0.0f,0.0f,1.0f);
+	Eigen::Vector3f norm(0.0f,1.0f,0.0f);
 	m_cloud.fromRandomPlanePoints(norm, nPoints, heightFun);
-	//m_cloud.fromRandomPlanePoints(norm, 10000);
 
 	m_cloudBBox.set(m_cloud);
 	m_cloudBBox.pad(0.0f, 0.0f, 0.1f);
-
-	m_cloud.reconstruct(15, 100, 4, 10, 4, 1000, &m_cloudBBox);
 
 	updateCloud();
 }

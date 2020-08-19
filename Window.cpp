@@ -78,7 +78,7 @@ Window::Window(QMainWindow *mw, MessageLogger* msgLogger)
 	//setLayout(mainLayout);
 	setLayout(container);
 
-	setWindowTitle(tr("PCReconstruct"));
+	setWindowTitle("PCReconstruct");
 
 	connect(this, &Window::cloudChanged,
 			glWidget, &GLWidget::setCloud);
@@ -92,6 +92,8 @@ Window::Window(QMainWindow *mw, MessageLogger* msgLogger)
 	connect(this, &Window::cloudDecimate,
 			glWidget, &GLWidget::decimateCloud);
 
+	connect(this, &Window::cloudReconstruct,
+			glWidget, &GLWidget::reconstructCloud);
 }
 
 

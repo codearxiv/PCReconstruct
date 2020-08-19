@@ -8,14 +8,20 @@
 #include "ensure_buffer_size.h"
 #include "constants.h"
 
+#include <Eigen/Dense>
 #include <functional>
 
 using Eigen::Matrix;
-using Eigen::Map;
 using Eigen::Dynamic;
 using Eigen::LDLT;
 using Eigen::Aligned16;
-
+using Eigen::Index;
+using Eigen::MatrixXf;
+using Eigen::VectorXf;
+using MapVectf = Eigen::Map<VectorXf, ALIGNEDX>;
+using MapMtrxf = Eigen::Map<MatrixXf, ALIGNEDX>;
+template<typename T> using Map = Eigen::Map<T, ALIGNEDX>;
+template<typename T> using vector = std::vector<T, Eigen::aligned_allocator<T>>;
 
 
 //-------------------------------------------------------------------------

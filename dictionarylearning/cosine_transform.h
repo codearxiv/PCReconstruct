@@ -8,7 +8,7 @@
 
 #include "alignment.h"
 
-#include <Eigen/Dense>
+#include <Eigen/Core>
 #include <vector>
 
 

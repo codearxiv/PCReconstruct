@@ -9,6 +9,12 @@
 #include "ensure_buffer_size.h"
 #include "constants.h"
 
+#include <Eigen/Core>
+
+using Index = Eigen::Index;
+using MatrixXf = Eigen::MatrixXf;
+using VectorXf = Eigen::VectorXf;
+
 //-------------------------------------------------------------------------
 void MatchingPursuit::ensure(
 		Index nd, Index na, Index lm)

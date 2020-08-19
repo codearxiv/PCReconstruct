@@ -175,18 +175,6 @@ void ksvd_dct2D(
 	VectorXf TY(nfreqsq);
 
 	for(int iter = 1; iter <= maxIters; ++iter){
-		if(msgLogger != nullptr) {
-#pragma omp single
-{
-			lastIter = iter;
-			if(iter == 1){
-				msgLogger->logMessage(
-							"Avg. error (coord. diff., cos angle, vect. diff.)");
-				print_error_dct2D(
-							useOpenMP, Y, U, V, D, X, nfreq, iter-1, msgLogger);
-			}
-}
-		}
 		// Fix dictionary D and optimize code matrix X.
 #pragma omp for schedule(dynamic)
 		for(Index isig = 0; isig < nsig; ++isig){
@@ -324,7 +312,24 @@ void ksvd_dct2D(
 
 		}
 
-	}
+
+		if(msgLogger != nullptr) {
+#pragma omp single
+{
+			lastIter = iter;
+			if(iter == 1){
+				msgLogger->logMessage(
+							"Avg. error (coord. diff., cos angle, vect. diff.)");
+				print_error_dct2D(
+							useOpenMP, Y, U, V, D, X, nfreq, iter, msgLogger);
+			}
+}
+		}
+
+
+	} // kSVD iterations
+
+
 
 	if(msgLogger != nullptr) {
 #pragma omp single

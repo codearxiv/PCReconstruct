@@ -106,6 +106,15 @@ public slots:
 	void setRandomCloud(size_t nPoints);
 	void decimateCloud(size_t nHoles, size_t kNN)
 	{ emit cloudDecimate(nHoles,kNN); }
+	void reconstructCloud(
+			int kSVDIters, size_t kNN, size_t nfreq,
+			size_t natm, size_t latm, size_t maxNewPoints,
+			SparseApprox method)
+	{
+		emit cloudReconstruct(
+					kSVDIters, kNN, nfreq, natm, latm,
+					maxNewPoints, method);
+	}
 	void updateCloud();
 
 signals:
@@ -113,6 +122,10 @@ signals:
 	void vectTranslationChanged(QVector3D v);
 	//void cloudSetRandom(size_t nPoints);
 	void cloudDecimate(size_t nHoles, size_t kNN);
+	void cloudReconstruct(
+			int kSVDIters, size_t kNN, size_t nfreq,
+			size_t natm, size_t latm, size_t maxNewPoints,
+			SparseApprox method);
 	void logMessage(const QString& text);
 
 protected:

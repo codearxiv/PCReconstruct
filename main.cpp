@@ -3,6 +3,7 @@
 
 #include "GLWidget.h"
 #include "MainWindow.h"
+#include "constants.h"
 
 #include <Eigen/Dense>
 #include <QApplication>
@@ -26,6 +27,7 @@ int main(int argc, char *argv[])
 	qRegisterMetaType<size_t>("size_t");
 	qRegisterMetaType<QTextBlock>("QTextBlock");
 	qRegisterMetaType<QTextCursor>("QTextCursor");
+	qRegisterMetaType<SparseApprox>("SparseApprox");
 
 	QCoreApplication::setApplicationName("PCReconstruct");
 	QCoreApplication::setOrganizationName("Peter Beben");

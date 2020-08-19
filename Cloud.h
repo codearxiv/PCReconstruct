@@ -10,7 +10,7 @@
 #include "constants.h"
 //#include "MessageLogger.h"
 
-#include <Eigen/Dense>
+#include <Eigen/Core>
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 #include <qopengl.h>
@@ -34,7 +34,7 @@ class Cloud : public QObject
 	typedef pcl::PointCloud<pcl::PointXYZ>::Ptr CloudPtr;
 
 public:
-	Cloud(MessageLogger* msgLogger = nullptr);
+	Cloud(MessageLogger* msgLogger = nullptr, QObject *parent = nullptr);
 	~Cloud();
 	const Vector3f point(size_t idx) const { return m_cloud[idx]; }
 	const GLfloat* vertGLData();
@@ -70,7 +70,7 @@ public:
     void decimate(size_t nHoles, size_t kNN);
 	void reconstruct(
 			int kSVDIters, size_t kNN, size_t nfreq, size_t natm, size_t latm,
-			size_t maxNewPoints, BoundBox* BBox = nullptr,
+			size_t maxNewPoints, BoundBox* bBox = nullptr,
 			SparseApprox method = SparseApprox::OrthogonalPursuit);
 
 private:

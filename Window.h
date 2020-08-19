@@ -52,6 +52,7 @@
 #define WINDOW_H
 
 #include "MessageLogger.h"
+#include "constants.h"
 
 //#include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
@@ -89,11 +90,25 @@ public slots:
 	void decimateCloud(size_t nHoles, size_t kNN)
 	{ emit cloudDecimate(nHoles, kNN); }
 
+	void reconstructCloud(
+			int kSVDIters, size_t kNN, size_t nfreq,
+			size_t natm, size_t latm, size_t maxNewPoints,
+			SparseApprox method)
+	{
+		emit cloudReconstruct(
+					kSVDIters, kNN, nfreq, natm, latm,
+					maxNewPoints, method);
+	}
+
 signals:
 	void cloudChanged(CloudPtr cloud);
 	void cloudQueried(CloudPtr& cloud);
 	void cloudSetRandom(size_t nPoints);
 	void cloudDecimate(size_t nHoles, size_t kNN);
+	void cloudReconstruct(
+			int kSVDIters, size_t kNN, size_t nfreq,
+			size_t natm, size_t latm, size_t maxNewPoints,
+			SparseApprox method);
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;

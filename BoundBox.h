@@ -38,11 +38,22 @@ public:
 	const GLuint *elemGLData() const
 	{ return static_cast<const GLuint*>(m_elemGL.data()); }
 
-	bool pointInBBox(const Vector3f& v) {
-		return  v(0) >= m_minBBox[0] && v(0) <= m_maxBBox[0] &&
-				v(1) >= m_minBBox[1] && v(1) <= m_maxBBox[1] &&
-				v(2) >= m_minBBox[2] && v(2) <= m_maxBBox[2];
+	bool pointInBBox(const Vector3f& p) {
+		return  p(0) >= m_minBBox[0] && p(0) <= m_maxBBox[0] &&
+				p(1) >= m_minBBox[1] && p(1) <= m_maxBBox[1] &&
+				p(2) >= m_minBBox[2] && p(2) <= m_maxBBox[2];
 	}
+
+	float ballInBBox(const Vector3f& p, float radius) {
+		return  p(0) - m_minBBox[0] >= radius &&
+				p(1) - m_minBBox[1] >= radius &&
+				p(2) - m_minBBox[2] >= radius &&
+				m_maxBBox[0] - p(0) >= radius &&
+				m_maxBBox[1] - p(1) >= radius &&
+				m_maxBBox[2] - p(2) >= radius;
+	}
+
+
 private:
 	float m_minBBox[3];
 	float m_maxBBox[3];

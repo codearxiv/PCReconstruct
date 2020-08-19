@@ -23,6 +23,7 @@ class Window;
 class MessageLogger;
 class SetRandomDialog;
 class DecimateDialog;
+class ReconstructDialog;
 
 class MainWindow : public QMainWindow
 {
@@ -64,11 +65,13 @@ public slots:
 			size_t natm, size_t latm, size_t maxNewPoints,
 			SparseApprox method)
 	{
-		emit cloudReconstruct(kSVDIters, kNN, nfreq, natm, latm,
-							  maxNewPoints, method);
+		emit cloudReconstruct(
+					kSVDIters, kNN, nfreq, natm, latm,
+					maxNewPoints, method);
 	}
 
 	void appendLogText(const QString& text);
+	void insertLogText(const QString& text);
 
 signals:
 	void cloudChanged(CloudPtr cloud);
@@ -89,6 +92,7 @@ private:
 	QPlainTextEdit *logText;
 	SetRandomDialog *setRandomDialog;
 	DecimateDialog *decimateDialog;
+	ReconstructDialog *reconstructDialog;
 
 	MessageLogger *msgLogger;
 

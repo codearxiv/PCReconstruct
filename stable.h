@@ -14,6 +14,7 @@
 //#include <queue>
 //#include <numeric>
 //#include <algorithm>
+//#include <Eigen/Core>
 //#include <Eigen/Dense>
 //#include <Eigen/Geometry>
 //#include <QApplication>

@@ -7,6 +7,8 @@
 #include "MessageLogger.h"
 #include "SetRandomDialog.h"
 #include "DecimateDialog.h"
+#include "ReconstructDialog.h"
+#include "constants.h"
 
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_cloud.h>
@@ -36,7 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	//------
 	// Add docks
-	QDockWidget *dock = new QDockWidget(tr("Log Window"), this);
+	QDockWidget *dock = new QDockWidget("Log Window", this);
 	dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	logText = new QPlainTextEdit;
 	logText->setReadOnly(true);
@@ -45,56 +47,62 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	//------
 	// Add actions
-	QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
-	QMenu *viewMenu = menuBar()->addMenu(tr("&View"));
-	QMenu *toolsMenu = menuBar()->addMenu(tr("&Tools"));
-	QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
+	QMenu *fileMenu = menuBar()->addMenu("&File");
+	QMenu *viewMenu = menuBar()->addMenu("&View");
+	QMenu *toolsMenu = menuBar()->addMenu("&Tools");
+	QMenu *helpMenu = menuBar()->addMenu("&Help");
 
-	QToolBar *fileToolBar = addToolBar(tr("File"));
+	QToolBar *fileToolBar = addToolBar("File");
 
 	const QIcon openIcon =
 			QIcon::fromTheme("document-open", QIcon(":/images/open.png"));
-	QAction *openAct = new QAction(openIcon, tr("&Open..."), this);
+	QAction *openAct = new QAction(openIcon, "&Open...", this);
 	openAct->setShortcuts(QKeySequence::Open);
-	openAct->setStatusTip(tr("Open an existing PCD file"));
+	openAct->setStatusTip("Open an existing PCD file");
 	connect(openAct, &QAction::triggered, this, &MainWindow::open);
 	fileMenu->addAction(openAct);
 	fileToolBar->addAction(openAct);
 
 	const QIcon saveAsIcon =
 			QIcon::fromTheme("document-save-as", QIcon(":/images/save.png"));
-	QAction *saveAsAct = new QAction(saveAsIcon, tr("Save &As..."), this);
+	QAction *saveAsAct = new QAction(saveAsIcon, "Save &As...", this);
 	saveAsAct->setShortcuts(QKeySequence::SaveAs);
-	saveAsAct->setStatusTip(tr("Save PCD to disk"));
+	saveAsAct->setStatusTip("Save PCD to disk");
 	connect(saveAsAct, &QAction::triggered, this, &MainWindow::saveAs);
 	fileMenu->addAction(saveAsAct);
 	fileToolBar->addAction(saveAsAct);
 
 	const QIcon exitIcon = QIcon::fromTheme("application-exit");
 	QAction *exitAct =
-			fileMenu->addAction(exitIcon, tr("E&xit"), this, &QWidget::close);
+			fileMenu->addAction(exitIcon, "E&xit", this, &QWidget::close);
 	exitAct->setShortcuts(QKeySequence::Quit);
-	exitAct->setStatusTip(tr("Exit PCReconstruct"));
+	exitAct->setStatusTip("Exit PCReconstruct");
 
 	viewMenu->addAction(dock->toggleViewAction());
 
-	QAction *setRandomAct = new QAction(tr("&Set Random"), this);
-	saveAsAct->setStatusTip(tr("Sample a point cloud randomly from a random surface"));
+	QAction *setRandomAct = new QAction("&Set Random", this);
+	setRandomAct->setStatusTip(
+				"Sample a point cloud randomly from a random surface");
 	connect(setRandomAct, &QAction::triggered, this, &MainWindow::setRandom);
 	toolsMenu->addAction(setRandomAct);
 
-	QAction *decimateAct = new QAction(tr("&Decimate"), this);
-	saveAsAct->setStatusTip(tr("Generate random holes in point cloud"));
+	QAction *decimateAct = new QAction("&Decimate", this);
+	decimateAct->setStatusTip("Generate random holes in point cloud");
 	connect(decimateAct, &QAction::triggered, this, &MainWindow::decimate);
 	toolsMenu->addAction(decimateAct);
 
+	QAction *reconstructAct = new QAction("&Reconstruct", this);
+	reconstructAct->setStatusTip("Reconstruct point cloud");
+	connect(reconstructAct, &QAction::triggered, this, &MainWindow::reconstruct);
+	toolsMenu->addAction(reconstructAct);
+
 	QAction *aboutAct =
-			helpMenu->addAction(tr("&About"), this, &MainWindow::about);
-	aboutAct->setStatusTip(tr("About"));
+			helpMenu->addAction("&About", this, &MainWindow::about);
+	aboutAct->setStatusTip("About");
 
 	QAction *aboutQtAct =
-			helpMenu->addAction(tr("About &Qt"), qApp, &QApplication::aboutQt);
-	aboutQtAct->setStatusTip(tr("About Qt"));
+			helpMenu->addAction("About &Qt", qApp, &QApplication::aboutQt);
+	aboutQtAct->setStatusTip("About Qt");
 
 
 	//------
@@ -104,6 +112,12 @@ MainWindow::MainWindow(QWidget *parent) :
 	centralWidget = new Window(this, msgLogger);
 	centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
 	setCentralWidget(centralWidget);
+
+	connect(msgLogger, &MessageLogger::logTextAppend,
+			this, &MainWindow::appendLogText);
+
+	connect(msgLogger, &MessageLogger::logTextInsert,
+			this, &MainWindow::insertLogText);
 
 	connect(this, &MainWindow::cloudChanged,
 			centralWidget, &Window::setCloud);
@@ -117,6 +131,9 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(this, &MainWindow::cloudDecimate,
 			centralWidget, &Window::decimateCloud);
 
+	connect(this, &MainWindow::cloudReconstruct,
+			centralWidget, &Window::reconstructCloud);
+
 
 	//------
 	// Dialogs
@@ -124,6 +141,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	setRandomDialog = new SetRandomDialog(this);
 	decimateDialog = new DecimateDialog(this);
 	//sparsityDialog = new sparsifyDialog(this);
+	reconstructDialog = new ReconstructDialog(this);
 
 
 	//------
@@ -138,7 +156,7 @@ void MainWindow::open()
 {
 
 	QString q_pcdPath = QFileDialog::getOpenFileName(
-				this, tr("Open File"), "", tr("PCD (*.pcd)")
+				this, "Open File", "", "PCD (*.pcd)"
 				);
 
 	std::string pcdPath = q_pcdPath.toStdString();
@@ -170,7 +188,7 @@ void MainWindow::open()
 void MainWindow::saveAs()
 {
 	QString q_pcdPath = QFileDialog::getSaveFileName(
-	  this, tr("Open File"), "", tr("PCD (*.pcd)")
+	  this, "Open File", "", "PCD (*.pcd)"
 	);
 	std::string pcdPath = q_pcdPath.toStdString();
 
@@ -234,10 +252,60 @@ void MainWindow::decimate()
 
 //---------------------------------------------------------
 
+void MainWindow::reconstruct()
+{
+	// Show the dialog as modal
+	if(reconstructDialog->exec() == QDialog::Accepted){
+		int kSVDIters;
+		size_t kNN, nfreq, natm, latm, maxNewPoints;
+		SparseApprox method;
+
+		int ok = reconstructDialog->getFields(
+					kSVDIters, kNN, nfreq, natm, latm,
+					maxNewPoints, method);
+		switch( ok ){
+		case -1:
+			badInputMessageBox(
+						"Number of iterations field must be bigger than zero.");
+			break;
+		case -2:
+			badInputMessageBox(
+						"Patch size field must be bigger than zero.");
+			break;
+		case -3:
+			badInputMessageBox(
+						"Frequency field must be bigger than zero.");
+			break;
+		case -4:
+			badInputMessageBox(
+						"Number of atoms field must be bigger than zero.");
+			break;
+		case -5:
+			badInputMessageBox(
+						QString("Sparsity constraint must be bigger than zero, ") +
+						QString("and no bigger than the number of atoms field.")
+						);
+			break;
+		case -6:
+			badInputMessageBox(
+						"Max. new points field should be bigger than zero.");
+			break;
+		default:
+			reconstructCloud(
+						kSVDIters, kNN, nfreq, natm, latm,
+						maxNewPoints, method);
+		}
+	}
+
+}
+
+
+//---------------------------------------------------------
+
 void MainWindow::about()
 {
-   QMessageBox::about(this, tr("About"),
-			tr("PCReconstruct. Copyright 2019 Piotr (Peter) Beben."));
+   QMessageBox::about(this, "About",
+			"PCReconstruct. Copyright 2019 Piotr (Peter) Beben.");
 }
 
 //---------------------------------------------------------
@@ -262,5 +330,14 @@ void MainWindow::appendLogText(const QString& text)
 				logText->verticalScrollBar()->maximum());
 }
 
+//---------------------------------------------------------
+
+void MainWindow::insertLogText(const QString& text)
+{
+	logText->undo();
+	logText->appendPlainText(text);
+	logText->verticalScrollBar()->setValue(
+				logText->verticalScrollBar()->maximum());
+}
 
 //---------------------------------------------------------
