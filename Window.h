@@ -103,6 +103,10 @@ public slots:
 					maxNewPoints, method);
 	}
 
+    void setPointSize(float size)
+    { emit pointSizeChanged(size); }
+
+
 signals:
 	void cloudChanged(CloudPtr cloud);
 	void cloudQueried(CloudPtr& cloud);
@@ -113,6 +117,7 @@ signals:
             int kSVDIters, size_t kNN, size_t nfreq, float densify,
 			size_t natm, size_t latm, size_t maxNewPoints,
 			SparseApprox method);
+    void pointSizeChanged(float size);
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;

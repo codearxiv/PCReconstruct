@@ -9,6 +9,7 @@
 #include "DecimateDialog.h"
 #include "SparsifyDialog.h"
 #include "ReconstructDialog.h"
+#include "OptionsDialog.h"
 #include "constants.h"
 
 #include <pcl/io/pcd_io.h>
@@ -102,6 +103,14 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(reconstructAct, &QAction::triggered, this, &MainWindow::reconstruct);
 	toolsMenu->addAction(reconstructAct);
 
+    toolsMenu->addSeparator();
+
+    QAction *optionsAct = new QAction("&Options", this);
+    optionsAct->setStatusTip("Change app settings.");
+    connect(optionsAct, &QAction::triggered, this, &MainWindow::options);
+    toolsMenu->addAction(optionsAct);
+
+
 	QAction *aboutAct =
 			helpMenu->addAction("&About", this, &MainWindow::about);
 	aboutAct->setStatusTip("About");
@@ -143,6 +152,10 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(this, &MainWindow::cloudReconstruct,
 			centralWidget, &Window::reconstructCloud);
 
+    connect(this, &MainWindow::pointSizeChanged,
+            centralWidget, &Window::setPointSize);
+
+
 	//------
 	// Dialogs
 
@@ -150,6 +163,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	decimateDialog = new DecimateDialog(this);
 	sparsifyDialog = new SparsifyDialog(this);
 	reconstructDialog = new ReconstructDialog(this);
+    optionsDialog = new OptionsDialog(this);
 
 
 	//------
@@ -187,7 +201,7 @@ void MainWindow::open()
 		appendLogText("Opened: " + q_pcdPath + "\n");
 	}
 
-	setCloud(cloud);
+    emit cloudChanged(cloud);
 
 }
 
@@ -201,7 +215,7 @@ void MainWindow::saveAs()
 	std::string pcdPath = q_pcdPath.toStdString();
 
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-	getCloud(cloud);
+    emit cloudQueried(cloud);
 
 	int success = 0;
 	try{
@@ -236,7 +250,7 @@ void MainWindow::setRandom()
 			badInputMessageBox("All fields should be integers bigger than zero.");
 			return;
 		}
-		setRandomCloud(nPoints);
+        emit cloudSetRandom(nPoints);
 	}
 
 }
@@ -253,7 +267,7 @@ void MainWindow::decimate()
 			badInputMessageBox("All fields should be integers bigger than zero.");
 			return;
 		}
-		decimateCloud(nHoles,kNN);
+        emit cloudDecimate(nHoles,kNN);
 	}
 
 }
@@ -270,7 +284,7 @@ void MainWindow::sparsify()
 			badInputMessageBox("Percent field should be between 0 and 100.");
 			return;
 		}
-		sparsifyCloud(percent);
+        emit cloudSparsify(percent);
 	}
 
 }
@@ -322,7 +336,7 @@ void MainWindow::reconstruct()
 						"Max. new points field should be bigger than zero.");
 			break;
 		default:
-			reconstructCloud(
+            emit cloudReconstruct(
                         kSVDIters, kNN, nfreq, densify, natm, latm,
                         maxNewPoints, method);
 		}
@@ -330,6 +344,23 @@ void MainWindow::reconstruct()
 
 }
 
+
+//---------------------------------------------------------
+
+void MainWindow::options()
+{
+    // Show the dialog as modal
+    if(optionsDialog->exec() == QDialog::Accepted){
+        float pointSize;
+        bool ok = optionsDialog->getFields(pointSize);
+        if(!ok){
+            badInputMessageBox("point size field should be greater than zero.");
+            return;
+        }
+        emit pointSizeChanged(pointSize);
+    }
+
+}
 
 //---------------------------------------------------------
 

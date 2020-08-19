@@ -25,6 +25,7 @@ class SetRandomDialog;
 class DecimateDialog;
 class SparsifyDialog;
 class ReconstructDialog;
+class OptionsDialog;
 
 class MainWindow : public QMainWindow
 {
@@ -43,34 +44,10 @@ private:
 	void decimate();
 	void sparsify();
 	void reconstruct();
-	void about();
+    void options();
+    void about();
 
 public slots:
-	void setCloud(CloudPtr cloud)
-	{ emit cloudChanged(cloud); }
-
-	void getCloud(CloudPtr& cloud)
-	{ emit cloudQueried(cloud); }
-
-	void setRandomCloud(size_t nPoints)
-	{ emit cloudSetRandom(nPoints); }
-
-	void decimateCloud(size_t nHoles, size_t kNN)
-	{ emit cloudDecimate(nHoles, kNN); }
-
-	void sparsifyCloud(float percent)
-	{ emit cloudSparsify(percent); }
-
-	void reconstructCloud(
-            int kSVDIters, size_t kNN, size_t nfreq, float densify,
-			size_t natm, size_t latm, size_t maxNewPoints,
-			SparseApprox method)
-	{
-		emit cloudReconstruct(
-                    kSVDIters, kNN, nfreq, densify, natm, latm,
-					maxNewPoints, method);
-	}
-
 	void appendLogText(const QString& text);
 	void insertLogText(const QString& text);
 
@@ -84,6 +61,7 @@ signals:
             int kSVDIters, size_t kNN, size_t nfreq, float densify,
 			size_t natm, size_t latm, size_t maxNewPoints,
 			SparseApprox method);
+    void pointSizeChanged(float size);
 
 private:
 	Window *centralWidget;
@@ -95,6 +73,7 @@ private:
 	DecimateDialog *decimateDialog;
 	SparsifyDialog *sparsifyDialog;
 	ReconstructDialog *reconstructDialog;
+    OptionsDialog *optionsDialog;
 
 	MessageLogger *msgLogger;
 

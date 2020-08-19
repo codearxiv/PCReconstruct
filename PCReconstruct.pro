@@ -35,6 +35,7 @@ SOURCES += \
 	MessageLogger.cpp \
 	Window.cpp \
 	dialogs/DecimateDialog.cpp \
+	dialogs/OptionsDialog.cpp \
 	dialogs/ReconstructDialog.cpp \
 	dialogs/SetRandomDialog.cpp \
 	dialogs/SparsifyDialog.cpp \
@@ -62,6 +63,7 @@ HEADERS += \
 	alignment.h \
 	constants.h \
 	dialogs/DecimateDialog.h \
+	dialogs/OptionsDialog.h \
 	dialogs/ReconstructDialog.h \
 	dialogs/SetRandomDialog.h \
 	dialogs/SparsifyDialog.h \

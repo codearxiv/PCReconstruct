@@ -854,7 +854,7 @@ void Cloud::reconstruct(
 	if(m_msgLogger != nullptr) {
 		m_msgLogger->logMessage("Reconstructing point cloud...");
 		m_msgLogger->logMessage(
-					QString::number(qpoints.size()) + " patches in queue...");
+					QString::number(qpoints.size()) + " points in queue...");
 	}
 
 	size_t nprocessed = 0;
@@ -864,7 +864,7 @@ void Cloud::reconstruct(
 		if(m_msgLogger != nullptr) {
 			if( nprocessed%1000 == 0 ){
 				m_msgLogger->logMessage(
-							QString::number(nprocessed) + " patches processed...");
+							QString::number(nprocessed) + " points processed...");
 			}
 			++nprocessed;
 		}

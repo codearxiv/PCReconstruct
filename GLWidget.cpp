@@ -85,6 +85,7 @@ GLWidget::GLWidget(QWidget *parent, MessageLogger* msgLogger)
 	  m_program(0),
 	  m_rotVect(0.0f,0.0f,0.0f),
 	  m_movVect(0.0f,0.0f,0.0f),
+      m_pointSize(30.0f),
 	  m_cloudVbo(QOpenGLBuffer::VertexBuffer),
 	  m_cloudBBoxVbo(QOpenGLBuffer::VertexBuffer),
 	  m_cloudBBoxEbo(QOpenGLBuffer::IndexBuffer),
@@ -198,11 +199,12 @@ static const char *vertexShaderSourceCore =
 		"uniform mat4 projMatrix;\n"
 		"uniform mat4 mvMatrix;\n"
 		"uniform mat3 normalMatrix;\n"
-		"void main() {\n"
+        "uniform float pointSize;\n"
+        "void main() {\n"
 		"   vert = vertex.xyz;\n"
 		"   vertNormal = normalMatrix * normal;\n"
 		"   gl_Position = projMatrix * mvMatrix * vertex;\n"
-		"   gl_PointSize = 30.0/(0.1+10.0*abs(gl_Position.z));\n"
+        "   gl_PointSize = pointSize/(0.1+10.0*abs(gl_Position.z));\n"
 //		"   gl_PointSize = 50.0;\n"
 		"}\n";
 
@@ -230,11 +232,12 @@ static const char *vertexShaderSource =
 		"uniform mat4 projMatrix;\n"
 		"uniform mat4 mvMatrix;\n"
 		"uniform mat3 normalMatrix;\n"
+        "uniform float pointSize;\n"
 		"void main() {\n"
 		"   vert = vertex.xyz;\n"
 		"   vertNormal = normalMatrix * normal;\n"
 		"   gl_Position = projMatrix * mvMatrix * vertex;\n"
-		"   gl_PointSize = 30.0/(0.1+10.0*abs(gl_Position.z));\n"
+        "   gl_PointSize = pointSize/(0.1+10.0*abs(gl_Position.z));\n"
 //		"   gl_PointSize = 500.0;\n"
 		"}\n";
 
@@ -280,6 +283,7 @@ void GLWidget::initializeGL()
 	m_normalMatrixLoc = m_program->uniformLocation("normalMatrix");
 	m_lightPosLoc = m_program->uniformLocation("lightPos");
 	m_colorLoc = m_program->uniformLocation("vertColor");
+    m_pointSizeLoc = m_program->uniformLocation("pointSize");
 
 	m_cloudVao.create();
 	QOpenGLVertexArrayObject::Binder vaoBinderCloud(&m_cloudVao);
@@ -331,6 +335,7 @@ void GLWidget::paintGL()
 	m_program->setUniformValue(m_mvMatrixLoc, m_camera * m_world.transposed());
 	QMatrix3x3 normalMatrix = m_world.normalMatrix();
 	m_program->setUniformValue(m_normalMatrixLoc, normalMatrix);
+    m_program->setUniformValue(m_pointSizeLoc, m_pointSize);
 
 	size_t npoints = m_cloud.pointCount();
 	size_t npointsOrig = m_cloud.pointCountOrig();

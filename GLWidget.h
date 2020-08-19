@@ -117,7 +117,8 @@ public slots:
                     kSVDIters, kNN, nfreq, densify, natm, latm,
 					maxNewPoints, method);
 	}
-	void updateCloud();
+    void setPointSize(float size) { m_pointSize = size; }
+    void updateCloud();
 
 signals:
 	void vectRotationChanged(int angle, QVector3D v);
@@ -168,6 +169,8 @@ private:
 	int m_normalMatrixLoc;
 	int m_lightPosLoc;
 	int m_colorLoc;
+    int m_pointSizeLoc;
+    float m_pointSize;
 	QMatrix4x4 m_proj;
 	QMatrix4x4 m_camera;
 	QMatrix4x4 m_world;

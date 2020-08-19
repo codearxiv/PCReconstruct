@@ -97,6 +97,10 @@ Window::Window(QMainWindow *mw, MessageLogger* msgLogger)
 
 	connect(this, &Window::cloudReconstruct,
 			glWidget, &GLWidget::reconstructCloud);
+
+    connect(this, &Window::pointSizeChanged,
+            glWidget, &GLWidget::setPointSize);
+
 }
 
 
