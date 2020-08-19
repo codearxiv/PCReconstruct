@@ -15,20 +15,13 @@ class QDialogButtonBox;
 class QIntValidator;
 QT_END_NAMESPACE
 
-class SetRandomDialog : public QDialog
+class RandomSurfDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
-	SetRandomDialog(QWidget *parent = nullptr);
+    RandomSurfDialog(QWidget *parent = nullptr);
 	bool getFields(size_t& nPoints);
-
-public slots:
-	void setRandomCloud(size_t nPoints)
-	{ emit cloudSetRandom(nPoints); }
-
-signals:
-	void cloudSetRandom(size_t nPoints);
 
 private:
 	QFormLayout *form;

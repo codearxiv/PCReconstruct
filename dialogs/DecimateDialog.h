@@ -23,13 +23,6 @@ public:
 	DecimateDialog(QWidget *parent = nullptr);
 	bool getFields(size_t& nHoles, size_t& kNN);
 
-public slots:
-	void decimateCloud(size_t nHoles, size_t kNN)
-	{ emit cloudDecimate(nHoles, kNN); }
-
-signals:
-	void cloudDecimate(size_t nHoles, size_t kNN);
-
 private:
 	QFormLayout *form;
 	QLineEdit *nHolesLineEdit;

@@ -1,8 +1,8 @@
 //     Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
 //     See LICENSE included.
 
-#ifndef OPTIONSDIALOG_H
-#define OPTIONSDIALOG_H
+#ifndef BOUNDBOXDIALOG_H
+#define BOUNDBOXDIALOG_H
 
 #include <QWidget>
 #include <QDialog>
@@ -15,21 +15,22 @@ class QDialogButtonBox;
 class QDoubleValidator;
 QT_END_NAMESPACE
 
-class OptionsDialog : public QDialog
+class BoundBoxDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    OptionsDialog(QWidget *parent = nullptr);
-    bool getFields(float& percent);
+    BoundBoxDialog(QWidget *parent = nullptr);
+    bool getFields(float minBBox[], float maxBBox[]);
 
 private:
     QFormLayout *form;
-    QLineEdit *pointSizeLineEdit;
+    QLineEdit* minLineEdit[3];
+    QLineEdit* maxLineEdit[3];
     QDialogButtonBox *buttonBox;
     QDoubleValidator *validator;
 
 };
 
 
-#endif // OPTIONSDIALOG_H
+#endif // BOUNDBOXDIALOG_H

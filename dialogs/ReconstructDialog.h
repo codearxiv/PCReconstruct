@@ -30,22 +30,6 @@ public:
             size_t& natm, size_t& latm, size_t& maxNewPoints,
             SparseApprox& method);
 
-public slots:
-    void reconstructCloud(
-            int kSVDIters, size_t kNN, size_t nfreq, float& densify,
-            size_t natm, size_t latm, size_t maxNewPoints,
-            SparseApprox method)
-    {
-		emit cloudReconstruct(kSVDIters, kNN, nfreq, densify,
-							  natm, latm, maxNewPoints, method);
-    }
-
-signals:
-	void cloudReconstruct(
-			int kSVDIters, size_t kNN, size_t nfreq, float densify,
-			size_t natm, size_t latm, size_t maxNewPoints,
-			SparseApprox method);
-
 private:
 	QFormLayout *form;
 	QLineEdit *nItersLineEdit;

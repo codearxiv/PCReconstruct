@@ -89,6 +89,9 @@ Window::Window(QMainWindow *mw, MessageLogger* msgLogger)
 	connect(this, &Window::cloudSetRandom,
 			glWidget, &GLWidget::setRandomCloud);
 
+    connect(this, &Window::cloudSetBBox,
+            glWidget, &GLWidget::setCloudBBox);
+
 	connect(this, &Window::cloudDecimate,
 			glWidget, &GLWidget::decimateCloud);
 

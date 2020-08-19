@@ -104,6 +104,7 @@ public slots:
 	void setCloud(CloudPtr cloud);
 	void getCloud(CloudPtr& cloud);
 	void setRandomCloud(size_t nPoints);
+    void setCloudBBox(float minBBox[3], float maxBBox[3]);
 	void decimateCloud(size_t nHoles, size_t kNN)
 	{ emit cloudDecimate(nHoles,kNN); }
 	void sparsifyCloud(float percent)

@@ -34,10 +34,11 @@ SOURCES += \
 	MainWindow.cpp \
 	MessageLogger.cpp \
 	Window.cpp \
+	dialogs/BoundBoxDialog.cpp \
 	dialogs/DecimateDialog.cpp \
 	dialogs/OptionsDialog.cpp \
+	dialogs/RandomSurfDialog.cpp \
 	dialogs/ReconstructDialog.cpp \
-	dialogs/SetRandomDialog.cpp \
 	dialogs/SparsifyDialog.cpp \
 	dictionarylearning/MatchingPursuit.cpp \
 	dictionarylearning/OrthogonalPursuit.cpp \
@@ -62,10 +63,11 @@ HEADERS += \
 	Window.h \
 	alignment.h \
 	constants.h \
+	dialogs/BoundBoxDialog.h \
 	dialogs/DecimateDialog.h \
 	dialogs/OptionsDialog.h \
+	dialogs/RandomSurfDialog.h \
 	dialogs/ReconstructDialog.h \
-	dialogs/SetRandomDialog.h \
 	dialogs/SparsifyDialog.h \
 	dictionarylearning/MatchingPursuit.h \
 	dictionarylearning/OrthogonalPursuit.h \

@@ -5,7 +5,8 @@
 #include "MainWindow.h"
 #include "Window.h"
 #include "MessageLogger.h"
-#include "SetRandomDialog.h"
+#include "RandomSurfDialog.h"
+#include "BoundBoxDialog.h"
 #include "DecimateDialog.h"
 #include "SparsifyDialog.h"
 #include "ReconstructDialog.h"
@@ -82,11 +83,17 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	viewMenu->addAction(dock->toggleViewAction());
 
-	QAction *setRandomAct = new QAction("&Set Random", this);
-	setRandomAct->setStatusTip(
+    QAction *randomSurfAct = new QAction("&Random surface", this);
+    randomSurfAct->setStatusTip(
 				"Sample a point cloud randomly from a random surface");
-	connect(setRandomAct, &QAction::triggered, this, &MainWindow::setRandom);
-	toolsMenu->addAction(setRandomAct);
+    connect(randomSurfAct, &QAction::triggered, this, &MainWindow::setRandom);
+    toolsMenu->addAction(randomSurfAct);
+
+    QAction *boundBoxAct = new QAction("&Set bounding box", this);
+    boundBoxAct->setStatusTip(
+                "Set bounding box, inside which operations are performed");
+    connect(boundBoxAct, &QAction::triggered, this, &MainWindow::setBBox);
+    toolsMenu->addAction(boundBoxAct);
 
 	QAction *decimateAct = new QAction("&Decimate", this);
 	decimateAct->setStatusTip("Generate random holes in point cloud");
@@ -143,6 +150,9 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(this, &MainWindow::cloudSetRandom,
 			centralWidget, &Window::setRandomCloud);
 
+    connect(this, &MainWindow::cloudSetBBox,
+            centralWidget, &Window::setCloudBBox);
+
 	connect(this, &MainWindow::cloudDecimate,
 			centralWidget, &Window::decimateCloud);
 
@@ -159,8 +169,9 @@ MainWindow::MainWindow(QWidget *parent) :
 	//------
 	// Dialogs
 
-	setRandomDialog = new SetRandomDialog(this);
-	decimateDialog = new DecimateDialog(this);
+    randomSurfDialog = new RandomSurfDialog(this);
+    boundBoxDialog = new BoundBoxDialog(this);
+    decimateDialog = new DecimateDialog(this);
 	sparsifyDialog = new SparsifyDialog(this);
 	reconstructDialog = new ReconstructDialog(this);
     optionsDialog = new OptionsDialog(this);
@@ -243,9 +254,9 @@ void MainWindow::saveAs()
 void MainWindow::setRandom()
 {
 	// Show the dialog as modal
-	if(setRandomDialog->exec() == QDialog::Accepted){
+    if(randomSurfDialog->exec() == QDialog::Accepted){
 		size_t nPoints;
-		bool ok = setRandomDialog->getFields(nPoints);
+        bool ok = randomSurfDialog->getFields(nPoints);
 		if(!ok){
 			badInputMessageBox("All fields should be integers bigger than zero.");
 			return;
@@ -254,6 +265,27 @@ void MainWindow::setRandom()
 	}
 
 }
+
+
+//---------------------------------------------------------
+
+void MainWindow::setBBox()
+{
+    // Show the dialog as modal
+    if(boundBoxDialog->exec() == QDialog::Accepted){
+        float minBBox[3], maxBBox[3];
+        bool ok = boundBoxDialog->getFields(minBBox, maxBBox);
+        if(!ok){
+            badInputMessageBox(
+                        QString("All fields should be bigger than zero,\n") +
+                        QString("and min. extents less than max. extents."));
+            return;
+        }
+        emit cloudSetBBox(minBBox, maxBBox);
+    }
+
+}
+
 
 //---------------------------------------------------------
 

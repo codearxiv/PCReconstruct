@@ -84,8 +84,11 @@ public slots:
 	void getCloud(CloudPtr& cloud)
 	{ emit cloudQueried(cloud); }
 
-	void setRandomCloud(size_t nPoints)
-	{ emit cloudSetRandom(nPoints); }
+    void setRandomCloud(size_t nPoints)
+    { emit cloudSetRandom(nPoints); }
+
+    void setCloudBBox(float minBBox[3], float maxBBox[3])
+    { emit cloudSetBBox(minBBox, maxBBox); }
 
 	void decimateCloud(size_t nHoles, size_t kNN)
 	{ emit cloudDecimate(nHoles, kNN); }
@@ -111,6 +114,7 @@ signals:
 	void cloudChanged(CloudPtr cloud);
 	void cloudQueried(CloudPtr& cloud);
 	void cloudSetRandom(size_t nPoints);
+    void cloudSetBBox(float minBBox[3], float maxBBox[3]);
 	void cloudDecimate(size_t nHoles, size_t kNN);
 	void cloudSparsify(float percent);
 	void cloudReconstruct(

@@ -1,7 +1,7 @@
 //     Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
 //     See LICENSE included.
 
-#include "SetRandomDialog.h"
+#include "RandomSurfDialog.h"
 #include "constants.h"
 
 #include <QFormLayout>
@@ -13,7 +13,7 @@
 #include <QIntValidator>
 
 
-SetRandomDialog::SetRandomDialog(QWidget *parent) : QDialog(parent)
+RandomSurfDialog::RandomSurfDialog(QWidget *parent) : QDialog(parent)
 {
 	validator = new QIntValidator(1, int_infinity, this);
 
@@ -36,7 +36,7 @@ SetRandomDialog::SetRandomDialog(QWidget *parent) : QDialog(parent)
 }
 
 
-bool SetRandomDialog::getFields(size_t& nPoints)
+bool RandomSurfDialog::getFields(size_t& nPoints)
 {
 
 	QString nPointsStr = nPointsLineEdit->text();

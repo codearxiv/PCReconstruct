@@ -23,13 +23,6 @@ public:
 	SparsifyDialog(QWidget *parent = nullptr);
 	bool getFields(float& percent);
 
-public slots:
-	void SparsifyCloud(float percent)
-	{ emit cloudSparsify(percent); }
-
-signals:
-	void cloudSparsify(float percent);
-
 private:
 	QFormLayout *form;
 	QLineEdit *percentLineEdit;

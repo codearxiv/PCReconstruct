@@ -434,24 +434,29 @@ void Cloud::decimate(size_t nHoles, size_t kNN)
 
 	//std::random_device rd;
 	//std::mt19937 mt(rd());
-	vector<size_t> shuffled(npoints);
-	for(size_t i=0; i < npoints; ++i){ shuffled[i] = i; }
+    vector<size_t> shuffled;
+    shuffled.reserve(npoints);
+
+    for(size_t idx=0; idx < npoints; ++idx){
+        if( useBBox ){
+            if( !m_bBox->pointInBBox(m_cloud[idx]) ) continue;
+        }
+        shuffled.push_back(idx);
+    }
 	std::random_shuffle(shuffled.begin(), shuffled.end());
 
-	size_t nSubset = min(nHoles,npoints);
+    size_t nSubset = min(nHoles,shuffled.size());
 
-	for(size_t i=0; i < npoints; ++i){
+    for(size_t i=0; i < nSubset; ++i){
         // Log progress
 		if(m_msgLogger != nullptr) {
 			m_msgLogger->logProgress(actionStr, i+1, nSubset, 10,
 							 threshold, lastPos);
 		}
 		size_t randIdx = shuffled[i];
-		Vector3f p = m_cloud[randIdx];
-		if( useBBox ) if( !m_bBox->pointInBBox(p) ) continue;
 
 		if( kNN > 1 ){
-			pointKNN(p, kNN, neighs);
+            pointKNN(m_cloud[randIdx], kNN, neighs);
 			typename vector<CoverTreePoint<Vector3f>>::const_iterator it;
 			for(it=neighs.begin(); it!=neighs.end(); ++it){
 				size_t idx = it->getId();
@@ -508,8 +513,21 @@ void Cloud::sparsify(float percent)
 {
 	QMutexLocker locker(&m_recMutex);
 
-	size_t nKeep = size_t(ceil( percent*m_cloud.size()/100.0 ));
-	size_t nRemove = max(size_t(0), m_cloud.size() - nKeep);
+    bool useBBox = (m_bBox != nullptr);
+
+    size_t nPointsUse = 0;
+    if( useBBox ){
+        for(size_t idx=0; idx < m_cloud.size(); ++idx){
+            if( !m_bBox->pointInBBox(m_cloud[idx]) ) continue;
+            ++nPointsUse;
+        }
+    }
+    else{
+        nPointsUse = m_cloud.size();
+    }
+
+    size_t nKeep = size_t(ceil( percent*nPointsUse/100.0 ));
+    size_t nRemove = max(size_t(0), nPointsUse - nKeep);
 	decimate(nRemove, 1);
 
 }

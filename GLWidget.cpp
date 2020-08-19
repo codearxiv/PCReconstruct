@@ -70,7 +70,7 @@
 #include <QRecursiveMutex>
 #include <math.h>
 
-#define SHOW_CLOUD_NORMS
+//#define SHOW_CLOUD_NORMS
 //#define SHOW_CLOUD_DBUG
 
 
@@ -556,6 +556,18 @@ void GLWidget::setRandomCloud(size_t nPoints)
 	updateCloud();
 }
 
+//---------------------------------------------------------
+
+void GLWidget::setCloudBBox(float minBBox[3], float maxBBox[3])
+{
+    QMutexLocker locker(&m_recMutex);
+
+    m_cloudBBox.set(minBBox, maxBBox);
+
+    setGLBBox(m_cloudBBox, m_cloudBBoxVbo, m_cloudBBoxEbo);
+    update();
+
+}
 
 //---------------------------------------------------------
 
