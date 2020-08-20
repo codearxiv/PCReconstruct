@@ -772,7 +772,7 @@ void Cloud::reconstruct(
 
 //		if( numEmpty > 0 ) qpoints.push(idx);
 		if( numEmpty > 0 ){
-			float weight = -float(numEmpty)/(gridDimX*gridDimY);
+			float weight = float(numEmpty)/(gridDimX*gridDimY);
 			pqpoints.push(std::make_pair(weight,idx));
 		}
 
