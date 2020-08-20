@@ -502,43 +502,40 @@ void Cloud::reconstruct(
 		size_t n = vneighsXY.size();
 		for(size_t i=0; i<n; ++i){
 			Vector3f v = vneighsXY[i];
-			sizeX += abs(v(0));
-			sizeY += abs(v(1));
+			sizeX += v(0)*v(0);
+			sizeY += v(1)*v(1);
 		}
-		sizeX = SD*(sizeX/n);
-		sizeY = SD*(sizeY/n);
+		sizeX = SD*sqrt(sizeX/n);
+		sizeY = SD*sqrt(sizeY/n);
+		//float avgX = 0.0f, avgY = 0.0f;
+//		for(size_t i=0; i<n; ++i){
+//			Vector3f v = vneighsXY[i];
+//			if(abs(v(0)) > sizeX || abs(v(1)) > sizeY) continue;
+//			avgX += v(0);
+//			avgY += v(1);
+//			++numInGrid;
+//		}
+//		avgX = avgX/n;
+//		avgY = avgY/n;
+
 		size_t numInGrid = 0;
 		for(size_t i=0; i<n; ++i){
-			if( abs(vneighsXY[i](0)) > sizeX ) continue;
-			if( abs(vneighsXY[i](1)) > sizeY ) continue;
+			Vector3f v = vneighsXY[i];
+			if(abs(v(0)) > sizeX || abs(v(1)) > sizeY) continue;
 			++numInGrid;
 		}
-		gridDim = max(1, int(0.8f*floor(sqrt(float(numInGrid)))));
+		gridDim = max(1, int(floor(0.8f*sqrt(float(numInGrid)))));
 	};
 
-	//--------
-	auto uvw_to_xyz = [=](
-			float cu, float cv, float cw,
-			const Vector3f& p, const Matrix3f& rotXYInv,
-			float sizeX, float sizeY)
-	{
-		Vector3f qXY, q;
-		qXY(0) = (2*cu - 1.0f)*sizeX;
-		qXY(1) = (2*cv - 1.0f)*sizeY;
-		qXY(2) = cw;
-		q.noalias() = rotXYInv*qXY;
-		q += p;
-		return q;
-	};
+
 
 	//--------
-	auto get_gridXY_occupancy = [=, &bBox](
+	auto get_gridXY_occupancy = [=](
 			const Vector3f& p,
 			const vector<CoverTreePoint<Vector3f>>& neighs,
-			const Matrix3f& rotXY,
 			const vector<Vector3f>& vneighsXY,
 			float sizeX, float sizeY, size_t gridDim,
-			size_t& numEmpty, MapMtrxi& gridXY,
+			MapMtrxi& gridXY,
 			vector<gridLocation>& gridLoc)
 	{
 		gridXY.setZero();
@@ -560,36 +557,8 @@ void Cloud::reconstruct(
 			loc.inGrid = true;
 		}
 
-		bool ignoreBBox = true;
-		if( useBBox ){
-			ignoreBBox = !bBox->ballInBBox(p, max(sizeX,sizeY));
-		}
-
-		numEmpty = 0;
-		if( ignoreBBox ){
-			for(size_t j=0; j<gridDim; ++j){
-				for(size_t k=0; k<gridDim; ++k){
-					if(gridXY(k,j) > 0) continue;
-					++numEmpty;
-				}
-			}
-		}
-		else{
-			Matrix3f rotXYInv = rotXY.transpose();
-			for(size_t j=0; j<gridDim; ++j){
-				float cv = (j/gridDim);
-				for(size_t k=0; k<gridDim; ++k){
-					if(gridXY(k,j) > 0) continue;
-					float cu = (k/gridDim);
-					Vector3f q = uvw_to_xyz(
-								cu, cv, 0.0f, p, rotXYInv, sizeX, sizeY);
-					if( !bBox->pointInBBox(q) ) continue;
-					++numEmpty;
-				}
-			}
-		}
-
 	};
+
 	//--------
 
 	auto setup_grid = [&](
@@ -598,8 +567,8 @@ void Cloud::reconstruct(
 			const vector<Vector3f>& vneighs,
 			vector<Vector3f>& vneighsXY, Matrix3f& rotXY,
 			MapMtrxi& gridXY, float& sizeX, float& sizeY,
-			size_t& gridDim, size_t& numEmpty,
-			vector<gridLocation>& gridLoc, vectoria& iworkGrid)
+			size_t& gridDim, vector<gridLocation>& gridLoc,
+			vectoria& iworkGrid)
 	{
 		gridDim = 0;
 		vector_to_vector_rotation_matrix(norm, zaxis, true, true, rotXY);
@@ -608,13 +577,13 @@ void Cloud::reconstruct(
 			vneighsXY[j].noalias() = rotXY*vneighs[j];
 		}
 
-		fit_gridXY(vneighsXY, 1.5f, sizeX, sizeY, gridDim);
+		fit_gridXY(vneighsXY, 1.0f, sizeX, sizeY, gridDim);
 		if(min(sizeX,sizeY) <= 1e-5*max(sizeX,sizeY)) return false;
 		if(sizeX <= float_tiny || sizeY <= float_tiny) return false;
 		new (&gridXY) MapMtrxi(&iworkGrid[0], gridDim, gridDim);
 		get_gridXY_occupancy(
-					p, neighs, rotXY, vneighsXY, sizeX, sizeY, gridDim,
-					numEmpty, gridXY, gridLoc);
+					p, neighs, vneighsXY, sizeX, sizeY,
+					gridDim, gridXY, gridLoc);
 
 		return true;
 	};
@@ -644,6 +613,60 @@ void Cloud::reconstruct(
 		}
 	};
 
+	//--------
+	auto uvw_to_xyz = [=](
+			float cu, float cv, float cw,
+			const Vector3f& p, const Matrix3f& rotXYInv,
+			float sizeX, float sizeY)
+	{
+		Vector3f qXY, q;
+		qXY(0) = (2*cu - 1.0f)*sizeX;
+		qXY(1) = (2*cv - 1.0f)*sizeY;
+		qXY(2) = cw;
+		q.noalias() = rotXYInv*qXY;
+		q += p;
+		return q;
+	};
+
+	//--------
+	auto get_num_empty_cells = [=, &bBox](
+			const Vector3f& p, const Matrix3f& rotXY,
+			const MapMtrxi& gridXY,
+			float sizeX, float sizeY, size_t gridDim
+			)
+	{
+
+		bool ignoreBBox = true;
+		if( useBBox ){
+			ignoreBBox = !bBox->ballInBBox(p, max(sizeX,sizeY));
+		}
+
+		size_t numEmpty = 0;
+		if( ignoreBBox ){
+			for(size_t j=0; j<gridDim; ++j){
+				for(size_t k=0; k<gridDim; ++k){
+					if(gridXY(k,j) > 0) continue;
+					++numEmpty;
+				}
+			}
+		}
+		else{
+			Matrix3f rotXYInv = rotXY.transpose();
+			for(size_t j=0; j<gridDim; ++j){
+				float cv = (j/gridDim);
+				for(size_t k=0; k<gridDim; ++k){
+					if(gridXY(k,j) > 0) continue;
+					float cu = (k/gridDim);
+					Vector3f q = uvw_to_xyz(
+								cu, cv, 0.0f, p, rotXYInv, sizeX, sizeY);
+					if( !bBox->pointInBBox(q) ) continue;
+					++numEmpty;
+				}
+			}
+		}
+
+		return numEmpty;
+	};
 
 	//--------
 
@@ -676,12 +699,11 @@ void Cloud::reconstruct(
 	vector<VectorXf> Vs;
 	vector<VectorXf> Ws;
 
-//	queue<size_t> qpoints;
-	std::priority_queue<std::pair<float, size_t>> qpoints;
+	queue<size_t> qpoints;
+	std::priority_queue<std::pair<float, size_t>> pqpoints;
 	size_t threshold = 0, lastPos = 0;
 
 	if(m_msgLogger != nullptr) {
-//		QCoreApplication::processEvents();
 		m_msgLogger->logMessage("** Point cloud reconstruction **");
 	}
 
@@ -690,7 +712,6 @@ void Cloud::reconstruct(
 	for(size_t idx = 0; idx < m_npointsOrig; ++idx){
 		// Log progress
 		if(m_msgLogger != nullptr) {
-//			QCoreApplication::processEvents();
 			m_msgLogger->logProgress(
 						"Setting up signals",
 						idx+1, m_npointsOrig, 5, threshold, lastPos);
@@ -702,11 +723,11 @@ void Cloud::reconstruct(
 		Vector3f norm = update_normal(idx, neighs);
 
 		float sizeX, sizeY;
-		size_t gridDim, numEmpty;
+		size_t gridDim;
 		Matrix3f rotXY;
 		bool success = setup_grid(
 					p, norm, neighs, vneighs, vneighsXY, rotXY, gridXY,
-					sizeX, sizeY, gridDim, numEmpty, gridLoc, iworkGrid);
+					sizeX, sizeY, gridDim, gridLoc, iworkGrid);
 
 		if( !success ) continue;
 
@@ -715,12 +736,22 @@ void Cloud::reconstruct(
 		Vs.push_back(Vsig);
 		Ws.push_back(Wsig);
 
+		size_t numEmpty = get_num_empty_cells(
+					p, rotXY, gridXY, sizeX, sizeY, gridDim);
+
 //		if( numEmpty > 0 ) qpoints.push(idx);
 		if( numEmpty > 0 ){
-			float weight = float(numEmpty)/(gridDim*gridDim);
-			qpoints.push(std::make_pair(weight,idx));
+			float weight = -float(numEmpty)/(gridDim*gridDim);
+			pqpoints.push(std::make_pair(weight,idx));
 		}
 
+	}
+
+
+	while( !pqpoints.empty() ){
+		size_t idx = pqpoints.top().second;
+		pqpoints.pop();
+		qpoints.push(idx);
 	}
 
 	//--------
@@ -742,17 +773,16 @@ void Cloud::reconstruct(
 	OrthogonalPursuit op;
 
 	switch(method){
-	case SparseApprox::MatchingPursuit :
-		sparseFunct = mp;
-		break;
 	case SparseApprox::OrthogonalPursuit :
 		sparseFunct = op;
+		break;
+	case SparseApprox::MatchingPursuit :
+		sparseFunct = mp;
 		break;
 	}
 
 	if(m_msgLogger != nullptr) {
 		m_msgLogger->logMessage("Training dictionary...");
-//		QCoreApplication::processEvents();
 	}
 
 //	c_start = std::clock();//***
@@ -797,7 +827,6 @@ void Cloud::reconstruct(
 		m_msgLogger->logMessage("Reconstructing point cloud...");
 		m_msgLogger->logMessage(
 					QString::number(qpoints.size()) + " points in queue...");
-//		QCoreApplication::processEvents();
 	}
 
 	size_t nprocessed = 0;
@@ -806,16 +835,13 @@ void Cloud::reconstruct(
 		// Log progress
 		if(m_msgLogger != nullptr) {
 			if( nprocessed%1000 == 0 ){
-				//***
 				m_msgLogger->logMessage(
 							QString::number(nprocessed) + " points processed...");
-//				QCoreApplication::processEvents();
 			}
 			++nprocessed;
 		}
 
-//		size_t idx = qpoints.front();
-		size_t idx = qpoints.top().second;
+		size_t idx = qpoints.front();
 		qpoints.pop();
 
 		Vector3f p = m_cloud[idx];
@@ -827,6 +853,7 @@ void Cloud::reconstruct(
 			norm = m_norms[idx];
 		}
 		else{
+			//norm = m_norms[idx];
 			norm = update_normal(idx, neighs);
 		}
 
@@ -835,7 +862,7 @@ void Cloud::reconstruct(
 		Matrix3f rotXY;
 		bool success = setup_grid(
 					p, norm, neighs, vneighs, vneighsXY, rotXY, gridXY,
-					sizeX, sizeY, gridDim, numEmpty, gridLoc, iworkGrid);
+					sizeX, sizeY, gridDim, gridLoc, iworkGrid);
 
 		if( !success ) continue;
 
@@ -911,7 +938,6 @@ void Cloud::reconstruct(
 		W0sig.noalias() = T0D*Csig;
 
 		Matrix3f rotXYInv = rotXY.transpose();
-		float weight = 0.9f*float(numEmpty)/(gridDim*gridDim);
 
 		for(size_t j=0; j<gridLoc0.size(); ++j){
 			gridLocation& loc = gridLoc0[j];
@@ -936,23 +962,9 @@ void Cloud::reconstruct(
 			else{
 				loc.idx = addPoint(q, norm);
 				++nNewPoints;
-//				qpoints.push(loc.idx);
-				qpoints.push(std::make_pair(weight,idx));
+				qpoints.push(loc.idx);
 			}
 		}
-
-		//***
-//		std::cout << " " << maxNewPoints
-//				  << " " << nNewPoints
-//				  << std::endl;
-
-//		std::cout << " " << nsmpl
-//				  << " " << nsmpl0
-//				  << " " << nsmpl0a
-//				  << " " << nsmpl0b
-//				  << " " << gridDim
-//				  << " " << m_cloud.size()
-//				  << std::endl;
 
 		if( nNewPoints >= maxNewPoints ) break;
 

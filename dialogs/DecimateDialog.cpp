@@ -22,11 +22,11 @@ DecimateDialog::DecimateDialog(QWidget *parent) : QDialog(parent)
 	form->addRow(new QLabel("Create random holes in current point cloud"));
 	nHolesLineEdit = new QLineEdit(this);
 	nHolesLineEdit->setValidator(validator);
-	nHolesLineEdit->setText("10");
+	nHolesLineEdit->setText("50");
 	form->addRow(QString("Number of holes:"), nHolesLineEdit);
 	nPointsLineEdit = new QLineEdit(this);
 	nPointsLineEdit->setValidator(validator);
-	nPointsLineEdit->setText("100");
+	nPointsLineEdit->setText("200");
 	form->addRow(QString("Number of points per hole:"), nPointsLineEdit);
 
 	buttonBox = new QDialogButtonBox(

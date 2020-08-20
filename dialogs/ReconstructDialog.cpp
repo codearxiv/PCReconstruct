@@ -24,21 +24,22 @@ ReconstructDialog::ReconstructDialog(QWidget *parent) : QDialog(parent)
 
 	nItersLineEdit = new QLineEdit(this);
 	nItersLineEdit->setValidator(validator);
-	nItersLineEdit->setText("10");
+	nItersLineEdit->setText("20");
 	nItersLineEdit->setToolTip(
 				QString("This sets the number of training iterations within which\n") +
 				QString("the various local surface patterns in the point cloud\n") +
-				QString("are learned and used in it's reconstruction."));
+				QString("are learned, and used in the cloud's reconstruction."));
 	form->addRow(QString("Number of dictionary learning iterations:"), nItersLineEdit);
 
 	kNNLineEdit = new QLineEdit(this);
 	kNNLineEdit->setValidator(validator);
 	kNNLineEdit->setText("50");
 	kNNLineEdit->setToolTip(
-				QString("The cloud surface is reconstructed patch-by-patch.\n ") +
-				QString("This sets the maximum number of points in a patch.\n") +
-				QString("The more densely sampled the cloud is relative to gaps\n") +
-				QString("in the cloud, the larger this field should be."));
+				QString("The cloud surface is reconstructed patch-by-patch.\n") +
+				QString("This sets the maximum number of points in a patch.\n\n") +
+				QString("The larger gaps in the cloud are relative to density\n") +
+				QString("of point sampling, the larger this field should be.\n") +
+				QString("Expect crazy results otherwise!"));
 	form->addRow(QString("local patch size:"), kNNLineEdit);
 
 	nFreqLineEdit = new QLineEdit(this);
@@ -48,38 +49,39 @@ ReconstructDialog::ReconstructDialog(QWidget *parent) : QDialog(parent)
 				QString("Each local patch has a measure of complexity given by the\n") +
 				QString("surface bumpiness along an axis. This sets the maximum\n") +
 				QString("number of bumps along an axis that can be expected for\n") +
-				QString("the given patch size. Note: training time and memory\n") +
-				QString("footprint degrade quadratically as this value increases."));
+				QString("the given patch size.\n\n") +
+				QString("Note training time and memory footprint will degrade\n") +
+				QString("quadratically as this value increases."));
 	form->addRow(QString("Maximum frequency in a patch:"), nFreqLineEdit);
 
 	nAtmLineEdit = new QLineEdit(this);
 	nAtmLineEdit->setValidator(validator);
 	nAtmLineEdit->setText("10");
 	nAtmLineEdit->setToolTip(
-				QString("Total number of dictionary atoms available.\n") +
+				QString("Total number of dictionary atoms available.\n\n") +
 				QString("A too large value leads to overfitting, and too small\n") +
-				QString("leads to underfitting (depending on max. frequency). "));
+				QString("leads to underfitting, depending on max. frequency."));
 	form->addRow(QString("Number of dictionary atoms:"), nAtmLineEdit);
 
 	lAtmLineEdit = new QLineEdit(this);
 	lAtmLineEdit->setValidator(validator);
 	lAtmLineEdit->setText("4");
 	lAtmLineEdit->setToolTip(
-				QString("Maximum dictionary atoms used in reconstructing a patch.\n") +
+				QString("Maximum dictionary atoms used in patch reconstruction.\n\n") +
 				QString("A too large value leads to overfitting, and too small\n") +
-				QString("leads to underfitting (depending on max. frequency)."));
+				QString("leads to underfitting, depending on max. frequency."));
 	form->addRow(QString("Atom sparsity constraint:"), lAtmLineEdit);
 
 	maxNewLineEdit = new QLineEdit(this);
 	maxNewLineEdit->setValidator(validator);
-	maxNewLineEdit->setText("10000");
+	maxNewLineEdit->setText("25000");
 	maxNewLineEdit->setToolTip(
 				QString("Maximum number of new points to add to the cloud."));
 	form->addRow(QString("Maximum number of new points to add:"), maxNewLineEdit);
 
 	methodComboBox = new QComboBox;
-	methodComboBox->addItem(tr("Matching Pursuit"));
 	methodComboBox->addItem(tr("Orthogonal Pursuit"));
+	methodComboBox->addItem(tr("Matching Pursuit"));
 	methodComboBox->setToolTip(
 				QString("Sparse approximation method to use during training\n") +
 				QString("and patch reconstruction."));
@@ -172,10 +174,10 @@ int ReconstructDialog::getFields(
 	methodComboBox->activated(index);
 	switch(index){
 	case 0:
-		method = SparseApprox::MatchingPursuit;
+		method = SparseApprox::OrthogonalPursuit;
 		break;
 	case 1:
-		method = SparseApprox::OrthogonalPursuit;
+		method = SparseApprox::MatchingPursuit;
 		break;
 	}
 
