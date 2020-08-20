@@ -7,6 +7,7 @@
 #include "MessageLogger.h"
 #include "SetRandomDialog.h"
 #include "DecimateDialog.h"
+#include "SparsifyDialog.h"
 #include "ReconstructDialog.h"
 #include "constants.h"
 
@@ -91,6 +92,11 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(decimateAct, &QAction::triggered, this, &MainWindow::decimate);
 	toolsMenu->addAction(decimateAct);
 
+	QAction *sparsifyAct = new QAction("&Sparsify", this);
+	sparsifyAct->setStatusTip("Take a random subset of the point cloud");
+	connect(sparsifyAct, &QAction::triggered, this, &MainWindow::sparsify);
+	toolsMenu->addAction(sparsifyAct);
+
 	QAction *reconstructAct = new QAction("&Reconstruct", this);
 	reconstructAct->setStatusTip("Reconstruct point cloud");
 	connect(reconstructAct, &QAction::triggered, this, &MainWindow::reconstruct);
@@ -131,16 +137,18 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(this, &MainWindow::cloudDecimate,
 			centralWidget, &Window::decimateCloud);
 
+	connect(this, &MainWindow::cloudSparsify,
+			centralWidget, &Window::sparsifyCloud);
+
 	connect(this, &MainWindow::cloudReconstruct,
 			centralWidget, &Window::reconstructCloud);
-
 
 	//------
 	// Dialogs
 
 	setRandomDialog = new SetRandomDialog(this);
 	decimateDialog = new DecimateDialog(this);
-	//sparsityDialog = new sparsifyDialog(this);
+	sparsifyDialog = new SparsifyDialog(this);
 	reconstructDialog = new ReconstructDialog(this);
 
 
@@ -249,6 +257,24 @@ void MainWindow::decimate()
 	}
 
 }
+
+//---------------------------------------------------------
+
+void MainWindow::sparsify()
+{
+	// Show the dialog as modal
+	if(sparsifyDialog->exec() == QDialog::Accepted){
+		float percent;
+		bool ok = sparsifyDialog->getFields(percent);
+		if(!ok){
+			badInputMessageBox("Percent field should be between 0 and 100.");
+			return;
+		}
+		sparsifyCloud(percent);
+	}
+
+}
+
 
 //---------------------------------------------------------
 

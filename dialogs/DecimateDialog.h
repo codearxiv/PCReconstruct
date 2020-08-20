@@ -9,7 +9,6 @@
 #include <QObject>
 
 QT_BEGIN_NAMESPACE
-class QMainWindow;
 class QFormLayout;
 class QLineEdit;
 class QDialogButtonBox;
@@ -37,8 +36,6 @@ private:
 	QLineEdit *nPointsLineEdit;
 	QDialogButtonBox *buttonBox;
 	QIntValidator *validator;
-
-	QMainWindow *mainWindow;
 
 };
 

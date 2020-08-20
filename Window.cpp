@@ -92,6 +92,9 @@ Window::Window(QMainWindow *mw, MessageLogger* msgLogger)
 	connect(this, &Window::cloudDecimate,
 			glWidget, &GLWidget::decimateCloud);
 
+	connect(this, &Window::cloudSparsify,
+			glWidget, &GLWidget::sparsifyCloud);
+
 	connect(this, &Window::cloudReconstruct,
 			glWidget, &GLWidget::reconstructCloud);
 }

@@ -11,7 +11,6 @@
 #include <QObject>
 
 QT_BEGIN_NAMESPACE
-class QMainWindow;
 class QFormLayout;
 class QLineEdit;
 class QDialogButtonBox;
@@ -37,13 +36,13 @@ public slots:
             size_t natm, size_t latm, size_t maxNewPoints,
             SparseApprox method)
     {
-        emit cloudReconstruct(kSVDIters, kNN, nfreq, natm, latm,
-                              maxNewPoints, method);
+		emit cloudReconstruct(kSVDIters, kNN, nfreq, densify,
+							  natm, latm, maxNewPoints, method);
     }
 
 signals:
 	void cloudReconstruct(
-			int kSVDIters, size_t kNN, size_t nfreq,
+			int kSVDIters, size_t kNN, size_t nfreq, float densify,
 			size_t natm, size_t latm, size_t maxNewPoints,
 			SparseApprox method);
 
@@ -61,7 +60,6 @@ private:
 	QDialogButtonBox *buttonBox;
     QIntValidator *intValidator;
     QDoubleValidator *doubleValidator;
-    QMainWindow *mainWindow;
 
 };
 

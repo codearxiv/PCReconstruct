@@ -108,6 +108,9 @@ GLWidget::GLWidget(QWidget *parent, MessageLogger* msgLogger)
 	connect(this, &GLWidget::cloudDecimate,
 			m_cloudWorker, &CloudWorker::decimateCloud);
 
+	connect(this, &GLWidget::cloudSparsify,
+			m_cloudWorker, &CloudWorker::sparsifyCloud);
+
 	connect(this, &GLWidget::cloudReconstruct,
 			m_cloudWorker, &CloudWorker::reconstructCloud);
 
@@ -456,9 +459,9 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
 {
 	m_lastMousePos = event->pos();
 	//***
-	if(event->buttons() & Qt::MidButton){
-		setRandomCloud(25000);
-	}
+//	if(event->buttons() & Qt::MidButton){
+//		setRandomCloud(15000);
+//	}
 
 }
 //---------------------------------------------------------
@@ -499,7 +502,7 @@ void GLWidget::setCloud(CloudPtr cloud)
 
 	m_cloud.fromPCL(cloud);
 	m_cloudBBox.set(m_cloud);
-	m_cloudBBox.pad(0.0f, 0.0f, 0.1f);
+	m_cloudBBox.rescale(0.1f);
 
 	updateCloud();
 }
@@ -519,16 +522,23 @@ void GLWidget::setRandomCloud(size_t nPoints)
 
 	Eigen::VectorXf C = Eigen::VectorXf::Random(5);
 	Eigen::VectorXf D = Eigen::VectorXf::Random(8);
+	Eigen::VectorXf E = Eigen::VectorXf::Random(5);
+	Eigen::VectorXf F = Eigen::VectorXf::Random(8);
 
-	auto heightFun = [&C, &D](float xu, float xv){
+	auto heightFun = [&C, &D, &E, &F](float xu, float xv){
 		float pu = 15*xu, pv = 15*xv;
 		float height =
 				C(0)*cos(D(0)*pu) +
 				C(1)*cos(D(1)*pv) +
 				C(2)*cos(D(2)*pu)*cos(D(3)*pu) +
 				C(3)*cos(D(4)*pu)*cos(D(5)*pv) +
-				C(4)*cos(D(6)*pv)*cos(D(7)*pv);
-		return 0.1f*height;
+				C(4)*cos(D(6)*pv)*cos(D(7)*pv) +
+				E(0)*sin(F(0)*pu) +
+				E(1)*sin(F(1)*pv) +
+				E(2)*sin(F(2)*pu)*sin(F(3)*pu) +
+				E(3)*sin(F(4)*pu)*sin(F(5)*pv) +
+				E(4)*sin(F(6)*pv)*sin(F(7)*pv);
+		return 0.05f*height;
 	};
 
 	Eigen::Vector3f norm(0.0f,1.0f,0.0f);
@@ -536,7 +546,7 @@ void GLWidget::setRandomCloud(size_t nPoints)
 //	m_cloud.approxCloudNorms(25, 15);
 
 	m_cloudBBox.set(m_cloud);
-	m_cloudBBox.pad(0.0f, 0.0f, 0.1f);
+	m_cloudBBox.rescale(0.05f);
 
 	updateCloud();
 }

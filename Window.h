@@ -90,6 +90,9 @@ public slots:
 	void decimateCloud(size_t nHoles, size_t kNN)
 	{ emit cloudDecimate(nHoles, kNN); }
 
+	void sparsifyCloud(float percent)
+	{ emit cloudSparsify(percent); }
+
 	void reconstructCloud(
             int kSVDIters, size_t kNN, size_t nfreq, float densify,
 			size_t natm, size_t latm, size_t maxNewPoints,
@@ -105,6 +108,7 @@ signals:
 	void cloudQueried(CloudPtr& cloud);
 	void cloudSetRandom(size_t nPoints);
 	void cloudDecimate(size_t nHoles, size_t kNN);
+	void cloudSparsify(float percent);
 	void cloudReconstruct(
             int kSVDIters, size_t kNN, size_t nfreq, float densify,
 			size_t natm, size_t latm, size_t maxNewPoints,

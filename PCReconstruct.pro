@@ -37,6 +37,7 @@ SOURCES += \
 	dialogs/DecimateDialog.cpp \
 	dialogs/ReconstructDialog.cpp \
 	dialogs/SetRandomDialog.cpp \
+	dialogs/SparsifyDialog.cpp \
 	dictionarylearning/MatchingPursuit.cpp \
 	dictionarylearning/OrthogonalPursuit.cpp \
 	dictionarylearning/cosine_transform.cpp \
@@ -63,6 +64,7 @@ HEADERS += \
 	dialogs/DecimateDialog.h \
 	dialogs/ReconstructDialog.h \
 	dialogs/SetRandomDialog.h \
+	dialogs/SparsifyDialog.h \
 	dictionarylearning/MatchingPursuit.h \
 	dictionarylearning/OrthogonalPursuit.h \
 	dictionarylearning/cosine_transform.h \

@@ -1,9 +1,10 @@
 //     Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
 //     See LICENSE included.
 
-#include "SetRandomDialog.h"
+#include "SparsifyDialog.h"
 #include "constants.h"
 
+#include <QMainWindow>
 #include <QFormLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -13,17 +14,17 @@
 #include <QIntValidator>
 
 
-SetRandomDialog::SetRandomDialog(QWidget *parent) : QDialog(parent)
+SparsifyDialog::SparsifyDialog(QWidget *parent) : QDialog(parent)
 {
-	validator = new QIntValidator(1, int_infinity, this);
+	validator = new QDoubleValidator(0.0, 100.0, 2, this);
 
 	form = new QFormLayout(this);
 	form->addRow(new QLabel(
-					 "Create a new point cloud sampled randomly from a random surface"));
-	nPointsLineEdit = new QLineEdit(this);
-	nPointsLineEdit->setValidator(validator);
-	nPointsLineEdit->setText("15000");
-	form->addRow(QString("Number of points sampled:"), nPointsLineEdit);
+					 "Take a random subset of the current point cloud"));
+	percentLineEdit = new QLineEdit(this);
+	percentLineEdit->setValidator(validator);
+	percentLineEdit->setText("7.0");
+	form->addRow(QString("Percentage of points to keep:"), percentLineEdit);
 
 	buttonBox = new QDialogButtonBox(
 				QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
@@ -36,25 +37,24 @@ SetRandomDialog::SetRandomDialog(QWidget *parent) : QDialog(parent)
 }
 
 
-bool SetRandomDialog::getFields(size_t& nPoints)
+bool SparsifyDialog::getFields(float& percent)
 {
 
-	QString nPointsStr = nPointsLineEdit->text();
+	QString nPointsStr = percentLineEdit->text();
 	int pos = 0;
 	if(validator->validate(nPointsStr, pos) != QValidator::Acceptable){
-		nPointsLineEdit->clear();
+		percentLineEdit->clear();
 		return false;
 	}
 	else{
 		bool ok;
-		nPoints = nPointsStr.toULongLong(&ok);
+		percent = nPointsStr.toFloat(&ok);
 		if(!ok) {
-			nPointsLineEdit->clear();
+			percentLineEdit->clear();
 			return false;
 		}
 	}
 
 	return true;
 }
-
 

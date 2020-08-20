@@ -4,7 +4,6 @@
 #include "ReconstructDialog.h"
 #include "constants.h"
 
-#include <QMainWindow>
 #include <QFormLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -26,7 +25,7 @@ ReconstructDialog::ReconstructDialog(QWidget *parent) : QDialog(parent)
 
 	nItersLineEdit = new QLineEdit(this);
     nItersLineEdit->setValidator(intValidator);
-	nItersLineEdit->setText("20");
+	nItersLineEdit->setText("15");
 	nItersLineEdit->setToolTip(
 				QString("This sets the number of training iterations within which\n") +
 				QString("the various local surface patterns in the point cloud\n") +
@@ -60,9 +59,9 @@ ReconstructDialog::ReconstructDialog(QWidget *parent) : QDialog(parent)
     densifyLineEdit->setValidator(doubleValidator);
     densifyLineEdit->setText("1.0");
     densifyLineEdit->setToolTip(
-                QString("This sets how many times more dense the reconstruction\n") +
-                QString("should be in each region compared to the surrounding\n") +
-                QString("points in the original cloud\n"));
+				QString("This controls the density of the reconstruction in\n") +
+				QString("each region compared to the density of the nearby\n") +
+				QString("points in the original cloud."));
     form->addRow(QString("Densification factor:"), densifyLineEdit);
 
 	nAtmLineEdit = new QLineEdit(this);
@@ -85,7 +84,7 @@ ReconstructDialog::ReconstructDialog(QWidget *parent) : QDialog(parent)
 
 	maxNewLineEdit = new QLineEdit(this);
     maxNewLineEdit->setValidator(intValidator);
-	maxNewLineEdit->setText("25000");
+	maxNewLineEdit->setText("45000");
 	maxNewLineEdit->setToolTip(
 				QString("Maximum number of new points to add to the cloud."));
 	form->addRow(QString("Maximum number of new points to add:"), maxNewLineEdit);

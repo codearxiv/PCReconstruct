@@ -26,7 +26,7 @@ DecimateDialog::DecimateDialog(QWidget *parent) : QDialog(parent)
 	form->addRow(QString("Number of holes:"), nHolesLineEdit);
 	nPointsLineEdit = new QLineEdit(this);
 	nPointsLineEdit->setValidator(validator);
-	nPointsLineEdit->setText("200");
+	nPointsLineEdit->setText("100");
 	form->addRow(QString("Number of points per hole:"), nPointsLineEdit);
 
 	buttonBox = new QDialogButtonBox(

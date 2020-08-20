@@ -23,6 +23,7 @@ class Window;
 class MessageLogger;
 class SetRandomDialog;
 class DecimateDialog;
+class SparsifyDialog;
 class ReconstructDialog;
 
 class MainWindow : public QMainWindow
@@ -92,6 +93,7 @@ private:
 	QPlainTextEdit *logText;
 	SetRandomDialog *setRandomDialog;
 	DecimateDialog *decimateDialog;
+	SparsifyDialog *sparsifyDialog;
 	ReconstructDialog *reconstructDialog;
 
 	MessageLogger *msgLogger;

@@ -21,8 +21,9 @@ public:
 
 public slots:
 	void decimateCloud(size_t nHoles, size_t kNN);
+	void sparsifyCloud(float percent);
 	void reconstructCloud(
-			int kSVDIters, size_t kNN, size_t nfreq,
+			int kSVDIters, size_t kNN, size_t nfreq, float densify,
 			size_t natm, size_t latm, size_t maxNewPoints,
 			SparseApprox method);
 

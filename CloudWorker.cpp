@@ -26,16 +26,25 @@ void CloudWorker::decimateCloud(size_t nHoles, size_t kNN)
 }
 
 //-------------------------------------------------------------------------
+void CloudWorker::sparsifyCloud(float percent)
+{
+	if(m_cloud->pointCount() == 0) return;
+	m_cloud->sparsify(percent);
+
+	emit finished();
+}
+
+//-------------------------------------------------------------------------
 
 void CloudWorker::reconstructCloud(
-		int kSVDIters, size_t kNN, size_t nfreq,
+		int kSVDIters, size_t kNN, size_t nfreq, float densify,
 		size_t natm, size_t latm, size_t maxNewPoints,
 		SparseApprox method)
 {
 	if(m_cloud->pointCount() == 0) return;
 	m_cloud->reconstruct(
-				kSVDIters, kNN, nfreq, natm, latm,
-				maxNewPoints, m_boundBox, method);
+				kSVDIters, kNN, nfreq, densify,
+				natm, latm, maxNewPoints, m_boundBox, method);
 
 	emit finished();
 
