@@ -524,7 +524,7 @@ void Cloud::reconstruct(
 			if(abs(v(0)) > sizeX || abs(v(1)) > sizeY) continue;
 			++numInGrid;
 		}
-		gridDim = max(1, int(floor(sqrt(float(numInGrid)))));
+		gridDim = max(1, int(floor(0.8f*sqrt(float(numInGrid)))));
 	};
 
 
