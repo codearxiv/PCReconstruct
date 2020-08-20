@@ -576,7 +576,7 @@ void Cloud::reconstruct(
 			vneighsXY[j].noalias() = rotXY*vneighs[j];
 		}
 
-		fit_gridXY(vneighsXY, 1.1f, sizeX, sizeY, gridDim);
+		fit_gridXY(vneighsXY, 1.0f, sizeX, sizeY, gridDim);
 		if(min(sizeX,sizeY) <= 1e-5*max(sizeX,sizeY)) return false;
 		if(sizeX <= float_tiny || sizeY <= float_tiny) return false;
 		new (&gridXY) MapMtrxi(&iworkGrid[0], gridDim, gridDim);
@@ -740,7 +740,7 @@ void Cloud::reconstruct(
 
 //		if( numEmpty > 0 ) qpoints.push(idx);
 		if( numEmpty > 0 ){
-			float weight = float(numEmpty)/(gridDim*gridDim);
+			float weight = -float(numEmpty)/(gridDim*gridDim);
 			pqpoints.push(std::make_pair(weight,idx));
 		}
 
