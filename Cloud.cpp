@@ -531,7 +531,6 @@ void Cloud::reconstruct(
 
 	//--------
 	auto get_gridXY_occupancy = [=](
-			const Vector3f& p,
 			const vector<CoverTreePoint<Vector3f>>& neighs,
 			const vector<Vector3f>& vneighsXY,
 			float sizeX, float sizeY, size_t gridDim,
@@ -562,7 +561,7 @@ void Cloud::reconstruct(
 	//--------
 
 	auto setup_grid = [&](
-			const Vector3f& p, const Vector3f& norm,
+			const Vector3f& norm,
 			const vector<CoverTreePoint<Vector3f>>& neighs,
 			const vector<Vector3f>& vneighs,
 			vector<Vector3f>& vneighsXY, Matrix3f& rotXY,
@@ -582,7 +581,7 @@ void Cloud::reconstruct(
 		if(sizeX <= float_tiny || sizeY <= float_tiny) return false;
 		new (&gridXY) MapMtrxi(&iworkGrid[0], gridDim, gridDim);
 		get_gridXY_occupancy(
-					p, neighs, vneighsXY, sizeX, sizeY,
+					neighs, vneighsXY, sizeX, sizeY,
 					gridDim, gridXY, gridLoc);
 
 		return true;
@@ -726,7 +725,7 @@ void Cloud::reconstruct(
 		size_t gridDim;
 		Matrix3f rotXY;
 		bool success = setup_grid(
-					p, norm, neighs, vneighs, vneighsXY, rotXY, gridXY,
+					norm, neighs, vneighs, vneighsXY, rotXY, gridXY,
 					sizeX, sizeY, gridDim, gridLoc, iworkGrid);
 
 		if( !success ) continue;
@@ -741,7 +740,7 @@ void Cloud::reconstruct(
 
 //		if( numEmpty > 0 ) qpoints.push(idx);
 		if( numEmpty > 0 ){
-			float weight = -float(numEmpty)/(gridDim*gridDim);
+			float weight = float(numEmpty)/(gridDim*gridDim);
 			pqpoints.push(std::make_pair(weight,idx));
 		}
 
@@ -858,10 +857,10 @@ void Cloud::reconstruct(
 		}
 
 		float sizeX, sizeY;
-		size_t gridDim, numEmpty;
+		size_t gridDim;
 		Matrix3f rotXY;
 		bool success = setup_grid(
-					p, norm, neighs, vneighs, vneighsXY, rotXY, gridXY,
+					norm, neighs, vneighs, vneighsXY, rotXY, gridXY,
 					sizeX, sizeY, gridDim, gridLoc, iworkGrid);
 
 		if( !success ) continue;
