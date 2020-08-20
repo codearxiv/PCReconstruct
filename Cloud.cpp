@@ -524,7 +524,7 @@ void Cloud::reconstruct(
 			if(abs(v(0)) > sizeX || abs(v(1)) > sizeY) continue;
 			++numInGrid;
 		}
-		gridDim = max(1, int(floor(0.8f*sqrt(float(numInGrid)))));
+		gridDim = max(1, int(floor(sqrt(float(numInGrid)))));
 	};
 
 
@@ -576,7 +576,7 @@ void Cloud::reconstruct(
 			vneighsXY[j].noalias() = rotXY*vneighs[j];
 		}
 
-		fit_gridXY(vneighsXY, 1.0f, sizeX, sizeY, gridDim);
+		fit_gridXY(vneighsXY, 1.1f, sizeX, sizeY, gridDim);
 		if(min(sizeX,sizeY) <= 1e-5*max(sizeX,sizeY)) return false;
 		if(sizeX <= float_tiny || sizeY <= float_tiny) return false;
 		new (&gridXY) MapMtrxi(&iworkGrid[0], gridDim, gridDim);
