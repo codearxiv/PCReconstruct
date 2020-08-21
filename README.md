@@ -7,19 +7,37 @@ Takes a PCL point cloud surface and fills in gaps or densifies sparse regions by
 This is done using a "continuous signal" variation of the k-SVD dictionary learning algorithm adapted to unstructured point clouds.
 
 Example:
-Original surface sampled with 35000 points: capture5a
+Original surface sampled with 35000 points: 
 
-Sparsified down to 1225 points: capture5b
+![1](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture5a.PNG)
 
-Increasing the default densification field to 1.5 to get a denser reconstruction: capture5c
+Sparsified down to 1225 points: 
 
-This gives this reconstruction of the sparsified point cloud: capture5d
+![2](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture5b.PNG)
+
+Increasing the default densification field to 1.5 to get a denser reconstruction:
+
+![3](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture5c.PNG)
+
+This gives this reconstruction of the sparsified point cloud: 
+
+![4](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture5d.PNG)
+
 
 Another Example:
-Original surface sampled with 35000 points: capture6a
+Original surface sampled with 35000 points:
 
-Heavily decimated with random holes: capture6b
+![5](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture6a.PNG)
 
-Increasing the default patch size field to 500 to take into the large gaps relative to sampling density: capture6c
+Heavily decimated with random holes:
 
-This gives the follwing reconstruction of the decimated point cloud: capture6d
+![6](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture6b.PNG)
+
+Increasing the default patch size field to 500 to take into the large gaps relative to sampling density:
+
+![7](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture6c.PNG)
+
+This gives the follwing reconstruction of the decimated point cloud:
+
+![8](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture6d.PNG)
+
