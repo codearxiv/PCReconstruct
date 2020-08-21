@@ -6,7 +6,7 @@ Takes a PCL point cloud surface and fills in gaps or densifies sparse regions by
 
 This is done using a "continuous signal" variation of the k-SVD dictionary learning algorithm adapted to unstructured point clouds.
 
-Example:
+## Example:
 Original surface sampled with 35000 points: 
 
 ![1](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture5a.PNG)
@@ -24,7 +24,7 @@ This gives this reconstruction of the sparsified point cloud:
 ![4](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture5d.PNG)
 
 
-Another Example:
+## Another Example:
 Original surface sampled with 35000 points:
 
 ![5](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture6a.PNG)
