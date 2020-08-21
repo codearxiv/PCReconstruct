@@ -25,7 +25,7 @@ This gives this reconstruction of the sparsified point cloud:
 
 
 ## Another Example:
-Original surface sampled with 35000 points:
+Original surface sampled with 15000 points:
 
 ![5](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture7a.PNG)
 
@@ -33,7 +33,7 @@ Heavily decimated with random holes:
 
 ![6](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture7b.PNG)
 
-Increasing the default patch size field to 500 to take into account the large gaps relative to sampling density:
+Increasing the default patch size field to 150 to take into account the large gaps relative to sampling density:
 
 ![7](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture7c.PNG)
 
