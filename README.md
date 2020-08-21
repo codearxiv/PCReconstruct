@@ -33,7 +33,7 @@ Heavily decimated with random holes:
 
 ![6](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture6b.PNG)
 
-Increasing the default patch size field to 500 to take into the large gaps relative to sampling density:
+Increasing the default patch size field to 500 to take into account the large gaps relative to sampling density:
 
 ![7](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture6c.PNG)
 
