@@ -538,7 +538,7 @@ void GLWidget::setRandomCloud(size_t nPoints)
 				E(2)*sin(F(2)*pu)*sin(F(3)*pu) +
 				E(3)*sin(F(4)*pu)*sin(F(5)*pv) +
 				E(4)*sin(F(6)*pv)*sin(F(7)*pv);
-		return 0.075f*height;
+		return 0.05f*height;
 	};
 
 	Eigen::Vector3f norm(0.0f,1.0f,0.0f);
