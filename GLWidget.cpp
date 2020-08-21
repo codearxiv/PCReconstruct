@@ -202,7 +202,7 @@ static const char *vertexShaderSourceCore =
 		"   vert = vertex.xyz;\n"
 		"   vertNormal = normalMatrix * normal;\n"
 		"   gl_Position = projMatrix * mvMatrix * vertex;\n"
-		"   gl_PointSize = 20.0/(0.1+10.0*abs(gl_Position.z));\n"
+		"   gl_PointSize = 30.0/(0.1+10.0*abs(gl_Position.z));\n"
 //		"   gl_PointSize = 50.0;\n"
 		"}\n";
 
@@ -234,7 +234,7 @@ static const char *vertexShaderSource =
 		"   vert = vertex.xyz;\n"
 		"   vertNormal = normalMatrix * normal;\n"
 		"   gl_Position = projMatrix * mvMatrix * vertex;\n"
-		"   gl_PointSize = 20.0/(0.1+10.0*abs(gl_Position.z));\n"
+		"   gl_PointSize = 30.0/(0.1+10.0*abs(gl_Position.z));\n"
 //		"   gl_PointSize = 500.0;\n"
 		"}\n";
 
@@ -460,7 +460,7 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
 	m_lastMousePos = event->pos();
 	//***
 //	if(event->buttons() & Qt::MidButton){
-//		setRandomCloud(15000);
+//		setRandomCloud(35000);
 //	}
 
 }
@@ -502,7 +502,7 @@ void GLWidget::setCloud(CloudPtr cloud)
 
 	m_cloud.fromPCL(cloud);
 	m_cloudBBox.set(m_cloud);
-	m_cloudBBox.rescale(0.1f);
+	m_cloudBBox.rescale(0.01f);
 
 	updateCloud();
 }
@@ -538,7 +538,7 @@ void GLWidget::setRandomCloud(size_t nPoints)
 				E(2)*sin(F(2)*pu)*sin(F(3)*pu) +
 				E(3)*sin(F(4)*pu)*sin(F(5)*pv) +
 				E(4)*sin(F(6)*pv)*sin(F(7)*pv);
-		return 0.05f*height;
+		return 0.075f*height;
 	};
 
 	Eigen::Vector3f norm(0.0f,1.0f,0.0f);
@@ -546,7 +546,7 @@ void GLWidget::setRandomCloud(size_t nPoints)
 //	m_cloud.approxCloudNorms(25, 15);
 
 	m_cloudBBox.set(m_cloud);
-	m_cloudBBox.rescale(0.05f);
+	m_cloudBBox.rescale(0.01f);
 
 	updateCloud();
 }

@@ -41,7 +41,7 @@ ReconstructDialog::ReconstructDialog(QWidget *parent) : QDialog(parent)
 				QString("The larger gaps in the cloud are relative to density\n") +
 				QString("of point sampling, the larger this field should be.\n") +
 				QString("Expect crazy results otherwise!"));
-	form->addRow(QString("local patch size:"), kNNLineEdit);
+	form->addRow(QString("Local patch size:"), kNNLineEdit);
 
 	nFreqLineEdit = new QLineEdit(this);
     nFreqLineEdit->setValidator(intValidator);
