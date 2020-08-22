@@ -70,7 +70,7 @@
 #include <QRecursiveMutex>
 #include <math.h>
 
-//#define SHOW_CLOUD_NORMS
+#define SHOW_CLOUD_NORMS
 //#define SHOW_CLOUD_DBUG
 
 
@@ -535,7 +535,8 @@ void GLWidget::setRandomCloud(size_t nPoints)
 		float height =
 				C(0)*cos(D(0)*pu) +
 				C(1)*cos(D(1)*pv) +
-				C(2)*cos(D(2)*pu)*cos(D(3)*pu) +
+				C(2)*
+				cos(D(2)*pu)*cos(D(3)*pu) +
 				C(3)*cos(D(4)*pu)*cos(D(5)*pv) +
 				C(4)*cos(D(6)*pv)*cos(D(7)*pv) +
 				E(0)*sin(F(0)*pu) +
@@ -548,7 +549,6 @@ void GLWidget::setRandomCloud(size_t nPoints)
 
 	Eigen::Vector3f norm(0.0f,1.0f,0.0f);
 	m_cloud.fromRandomPlanePoints(norm, nPoints, heightFun);
-//	m_cloud.approxCloudNorms(25, 15);
 
 	m_cloudBBox.set(m_cloud);
 	m_cloudBBox.rescale(0.01f);

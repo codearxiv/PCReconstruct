@@ -19,7 +19,7 @@ DecimateDialog::DecimateDialog(QWidget *parent) : QDialog(parent)
 	validator = new QIntValidator(1, int_infinity, this);
 
 	form = new QFormLayout(this);
-	form->addRow(new QLabel("Create random holes in current point cloud"));
+	form->addRow(new QLabel("Create random holes within bounding box"));
 	nHolesLineEdit = new QLineEdit(this);
 	nHolesLineEdit->setValidator(validator);
 	nHolesLineEdit->setText("50");

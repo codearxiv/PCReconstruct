@@ -21,7 +21,7 @@ ReconstructDialog::ReconstructDialog(QWidget *parent) : QDialog(parent)
     doubleValidator = new QDoubleValidator(0.0, double_infinity, 2, this);
 
 	form = new QFormLayout(this);
-	form->addRow(new QLabel("Fill in surface gaps in current point cloud"));
+	form->addRow(new QLabel("Fill in surface gaps in cloud within bounding box"));
 
 	nItersLineEdit = new QLineEdit(this);
     nItersLineEdit->setValidator(intValidator);

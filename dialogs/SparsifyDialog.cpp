@@ -20,7 +20,7 @@ SparsifyDialog::SparsifyDialog(QWidget *parent) : QDialog(parent)
 
 	form = new QFormLayout(this);
 	form->addRow(new QLabel(
-					 "Take a random subset of the current point cloud"));
+					 "Take a random subset of point cloud within bounding box"));
 	percentLineEdit = new QLineEdit(this);
 	percentLineEdit->setValidator(validator);
 	percentLineEdit->setText("7.0");

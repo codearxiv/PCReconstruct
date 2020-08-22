@@ -44,6 +44,8 @@ public:
 	size_t pointCount() const { return m_cloud.size(); }
 	size_t pointCountOrig() const { return m_npointsOrig; }
 	size_t debugCount() const { return m_debug.size(); }
+
+	void setBoundBox(BoundBox *bBox);
 	void clear();
 	void fromPCL(CloudPtr cloud);
 	void toPCL(CloudPtr& cloud);
@@ -72,7 +74,6 @@ public:
 	void reconstruct(
             int kSVDIters, size_t kNN, size_t nfreq, float densify,
             size_t natm, size_t latm, size_t maxNewPoints,
-            BoundBox* bBox = nullptr,
 			SparseApprox method = SparseApprox::OrthogonalPursuit);
 
 private:
@@ -87,6 +88,7 @@ private:
 	vector<GLfloat> m_normGL;
 	vector<GLfloat> m_debugGL;
 	CoverTree<CoverTreePoint<Vector3f>> *m_CT;
+	BoundBox* m_bBox = nullptr;
 	bool m_CTStale = true;
 	MessageLogger* m_msgLogger;
 	QRecursiveMutex m_recMutex;

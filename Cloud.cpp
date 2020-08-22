@@ -55,7 +55,9 @@ typedef pcl::PointCloud<pcl::PointXYZ>::Ptr CloudPtr;
 //---------------------------------------------------------
 
 Cloud::Cloud(MessageLogger* m_msgLogger, QObject *parent)
-	: QObject(parent), m_CT(nullptr), m_msgLogger(m_msgLogger)
+	: QObject(parent), m_CT(nullptr), m_msgLogger(m_msgLogger),
+	  m_bBox(nullptr)
+
 {
 	m_cloud.reserve(2500);
 	m_norms.reserve(2500);
@@ -153,8 +155,18 @@ void Cloud::clear()
 	delete m_CT;
 	m_CT = nullptr;
 	m_CTStale = true;
+	m_bBox = nullptr;
 	m_npointsOrig = 0;
 }
+
+//---------------------------------------------------------
+
+void Cloud::setBoundBox(BoundBox *bBox) {
+	m_bBox = bBox;
+	m_CTStale = true;
+}
+
+
 //---------------------------------------------------------
 
 void Cloud::fromPCL(CloudPtr cloud)
@@ -340,6 +352,7 @@ void Cloud::buildSpatialIndex()
 
 	m_CT = new CoverTree<CoverTreePoint<Vector3f>>();
 
+	bool useBBox = (m_bBox != nullptr);
 	size_t npoints = m_cloud.size();
 	size_t threshold = 0, lastPos = 0;
 
@@ -351,8 +364,9 @@ void Cloud::buildSpatialIndex()
 						"Building cloud spatial index",
 						i+1, npoints, 5, threshold, lastPos);
 		}
-
-		CoverTreePoint<Vector3f> cp(m_cloud[i], i);
+		Vector3f p = m_cloud[i];
+		if( useBBox ) if( !m_bBox->pointInBBox(p) ) continue;
+		CoverTreePoint<Vector3f> cp(p, i);
 		m_CT->insert(cp);
 	}
 
@@ -365,6 +379,7 @@ void Cloud::approxCloudNorms(int iters, size_t kNN)
 {
 	QMutexLocker locker(&m_recMutex);
 
+	bool useBBox = (m_bBox != nullptr);
 	size_t npoints = m_cloud.size();
 	size_t threshold = 0, lastPos = 0;
 	vector<CoverTreePoint<Vector3f>> neighs;
@@ -383,6 +398,7 @@ void Cloud::approxCloudNorms(int iters, size_t kNN)
 		}
 
 		Vector3f p = m_cloud[i];
+		if( useBBox ) if( !m_bBox->pointInBBox(p) ) continue;
 		CoverTreePoint<Vector3f> cp(p, 0);
 		neighs = m_CT->kNearestNeighbors(cp, kNN);
 		m_norms[i] = approxNorm(p, iters, neighs, vneighs, vwork);
@@ -406,11 +422,13 @@ void Cloud::decimate(size_t nHoles, size_t kNN)
 
 	size_t npoints = m_cloud.size();
 	if(npoints == 0 || nHoles <= 0 || kNN <= 0) return;
+
 	vector<CoverTreePoint<Vector3f>> neighs;
 	vector<bool> deletedPoint(npoints, false);
 	size_t threshold = 0, lastPos = 0;
 	size_t ndeleted = 0;	
 
+	bool useBBox = (m_bBox != nullptr);
 	if( m_CTStale && kNN > 1 ) buildSpatialIndex();
 	QString actionStr = kNN > 1 ? "Decimating" : "Sparsifying";
 
@@ -422,16 +440,18 @@ void Cloud::decimate(size_t nHoles, size_t kNN)
 
 	size_t nSubset = min(nHoles,npoints);
 
-	for(size_t i=0; i < nSubset; ++i){
+	for(size_t i=0; i < npoints; ++i){
         // Log progress
 		if(m_msgLogger != nullptr) {
 			m_msgLogger->logProgress(actionStr, i+1, nSubset, 10,
 							 threshold, lastPos);
 		}
 		size_t randIdx = shuffled[i];
+		Vector3f p = m_cloud[randIdx];
+		if( useBBox ) if( !m_bBox->pointInBBox(p) ) continue;
 
 		if( kNN > 1 ){
-			pointKNN(m_cloud[randIdx], kNN, neighs);
+			pointKNN(p, kNN, neighs);
 			typename vector<CoverTreePoint<Vector3f>>::const_iterator it;
 			for(it=neighs.begin(); it!=neighs.end(); ++it){
 				size_t idx = it->getId();
@@ -449,7 +469,6 @@ void Cloud::decimate(size_t nHoles, size_t kNN)
 		if(ndeleted >= npoints) break;
 
     }
-loopend:
 
 	size_t nremaining = max(size_t(0), npoints-ndeleted);
 	if( nremaining <= 0 ){
@@ -499,7 +518,7 @@ void Cloud::sparsify(float percent)
 
 void Cloud::reconstruct(
         int kSVDIters, size_t kNN, size_t nfreq, float densify,
-        size_t natm, size_t latm, size_t maxNewPoints, BoundBox* bBox,
+		size_t natm, size_t latm, size_t maxNewPoints,
         SparseApprox method)
 {
 	QMutexLocker locker(&m_recMutex);
@@ -512,7 +531,7 @@ void Cloud::reconstruct(
 	if(m_npointsOrig == 0) return;
 	size_t nfreqsq = nfreq*nfreq;
 	//size_t maxGridDim = max(1, int(floor(sqrt(float(kNN)))));
-	bool useBBox = (bBox != nullptr);
+	bool useBBox = (m_bBox != nullptr);
 	//--------
 	struct gridLocation {
 		size_t idx = -1;
@@ -660,7 +679,7 @@ void Cloud::reconstruct(
 	};
 
 	//--------
-	auto get_num_empty_cells = [=, &bBox](
+	auto get_num_empty_cells = [=](
 			const Vector3f& p, const Matrix3f& rotXY,
 			const MapMtrxi& gridXY, float sizeX, float sizeY,
 			size_t gridDimX, size_t gridDimY
@@ -669,7 +688,7 @@ void Cloud::reconstruct(
 
 		bool ignoreBBox = true;
 		if( useBBox ){
-			ignoreBBox = !bBox->ballInBBox(p, max(sizeX,sizeY));
+			ignoreBBox = !m_bBox->ballInBBox(p, max(sizeX,sizeY));
 		}
 
 		size_t numEmpty = 0;
@@ -690,7 +709,7 @@ void Cloud::reconstruct(
 					float cu = (k/gridDimX);
 					Vector3f q = uvw_to_xyz(
 								cu, cv, 0.0f, p, rotXYInv, sizeX, sizeY);
-					if( !bBox->pointInBBox(q) ) continue;
+					if( !m_bBox->pointInBBox(q) ) continue;
 					++numEmpty;
 				}
 			}
@@ -749,6 +768,7 @@ void Cloud::reconstruct(
 		}
 
 		Vector3f p = m_cloud[idx];
+		if( useBBox ) if( !m_bBox->pointInBBox(p) ) continue;
 		pointKNN(p, kNN, neighs);
 		getNeighVects(p, neighs, vneighs);
 		Vector3f norm = update_normal(idx, neighs);
@@ -980,9 +1000,7 @@ void Cloud::reconstruct(
 			}
 			Vector3f q = uvw_to_xyz(
 						loc.u, loc.v, W0sig(j), p, rotXYInv, sizeX, sizeY);
-			if( useBBox ){
-				if( !bBox->pointInBBox(q) ) continue;
-			}
+			if( useBBox ) if( !m_bBox->pointInBBox(q) ) continue;
 			if( loc.inCloud ){
 				// Modifying cover tree point coordinates by point
 				// removal and reinsertion is extremely slow.
