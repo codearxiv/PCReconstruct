@@ -23,12 +23,12 @@ after sparsifying).
 ![1c](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture1c.PNG)
 
 Increasing the default densification field to 1.5 to get a denser reconstruction,
-and making sure the "use points outside bounding box" field is True to get better
+and making sure the "use points outside bounding box" field is "True" to get better
 agreement around the boundary of the bounding box:
 
 ![1d](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture1d.PNG)
 
-This gives this reconstruction of the sparsified bunny: 
+The resulting reconstruction of the sparsified bunny: 
 
 ![1e](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture1e.PNG)
 
@@ -46,7 +46,7 @@ Increasing the default densification field to 1.5 to get a denser reconstruction
 
 ![5c](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture5c.PNG)
 
-This gives this reconstruction of the sparsified point cloud: 
+The resulting reconstruction of the sparsified point cloud: 
 
 ![5d](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture5d.PNG)
 
@@ -64,7 +64,7 @@ Increasing the default patch size field to 150 to take into account the large ga
 
 ![7c](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture7c.PNG)
 
-This gives the follwing reconstruction of the decimated point cloud:
+The resulting reconstruction of the decimated point cloud:
 
 ![7d](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture7d.PNG)
 
