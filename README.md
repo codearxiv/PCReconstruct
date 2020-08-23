@@ -6,38 +6,62 @@ Takes a PCL point cloud surface and fills in gaps or densifies sparse regions by
 
 This is done using a "continuous signal" variation of the k-SVD dictionary learning algorithm adapted to unstructured point clouds.
 
-## Example:
+## Sparsified Stanford Bunny:
+Original Stanford bunny sampled with 35847 points: 
+
+![1a](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture1a.PNG)
+
+Sparsifying the mid section to 5% after shrinking the bounding box to exclude
+exclude the ears (there are not enough points around the ear tips to approximate
+good normals after sparsifying).
+
+![1b](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture1b.PNG)
+![1c](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture1c.PNG)
+
+Increasing the default densification field to 1.5 to get a denser reconstruction,
+and making sure the "use points outside bounding box" field is True to get better
+agreement around the boundary of the bounding box:
+
+![1d](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture1d.PNG)
+
+This gives this reconstruction of the sparsified bunny: 
+
+![1e](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture1e.PNG)
+
+
+
+## Sparsified Random Surface:
 Original surface sampled with 35000 points: 
 
-![1](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture5a.PNG)
+![5a](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture5a.PNG)
 
 Sparsified down to 1225 points: 
 
-![2](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture5b.PNG)
+![5b](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture5b.PNG)
 
 Increasing the default densification field to 1.5 to get a denser reconstruction:
 
-![3](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture5c.PNG)
+![5c](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture5c.PNG)
 
 This gives this reconstruction of the sparsified point cloud: 
 
-![4](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture5d.PNG)
+![5d](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture5d.PNG)
 
 
-## Another Example:
+## Decimated Random Surface:
 Original surface sampled with 15000 points:
 
-![5](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture7a.PNG)
+![7a](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture7a.PNG)
 
 Heavily decimated with random holes:
 
-![6](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture7b.PNG)
+![7b](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture7b.PNG)
 
 Increasing the default patch size field to 150 to take into account the large gaps relative to sampling density:
 
-![7](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture7c.PNG)
+![7c](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture7c.PNG)
 
 This gives the follwing reconstruction of the decimated point cloud:
 
-![8](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture7d.PNG)
+![7d](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture7d.PNG)
 
