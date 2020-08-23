@@ -6,6 +6,10 @@ Takes a PCL point cloud surface and fills in gaps or densifies sparse regions by
 
 This is done using a "continuous signal" variation of the k-SVD dictionary learning algorithm adapted to unstructured point clouds.
 
+## TODO: 
+* Still struggles in areas of very high curvature. Smaller patch sizes may have to be selected here automatically. 
+* The slow signal setup step of reconstruction could be parallelized.
+
 ## Sparsified Stanford Bunny:
 Original Stanford bunny sampled with 35847 points: 
 
@@ -27,7 +31,6 @@ agreement around the boundary of the bounding box:
 This gives this reconstruction of the sparsified bunny: 
 
 ![1e](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture1e.PNG)
-
 
 
 ## Sparsified Random Surface:
