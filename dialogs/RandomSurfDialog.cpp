@@ -36,7 +36,7 @@ RandomSurfDialog::RandomSurfDialog(QWidget *parent) : QDialog(parent)
 }
 
 
-bool RandomSurfDialog::getFields(size_t& nPoints)
+bool RandomSurfDialog::getFields(size_t& nPoints) const
 {
 
 	QString nPointsStr = nPointsLineEdit->text();

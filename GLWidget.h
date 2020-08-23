@@ -111,15 +111,15 @@ public slots:
 	{ emit cloudSparsify(percent); }
 	void reconstructCloud(
             int kSVDIters, size_t kNN, size_t nfreq, float densify,
-			size_t natm, size_t latm, size_t maxNewPoints,
+			size_t natm, size_t latm, size_t maxNewPoints, bool looseBBox,
 			SparseApprox method)
 	{
 		emit cloudReconstruct(
                     kSVDIters, kNN, nfreq, densify, natm, latm,
-					maxNewPoints, method);
+					maxNewPoints, looseBBox, method);
 	}
     void setPointSize(float size) { m_pointSize = size; }
-    void updateCloud();
+	void updateCloud(bool updateBBox);
 
 signals:
 	void vectRotationChanged(int angle, QVector3D v);
@@ -129,8 +129,9 @@ signals:
 	void cloudSparsify(float percent);
 	void cloudReconstruct(
             int kSVDIters, size_t kNN, size_t nfreq, float densify,
-			size_t natm, size_t latm, size_t maxNewPoints,
+			size_t natm, size_t latm, size_t maxNewPoints, bool looseBBox,
 			SparseApprox method);
+	void bBoxFieldsChanged(float minBBox[3], float maxBBox[3]);
 	void logMessage(const QString& text);
 
 protected:

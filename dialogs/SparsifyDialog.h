@@ -21,7 +21,7 @@ class SparsifyDialog : public QDialog
 
 public:
 	SparsifyDialog(QWidget *parent = nullptr);
-	bool getFields(float& percent);
+	bool getFields(float& percent) const;
 
 private:
 	QFormLayout *form;

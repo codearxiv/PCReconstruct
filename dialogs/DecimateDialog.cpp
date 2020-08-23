@@ -41,7 +41,7 @@ DecimateDialog::DecimateDialog(QWidget *parent) : QDialog(parent)
 
 
 
-bool DecimateDialog::getFields(size_t& nHoles, size_t& kNN)
+bool DecimateDialog::getFields(size_t& nHoles, size_t& kNN) const
 {
 	QString nHolesStr = nHolesLineEdit->text();
 	int pos = 0;

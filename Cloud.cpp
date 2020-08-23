@@ -304,7 +304,7 @@ void Cloud::replacePoint(
 //---------------------------------------------------------
 void Cloud::pointKNN(
 		const Vector3f& p, size_t kNN,
-		vector<CoverTreePoint<Vector3f>>& neighs)
+		vector<CoverTreePoint<Vector3f>>& neighs) const
 {
 	assert(m_CT != nullptr);
 	CoverTreePoint<Vector3f> cp(p, 0);
@@ -315,7 +315,7 @@ void Cloud::pointKNN(
 Eigen::Vector3f Cloud::approxNorm(
 	const Vector3f& p, int iters,
 	const vector<CoverTreePoint<Vector3f>>& neighs,
-	vector<Vector3f>& vneighs, vector<Vector3f>& vwork)
+	vector<Vector3f>& vneighs, vector<Vector3f>& vwork) const
 {
 	static const Vector3f origin(0.0f,0.0f,0.0f);
 	assert(m_CT != nullptr);
@@ -327,7 +327,7 @@ Eigen::Vector3f Cloud::approxNorm(
 void Cloud::getNeighVects(
 	const Vector3f& p,
 	const vector<CoverTreePoint<Vector3f>>& neighs,
-	vector<Vector3f>& vneighs)
+	vector<Vector3f>& vneighs) const
 {
 	vneighs.reserve(neighs.size());
 	vneighs.resize(0);
@@ -341,7 +341,7 @@ void Cloud::getNeighVects(
 
 //---------------------------------------------------------
 
-void Cloud::buildSpatialIndex()
+void Cloud::buildSpatialIndex(bool useBBox)
 {
 	QMutexLocker locker(&m_recMutex);
 
@@ -352,7 +352,7 @@ void Cloud::buildSpatialIndex()
 
 	m_CT = new CoverTree<CoverTreePoint<Vector3f>>();
 
-	bool useBBox = (m_bBox != nullptr);
+	bool useBBox2 = (m_bBox != nullptr) && useBBox;
 	size_t npoints = m_cloud.size();
 	size_t threshold = 0, lastPos = 0;
 
@@ -365,7 +365,7 @@ void Cloud::buildSpatialIndex()
 						i+1, npoints, 5, threshold, lastPos);
 		}
 		Vector3f p = m_cloud[i];
-		if( useBBox ) if( !m_bBox->pointInBBox(p) ) continue;
+		if( useBBox2 ) if( !m_bBox->pointInBBox(p) ) continue;
 		CoverTreePoint<Vector3f> cp(p, i);
 		m_CT->insert(cp);
 	}
@@ -536,7 +536,7 @@ void Cloud::sparsify(float percent)
 
 void Cloud::reconstruct(
         int kSVDIters, size_t kNN, size_t nfreq, float densify,
-		size_t natm, size_t latm, size_t maxNewPoints,
+		size_t natm, size_t latm, size_t maxNewPoints, bool looseBBox,
         SparseApprox method)
 {
 	QMutexLocker locker(&m_recMutex);
@@ -775,7 +775,9 @@ void Cloud::reconstruct(
 		m_msgLogger->logMessage("** Point cloud reconstruction **");
 	}
 
-	if( m_CTStale ) buildSpatialIndex();
+
+	//if( m_CTStale ) buildSpatialIndex(false);
+	if( m_CTStale ) buildSpatialIndex(!looseBBox);
 
 	for(size_t idx = 0; idx < m_npointsOrig; ++idx){
 		// Log progress
@@ -892,7 +894,7 @@ void Cloud::reconstruct(
 	if(m_msgLogger != nullptr) {
 		m_msgLogger->logMessage("Reconstructing point cloud...");
 		m_msgLogger->logMessage(
-					QString::number(qpoints.size()) + " points in queue...");
+					QString::number(qpoints.size()) + " patches in queue...");
 	}
 
 	size_t nprocessed = 0;
@@ -902,7 +904,7 @@ void Cloud::reconstruct(
 		if(m_msgLogger != nullptr) {
 			if( nprocessed%1000 == 0 ){
 				m_msgLogger->logMessage(
-							QString::number(nprocessed) + " points processed...");
+							QString::number(nprocessed) + " patches processed...");
 			}
 			++nprocessed;
 		}

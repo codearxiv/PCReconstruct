@@ -16,7 +16,7 @@ class CloudWorker : public QObject
 
 public:
 	explicit CloudWorker(
-			Cloud& cloud, BoundBox& boundBox, QObject *parent = nullptr);
+			Cloud& cloud, QObject *parent = nullptr);
 	~CloudWorker();
 
 public slots:
@@ -24,16 +24,15 @@ public slots:
 	void sparsifyCloud(float percent);
 	void reconstructCloud(
 			int kSVDIters, size_t kNN, size_t nfreq, float densify,
-			size_t natm, size_t latm, size_t maxNewPoints,
+			size_t natm, size_t latm, size_t maxNewPoints, bool looseBBox,
 			SparseApprox method);
 
 
 signals:
-	void finished();
+	void finished(bool updateBBox);
 
 private:
 	Cloud *m_cloud;
-	BoundBox *m_boundBox;
 	QMutex m_mutex;
 };
 

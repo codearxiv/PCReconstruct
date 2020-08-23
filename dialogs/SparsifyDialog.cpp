@@ -37,7 +37,7 @@ SparsifyDialog::SparsifyDialog(QWidget *parent) : QDialog(parent)
 }
 
 
-bool SparsifyDialog::getFields(float& percent)
+bool SparsifyDialog::getFields(float& percent) const
 {
 
 	QString nPointsStr = percentLineEdit->text();

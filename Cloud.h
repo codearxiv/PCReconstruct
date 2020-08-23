@@ -62,24 +62,25 @@ public:
 	Vector3f approxNorm(
 			const Vector3f& p, int iters,
 			const vector<CoverTreePoint<Vector3f>>& neighs,
-			vector<Vector3f>& vneighs, vector<Vector3f>& vwork);
+			vector<Vector3f>& vneighs,
+			vector<Vector3f>& vwork) const;
 	void pointKNN(
 			const Vector3f& p, size_t kNN,
-			vector<CoverTreePoint<Vector3f>>& neighs);
+			vector<CoverTreePoint<Vector3f>>& neighs) const;
 
-	void buildSpatialIndex();
+	void buildSpatialIndex(bool useBBox = true);
 	void approxCloudNorms(int iters=25, size_t kNN=25);
     void decimate(size_t nHoles, size_t kNN);
 	void sparsify(float percent);
 	void reconstruct(
             int kSVDIters, size_t kNN, size_t nfreq, float densify,
-            size_t natm, size_t latm, size_t maxNewPoints,
+			size_t natm, size_t latm, size_t maxNewPoints, bool looseBBox,
 			SparseApprox method = SparseApprox::OrthogonalPursuit);
 
 private:
 	void getNeighVects(const Vector3f& p,
 					   const vector<CoverTreePoint<Vector3f>>& neighs,
-					   vector<Vector3f>& vneighs);
+					   vector<Vector3f>& vneighs) const;
 
 	vector<Vector3f> m_cloud;
 	vector<Vector3f> m_norms;

@@ -4,6 +4,7 @@
 
 #include "BoundBox.h"
 #include "Cloud.h"
+#include "MessageLogger.h"
 #include "constants.h"
 
 using Vector3f = Eigen::Vector3f;
@@ -13,15 +14,18 @@ constexpr const std::array<GLuint, 24> BoundBox::m_elemGL;
 
 //---------------------------------------------------------
 
-BoundBox::BoundBox(const float minBBox[3], const float maxBBox[3])
+BoundBox::BoundBox(const float minBBox[3], const float maxBBox[3],
+				   MessageLogger* msgLogger)
 {
+	m_msgLogger = msgLogger;
 	set(minBBox, maxBBox);
 }
 
 //---------------------------------------------------------
 
-BoundBox::BoundBox(const Cloud& cloud)
+BoundBox::BoundBox(const Cloud& cloud, MessageLogger* msgLogger)
 {
+	m_msgLogger = msgLogger;
 	set(cloud);
 }
 //---------------------------------------------------------
@@ -34,6 +38,7 @@ void BoundBox::set(const float minBBox[3], const float maxBBox[3])
 		m_maxBBox[i] = maxBBox[i];
 	}
 	m_vertCount = 8;
+
 }
 
 //---------------------------------------------------------
@@ -103,3 +108,22 @@ const GLfloat *BoundBox::vertGLData()
 }
 //---------------------------------------------------------
 
+void BoundBox::logMessageBBox() const
+{
+	if(m_msgLogger != nullptr) {
+		m_msgLogger->logMessage(
+					QString("Bounding box minimum extent:\n") +
+					QString("(") +
+					QString::number(m_minBBox[0]) +
+					QString(", ") + QString::number(m_minBBox[1]) +
+					QString(", ") + QString::number(m_minBBox[2]) +
+					QString(")\n") +
+					QString("Bounding box maximum extent:\n") +
+					QString("(") +
+					QString::number(m_maxBBox[0]) +
+					QString(", ") + QString::number(m_maxBBox[1]) +
+					QString(", ") + QString::number(m_maxBBox[2]) +
+					QString(")\n"));
+	}
+}
+//---------------------------------------------------------

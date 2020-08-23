@@ -21,7 +21,7 @@ OptionsDialog::OptionsDialog(QWidget *parent) : QDialog(parent)
     form->addRow(new QLabel("Change app settings"));
     pointSizeLineEdit = new QLineEdit(this);
     pointSizeLineEdit->setValidator(validator);
-    pointSizeLineEdit->setText("30.0");
+	pointSizeLineEdit->setText("5.0");
     form->addRow(QString("Display point size:"), pointSizeLineEdit);
 
     buttonBox = new QDialogButtonBox(
@@ -35,7 +35,7 @@ OptionsDialog::OptionsDialog(QWidget *parent) : QDialog(parent)
 }
 
 
-bool OptionsDialog::getFields(float& percent)
+bool OptionsDialog::getFields(float& percent) const
 {
 
     QString nPointsStr = pointSizeLineEdit->text();

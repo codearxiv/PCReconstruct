@@ -21,7 +21,7 @@ class DecimateDialog : public QDialog
 
 public:
 	DecimateDialog(QWidget *parent = nullptr);
-	bool getFields(size_t& nHoles, size_t& kNN);
+	bool getFields(size_t& nHoles, size_t& kNN) const;
 
 private:
 	QFormLayout *form;

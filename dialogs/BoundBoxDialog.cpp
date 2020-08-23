@@ -18,20 +18,28 @@ BoundBoxDialog::BoundBoxDialog(QWidget *parent) : QDialog(parent)
 {
     validator = new QDoubleValidator(-double_infinity, double_infinity, 8, this);
 
-    form = new QFormLayout(this);
+	QString label[3] = {"X","Y","Z"};
+
+	form = new QFormLayout(this);
     form->addRow(new QLabel(
                      "Set bounding box to perform operations within"));
     for(int i=0; i < 3; ++i){
         minLineEdit[i] = new QLineEdit(this);
         minLineEdit[i]->setValidator(validator);
-    }
+		minLineEdit[i]->setToolTip(
+					QString("The smallest ") + label[i]	+
+					QString(" coordinate in bounding box."));
+		form->addRow(QString("Minimum ") + label[i] + QString(" coordinate:"),
+					 minLineEdit[i]);
+		maxLineEdit[i] = new QLineEdit(this);
+		maxLineEdit[i]->setValidator(validator);
+		maxLineEdit[i]->setToolTip(
+					QString("The largest ") + label[i] +
+					QString(" coordinate in bounding box."));
+		form->addRow(QString("Maximum ") + label[i] + QString(" coordinate:"),
+					 maxLineEdit[i]);
+	}
 
-    form->addRow(QString("Minimum X coordinate:"), minLineEdit[0]);
-    form->addRow(QString("Minimum Y coordinate:"), minLineEdit[1]);
-    form->addRow(QString("Minimum Z coordinate:"), minLineEdit[2]);
-    form->addRow(QString("Maximum X coordinate:"), maxLineEdit[0]);
-    form->addRow(QString("Maximum Y coordinate:"), maxLineEdit[1]);
-    form->addRow(QString("Maximum Z coordinate:"), maxLineEdit[2]);
 
     buttonBox = new QDialogButtonBox(
                 QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
@@ -42,8 +50,8 @@ BoundBoxDialog::BoundBoxDialog(QWidget *parent) : QDialog(parent)
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 }
 
-
-bool BoundBoxDialog::getFields(float minBBox[], float maxBBox[])
+//-----------------------------------------------------------
+bool BoundBoxDialog::getFields(float minBBox[], float maxBBox[]) const
 {
     for(int i=0; i < 3; ++i){
         QString minStr = minLineEdit[i]->text();
@@ -81,3 +89,14 @@ bool BoundBoxDialog::getFields(float minBBox[], float maxBBox[])
 
     return true;
 }
+//-----------------------------------------------------------
+void BoundBoxDialog::setFields(const float minBBox[3], const float maxBBox[3])
+{
+	for(int i=0; i < 3; ++i){
+		minLineEdit[i]->setText(QString::number(minBBox[i]));
+		maxLineEdit[i]->setText(QString::number(maxBBox[i]));
+	}
+
+}
+
+//-----------------------------------------------------------

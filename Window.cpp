@@ -104,6 +104,9 @@ Window::Window(QMainWindow *mw, MessageLogger* msgLogger)
     connect(this, &Window::pointSizeChanged,
             glWidget, &GLWidget::setPointSize);
 
+	connect(glWidget, &GLWidget::bBoxFieldsChanged,
+			this, &Window::changeBBoxFields);
+
 }
 
 

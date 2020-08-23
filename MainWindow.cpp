@@ -165,6 +165,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::pointSizeChanged,
             centralWidget, &Window::setPointSize);
 
+	connect(centralWidget, &Window::bBoxFieldsChanged,
+			this, &MainWindow::changeBBoxFields);
+
 
 	//------
 	// Dialogs
@@ -331,11 +334,12 @@ void MainWindow::reconstruct()
 		int kSVDIters;
 		size_t kNN, nfreq, natm, latm, maxNewPoints;
         float densify;
-        SparseApprox method;
+		bool looseBBox;
+		SparseApprox method;
 
 		int ok = reconstructDialog->getFields(
                     kSVDIters, kNN, nfreq, densify, natm, latm,
-					maxNewPoints, method);
+					maxNewPoints, looseBBox, method);
 		switch( ok ){
 		case -1:
 			badInputMessageBox(
@@ -370,7 +374,7 @@ void MainWindow::reconstruct()
 		default:
             emit cloudReconstruct(
                         kSVDIters, kNN, nfreq, densify, natm, latm,
-                        maxNewPoints, method);
+						maxNewPoints, looseBBox, method);
 		}
 	}
 
@@ -413,6 +417,11 @@ void MainWindow::badInputMessageBox(const QString& info)
 	msgBox.setDefaultButton(QMessageBox::Ok);
 	msgBox.setIcon(QMessageBox::Information);
 	msgBox.exec();
+}
+//---------------------------------------------------------
+void MainWindow::changeBBoxFields(float minBBox[3], float maxBBox[3])
+{
+	boundBoxDialog->setFields(minBBox, maxBBox);
 }
 
 //---------------------------------------------------------

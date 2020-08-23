@@ -98,16 +98,19 @@ public slots:
 
 	void reconstructCloud(
             int kSVDIters, size_t kNN, size_t nfreq, float densify,
-			size_t natm, size_t latm, size_t maxNewPoints,
+			size_t natm, size_t latm, size_t maxNewPoints, bool looseBBox,
 			SparseApprox method)
 	{
 		emit cloudReconstruct(
                     kSVDIters, kNN, nfreq, densify, natm, latm,
-					maxNewPoints, method);
+					maxNewPoints, looseBBox, method);
 	}
 
     void setPointSize(float size)
     { emit pointSizeChanged(size); }
+
+	void changeBBoxFields(float minBBox[3], float maxBBox[3])
+	{ emit bBoxFieldsChanged(minBBox, maxBBox);}
 
 
 signals:
@@ -119,9 +122,10 @@ signals:
 	void cloudSparsify(float percent);
 	void cloudReconstruct(
             int kSVDIters, size_t kNN, size_t nfreq, float densify,
-			size_t natm, size_t latm, size_t maxNewPoints,
+			size_t natm, size_t latm, size_t maxNewPoints, bool looseBBox,
 			SparseApprox method);
     void pointSizeChanged(float size);
+	void bBoxFieldsChanged(float minBBox[3], float maxBBox[3]);
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;

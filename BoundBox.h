@@ -11,7 +11,7 @@
 #include <Eigen/Dense>
 #include <array>
 
-
+class MessageLogger;
 class Cloud;
 
 class BoundBox
@@ -20,9 +20,11 @@ class BoundBox
 	using Vector3f = Eigen::Vector3f;
 
 public:
-	BoundBox() { m_vertCount = 0; }
-    BoundBox(const float minBBox[3], const float maxBBox[3]);
-	BoundBox(const Cloud& cloud);
+	BoundBox(MessageLogger* msgLogger = nullptr): m_msgLogger(msgLogger){}
+	BoundBox(
+			const float minBBox[3], const float maxBBox[3],
+			 MessageLogger* msgLogger = nullptr);
+	BoundBox(const Cloud& cloud,  MessageLogger* msgLogger = nullptr);
 
     void set(const float minBBox[3], const float maxBBox[3]);
 	void set(const Cloud& cloud);
@@ -30,6 +32,12 @@ public:
 	void rescale(float frac);
 
 	int vertCount() const { return m_vertCount; }
+	void getExtents(float minBBox[], float maxBBox[]) const {
+		for(int i=0; i < 3; ++i){
+			minBBox[i] = m_minBBox[i];
+			maxBBox[i] = m_maxBBox[i];
+		}
+	}
 	float diagonalSize() const {
 		return sqrt(pt_to_pt_distsq(m_minBBox, m_maxBBox));
 	}
@@ -38,13 +46,13 @@ public:
 	const GLuint *elemGLData() const
 	{ return static_cast<const GLuint*>(m_elemGL.data()); }
 
-	bool pointInBBox(const Vector3f& p) {
+	bool pointInBBox(const Vector3f& p) const {
 		return  p(0) >= m_minBBox[0] && p(0) <= m_maxBBox[0] &&
 				p(1) >= m_minBBox[1] && p(1) <= m_maxBBox[1] &&
 				p(2) >= m_minBBox[2] && p(2) <= m_maxBBox[2];
 	}
 
-	float ballInBBox(const Vector3f& p, float radius) {
+	float ballInBBox(const Vector3f& p, float radius) const {
 		return  p(0) - m_minBBox[0] >= radius &&
 				p(1) - m_minBBox[1] >= radius &&
 				p(2) - m_minBBox[2] >= radius &&
@@ -53,11 +61,13 @@ public:
 				m_maxBBox[2] - p(2) >= radius;
 	}
 
+	void logMessageBBox() const;
+
 
 private:
 	float m_minBBox[3];
 	float m_maxBBox[3];
-	int m_vertCount;
+	int m_vertCount = 0;
 	std::array<GLfloat, 8*6> m_vertGL;
 
     static constexpr std::array<GLuint, 24> m_elemGL = {
@@ -74,6 +84,9 @@ private:
 		5, 7,
 		6, 7
 	};
+
+	MessageLogger* m_msgLogger;
+
 
 };
 

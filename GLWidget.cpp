@@ -85,13 +85,13 @@ GLWidget::GLWidget(QWidget *parent, MessageLogger* msgLogger)
 	  m_program(0),
 	  m_rotVect(0.0f,0.0f,0.0f),
 	  m_movVect(0.0f,0.0f,0.0f),
-      m_pointSize(30.0f),
+	  m_pointSize(5.0f),
 	  m_cloudVbo(QOpenGLBuffer::VertexBuffer),
 	  m_cloudBBoxVbo(QOpenGLBuffer::VertexBuffer),
 	  m_cloudBBoxEbo(QOpenGLBuffer::IndexBuffer),
 	  m_cloudNormsVbo(QOpenGLBuffer::VertexBuffer),
 	  m_cloudDebugVbo(QOpenGLBuffer::VertexBuffer),
-	  m_cloud(msgLogger, parent)
+	  m_cloud(msgLogger, parent), m_cloudBBox(msgLogger)
 {
 	m_core = QSurfaceFormat::defaultFormat().profile() == QSurfaceFormat::CoreProfile;
 	// --transparent causes the clear color to be transparent. Therefore, on systems that
@@ -103,7 +103,7 @@ GLWidget::GLWidget(QWidget *parent, MessageLogger* msgLogger)
 	}
 
 	m_cloudThread = new QThread(this);
-	m_cloudWorker = new CloudWorker(m_cloud, m_cloudBBox);
+	m_cloudWorker = new CloudWorker(m_cloud);
 	m_cloudWorker->moveToThread(m_cloudThread);
 
 	connect(this, &GLWidget::cloudDecimate,
@@ -506,10 +506,8 @@ void GLWidget::setCloud(CloudPtr cloud)
 	QMutexLocker locker(&m_recMutex);
 
 	m_cloud.fromPCL(cloud);
-	m_cloudBBox.set(m_cloud);
-	m_cloudBBox.rescale(0.01f);
 
-	updateCloud();
+	updateCloud(true);
 }
 
 //---------------------------------------------------------
@@ -550,10 +548,7 @@ void GLWidget::setRandomCloud(size_t nPoints)
 	Eigen::Vector3f norm(0.0f,1.0f,0.0f);
 	m_cloud.fromRandomPlanePoints(norm, nPoints, heightFun);
 
-	m_cloudBBox.set(m_cloud);
-	m_cloudBBox.rescale(0.01f);
-
-	updateCloud();
+	updateCloud(true);
 }
 
 //---------------------------------------------------------
@@ -563,7 +558,9 @@ void GLWidget::setCloudBBox(float minBBox[3], float maxBBox[3])
     QMutexLocker locker(&m_recMutex);
 
     m_cloudBBox.set(minBBox, maxBBox);
-
+	m_cloudBBox.logMessageBBox();
+	emit bBoxFieldsChanged(minBBox, maxBBox);
+	m_cloud.setBoundBox(&m_cloudBBox);
     setGLBBox(m_cloudBBox, m_cloudBBoxVbo, m_cloudBBoxEbo);
     update();
 
@@ -571,12 +568,22 @@ void GLWidget::setCloudBBox(float minBBox[3], float maxBBox[3])
 
 //---------------------------------------------------------
 
-void GLWidget::updateCloud()
+void GLWidget::updateCloud(bool updateBBox)
 {
 	QMutexLocker locker(&m_recMutex);
 
 	setGLCloud();
-	setGLBBox(m_cloudBBox, m_cloudBBoxVbo, m_cloudBBoxEbo);
+
+	if( updateBBox ){
+		float minBBox[3], maxBBox[3];
+		m_cloudBBox.set(m_cloud);
+		m_cloudBBox.rescale(0.01f);
+		m_cloudBBox.logMessageBBox();
+		m_cloudBBox.getExtents(minBBox, maxBBox);
+		emit bBoxFieldsChanged(minBBox, maxBBox);
+		m_cloud.setBoundBox(&m_cloudBBox);
+		setGLBBox(m_cloudBBox, m_cloudBBoxVbo, m_cloudBBoxEbo);
+	}
 
 #ifdef SHOW_CLOUD_NORMS
 	m_cloud.approxCloudNorms(25, 15);

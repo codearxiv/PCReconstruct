@@ -21,7 +21,8 @@ class BoundBoxDialog : public QDialog
 
 public:
     BoundBoxDialog(QWidget *parent = nullptr);
-    bool getFields(float minBBox[], float maxBBox[]);
+	bool getFields(float minBBox[], float maxBBox[]) const;
+	void setFields(const float minBBox[3], const float maxBBox[3]);
 
 private:
     QFormLayout *form;

@@ -21,7 +21,7 @@ class RandomSurfDialog : public QDialog
 
 public:
     RandomSurfDialog(QWidget *parent = nullptr);
-	bool getFields(size_t& nPoints);
+	bool getFields(size_t& nPoints) const;
 
 private:
 	QFormLayout *form;

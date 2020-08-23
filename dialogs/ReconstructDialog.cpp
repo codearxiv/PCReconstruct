@@ -89,6 +89,26 @@ ReconstructDialog::ReconstructDialog(QWidget *parent) : QDialog(parent)
 				QString("Maximum number of new points to add to the cloud."));
 	form->addRow(QString("Maximum number of new points to add:"), maxNewLineEdit);
 
+	bBoxComboBox = new QComboBox;
+	bBoxComboBox->addItem(tr("True"));
+	bBoxComboBox->addItem(tr("False"));
+	bBoxComboBox->setToolTip(
+				QString("Whether positions of points outside the bounding box\n") +
+				QString("are to be considered when reconstructing within the\n") +
+				QString("bounding box.\n\n") +
+				QString("This helps the reconstruction to agree with points just\n") +
+				QString("outside the bounding box.\n\n") +
+				QString("Note that this may have the undesirable effect of\n") +
+				QString("including points from two areas parallel surfaces where\n") +
+				QString("they nearly meet, depending on the patch size. In this\n") +
+				QString("case the bounding box for reconstruction might have to\n") +
+				QString("be adjusted manually to include only desired points,\n") +
+				QString("leaving this field false."));
+	form->addRow(QString("Use points outside bounding box:"), bBoxComboBox);
+
+	connect(bBoxComboBox, QOverload<int>::of(&QComboBox::activated),
+			this, &ReconstructDialog::bBoxComboChanged);
+
 	methodComboBox = new QComboBox;
 	methodComboBox->addItem(tr("Orthogonal Pursuit"));
 	methodComboBox->addItem(tr("Matching Pursuit"));
@@ -96,6 +116,9 @@ ReconstructDialog::ReconstructDialog(QWidget *parent) : QDialog(parent)
 				QString("Sparse approximation method to use during training\n") +
 				QString("and patch reconstruction."));
 	form->addRow(QString("Sparse approximation method:"), methodComboBox);
+
+	connect(methodComboBox, QOverload<int>::of(&QComboBox::activated),
+			this, &ReconstructDialog::methodComboChanged);
 
 	buttonBox = new QDialogButtonBox(
 				QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
@@ -105,13 +128,16 @@ ReconstructDialog::ReconstructDialog(QWidget *parent) : QDialog(parent)
 	connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
 	connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 
+
+
 }
 
+//---------------------------------------------------------
 
 int ReconstructDialog::getFields(
         int& kSVDIters, size_t& kNN, size_t& nfreq, float& densify,
-		size_t& natm, size_t& latm, size_t& maxNewPoints,
-		SparseApprox& method)
+		size_t& natm, size_t& latm, size_t& maxNewPoints, bool& looseBBox,
+		SparseApprox& method) const
 {
 
 	auto good = QValidator::Acceptable;
@@ -190,9 +216,16 @@ int ReconstructDialog::getFields(
         return -7;
 	}
 
-	int index = 0;
-	methodComboBox->activated(index);
-	switch(index){
+	switch(m_bBoxComboIdx){
+	case 0:
+		looseBBox = true;
+		break;
+	case 1:
+		looseBBox = false;
+		break;
+	}
+
+	switch(m_methodComboIdx){
 	case 0:
 		method = SparseApprox::OrthogonalPursuit;
 		break;

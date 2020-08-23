@@ -21,7 +21,7 @@ class OptionsDialog : public QDialog
 
 public:
     OptionsDialog(QWidget *parent = nullptr);
-    bool getFields(float& percent);
+	bool getFields(float& percent) const;
 
 private:
     QFormLayout *form;

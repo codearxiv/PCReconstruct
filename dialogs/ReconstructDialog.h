@@ -27,8 +27,12 @@ public:
 	ReconstructDialog(QWidget *parent = nullptr);
     int getFields(
             int& kSVDIters, size_t& kNN, size_t& nfreq, float& densify,
-            size_t& natm, size_t& latm, size_t& maxNewPoints,
-            SparseApprox& method);
+			size_t& natm, size_t& latm, size_t& maxNewPoints, bool& looseBBox,
+			SparseApprox& method) const;
+
+public slots:
+	void bBoxComboChanged(int idx) { m_bBoxComboIdx = idx; }
+	void methodComboChanged(int idx) { m_methodComboIdx = idx; }
 
 private:
 	QFormLayout *form;
@@ -39,7 +43,10 @@ private:
     QLineEdit *nAtmLineEdit;
 	QLineEdit *lAtmLineEdit;
 	QLineEdit *maxNewLineEdit;
+	QComboBox *bBoxComboBox;
+	int m_bBoxComboIdx = 0;
 	QComboBox *methodComboBox;
+	int m_methodComboIdx = 0;
 
 	QDialogButtonBox *buttonBox;
     QIntValidator *intValidator;

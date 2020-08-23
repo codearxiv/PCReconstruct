@@ -50,6 +50,7 @@ private:
     void about();
 
 public slots:
+	void changeBBoxFields(float minBBox[3], float maxBBox[3]);
 	void appendLogText(const QString& text);
 	void insertLogText(const QString& text);
 
@@ -62,7 +63,7 @@ signals:
 	void cloudSparsify(float percent);
 	void cloudReconstruct(
             int kSVDIters, size_t kNN, size_t nfreq, float densify,
-			size_t natm, size_t latm, size_t maxNewPoints,
+			size_t natm, size_t latm, size_t maxNewPoints, bool looseBBox,
 			SparseApprox method);
     void pointSizeChanged(float size);
 
