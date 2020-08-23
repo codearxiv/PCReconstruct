@@ -12,8 +12,8 @@ Original Stanford bunny sampled with 35847 points:
 ![1a](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture1a.PNG)
 
 Sparsifying the mid section to 5% after shrinking the bounding box to exclude
-exclude the ears (there are not enough points around the ear tips to approximate
-good normals after sparsifying).
+the ears (there are not enough points around the ear tips to approximate normals 
+after sparsifying).
 
 ![1b](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture1b.PNG)
 ![1c](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture1c.PNG)
