@@ -30,7 +30,7 @@ agreement around the boundary of the bounding box:
 
 The resulting reconstruction of the sparsified bunny: 
 
-![1e](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture1e.PNG)
+![1e](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture1d.PNG)
 
 
 ## Sparsified Random Surface:
