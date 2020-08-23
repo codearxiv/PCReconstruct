@@ -65,8 +65,8 @@ public:
 
 
 private:
-	float m_minBBox[3];
-	float m_maxBBox[3];
+	float m_minBBox[3] = {0.0f,0.0f,0.0f};
+	float m_maxBBox[3] = {0.0f,0.0f,0.0f};
 	int m_vertCount = 0;
 	std::array<GLfloat, 8*6> m_vertGL;
 

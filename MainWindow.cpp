@@ -14,6 +14,7 @@
 #include "constants.h"
 
 #include <pcl/io/pcd_io.h>
+//#include <pcl/io/ply_io.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 
@@ -191,28 +192,43 @@ MainWindow::MainWindow(QWidget *parent) :
 void MainWindow::open()
 {
 
-	QString q_pcdPath = QFileDialog::getOpenFileName(
+//	QString q_path = QFileDialog::getOpenFileName(
+//				this, "Open File", "", "(*.pcd *.ply)"
+//				);
+
+	QString q_path = QFileDialog::getOpenFileName(
 				this, "Open File", "", "PCD (*.pcd)"
 				);
 
-	std::string pcdPath = q_pcdPath.toStdString();
+	std::string path = q_path.toStdString();
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
 
 	int success = 0;
 	try{
-		success = pcl::io::loadPCDFile<pcl::PointXYZ>(pcdPath, *cloud);
+//		if( q_path.endsWith("pcd", Qt::CaseInsensitive) ){
+		success = pcl::io::loadPCDFile<pcl::PointXYZ>(path, *cloud);
+//		}
+//		else if( q_path.endsWith("ply", Qt::CaseInsensitive) ){
+//			success = pcl::io::loadPLYFile<pcl::PointXYZ>(path, *cloud);
+//			if( success == -1 ){
+//				success = pcl::io::loadPolygonFilePLY<pcl::PointXYZ>(path, *cloud);
+//			}
+//		}
+//		else{
+//			success = -1;
+//		}
+
 	}
 	catch (...){
 		success = -1;
 	}
 
 	if (success == -1) {
-		//PCL_ERROR ("Couldn't read PCD file\n");
 		appendLogText("Couldn't read PCD file\n");
 		return;
 	}
 	else{
-		appendLogText("Opened: " + q_pcdPath + "\n");
+		appendLogText("Opened: " + q_path + "\n");
 	}
 
     emit cloudChanged(cloud);

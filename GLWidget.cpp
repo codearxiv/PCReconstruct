@@ -85,7 +85,8 @@ GLWidget::GLWidget(QWidget *parent, MessageLogger* msgLogger)
 	  m_program(0),
 	  m_rotVect(0.0f,0.0f,0.0f),
 	  m_movVect(0.0f,0.0f,0.0f),
-	  m_pointSize(5.0f),
+	  m_pointSize(5.0f), m_aspectRatio(1.0f),
+	  m_farPlane(100.0f), m_nearPlane(0.01f),
 	  m_cloudVbo(QOpenGLBuffer::VertexBuffer),
 	  m_cloudBBoxVbo(QOpenGLBuffer::VertexBuffer),
 	  m_cloudBBoxEbo(QOpenGLBuffer::IndexBuffer),
@@ -305,12 +306,7 @@ void GLWidget::initializeGL()
 	setGLCloudDebug();
 #endif
 
-	m_rotVect = QVector3D(0.0f,0.0f,0.0f);
-	m_movVect = QVector3D(0.0f,0.0f,0.0f);
-
-	m_world.setToIdentity();
-	m_camera.setToIdentity();
-	m_camera.translate(0, 0, -1);
+	setGLView();
 
 	// Light position is fixed.
 	m_program->setUniformValue(m_lightPosLoc, QVector3D(0, 0, 70));
@@ -375,16 +371,33 @@ void GLWidget::paintGL()
 
 void GLWidget::resizeGL(int w, int h)
 {
+	m_aspectRatio = float(w)/h;
 	m_proj.setToIdentity();
-	m_proj.perspective(45.0f, GLfloat(w) / h, 0.01f, 100.0f);
+	m_proj.perspective(45.0f, m_aspectRatio, m_nearPlane, m_farPlane);
 }
 
+//---------------------------------------------------------
 
+void GLWidget::setGLView()
+{
+	m_rotVect = QVector3D(0.0f,0.0f,0.0f);
+	m_movVect = QVector3D(0.0f,0.0f,0.0f);
+
+	float diag = m_cloudBBox.diagonalSize();
+	m_nearPlane = 1e-5*diag;
+	m_farPlane = 100.0f*diag;
+	m_proj.setToIdentity();
+	m_proj.perspective(45.0f, m_aspectRatio, m_nearPlane, m_farPlane);
+
+	m_world.setToIdentity();
+	m_camera.setToIdentity();
+	m_camera.translate(0, 0, -diag);
+}
 //---------------------------------------------------------
 
 void GLWidget::setGLCloud()
 {
-	size_t npoints = m_cloud.pointCount();
+	size_t npoints = m_cloud.pointCount();	
 
 	// Setup our vertex buffer object for point cloud.
 	m_cloudVbo.create();
@@ -480,7 +493,8 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
 	bool rightButton = (event->buttons() & Qt::RightButton);
 
 	if ( leftButton && rightButton ) {
-		setVectTranslation(QVector3D(-dx,dy,0.0f));
+		float norm = frobeniusNorm4x4(m_camera);
+		setVectTranslation(QVector3D(-norm*dx,norm*dy,0.0f));
 	}
 	else if ( leftButton ) {
 		int angle = abs(dx) + abs(dy);
@@ -497,7 +511,8 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
 
 void GLWidget::wheelEvent(QWheelEvent *event)
 {
-	setVectTranslation(QVector3D(0.0f,0.0f,event->delta()));
+	float norm = frobeniusNorm4x4(m_camera) + 1e-3;
+	setVectTranslation(QVector3D(0.0f,0.0f,norm*event->delta()));
 }
 //---------------------------------------------------------
 
@@ -508,6 +523,7 @@ void GLWidget::setCloud(CloudPtr cloud)
 	m_cloud.fromPCL(cloud);
 
 	updateCloud(true);
+	setGLView();
 }
 
 //---------------------------------------------------------
@@ -549,6 +565,8 @@ void GLWidget::setRandomCloud(size_t nPoints)
 	m_cloud.fromRandomPlanePoints(norm, nPoints, heightFun);
 
 	updateCloud(true);
+
+	setGLView();
 }
 
 //---------------------------------------------------------
@@ -562,6 +580,7 @@ void GLWidget::setCloudBBox(float minBBox[3], float maxBBox[3])
 	emit bBoxFieldsChanged(minBBox, maxBBox);
 	m_cloud.setBoundBox(&m_cloudBBox);
     setGLBBox(m_cloudBBox, m_cloudBBoxVbo, m_cloudBBoxEbo);
+	//m_farPlane = 10.0f*maxBBox[2];
     update();
 
 }
@@ -571,8 +590,6 @@ void GLWidget::setCloudBBox(float minBBox[3], float maxBBox[3])
 void GLWidget::updateCloud(bool updateBBox)
 {
 	QMutexLocker locker(&m_recMutex);
-
-	setGLCloud();
 
 	if( updateBBox ){
 		float minBBox[3], maxBBox[3];
@@ -584,6 +601,8 @@ void GLWidget::updateCloud(bool updateBBox)
 		m_cloud.setBoundBox(&m_cloudBBox);
 		setGLBBox(m_cloudBBox, m_cloudBBoxVbo, m_cloudBBoxEbo);
 	}
+
+	setGLCloud();
 
 #ifdef SHOW_CLOUD_NORMS
 	m_cloud.approxCloudNorms(25, 15);
@@ -598,4 +617,27 @@ void GLWidget::updateCloud(bool updateBBox)
 	update();
 }
 
+//---------------------------------------------------------
+
+float GLWidget::frobeniusNorm4x4(QMatrix4x4 M)
+{
+	float normSq =
+			M(0,0)*M(0,0) +
+			M(1,0)*M(1,0) +
+			M(2,0)*M(2,0) +
+			M(3,0)*M(3,0) +
+			M(0,1)*M(0,1) +
+			M(1,1)*M(1,1) +
+			M(2,1)*M(2,1) +
+			M(3,1)*M(3,1) +
+			M(0,2)*M(0,2) +
+			M(1,2)*M(1,2) +
+			M(2,2)*M(2,2) +
+			M(3,2)*M(3,2) +
+			M(0,3)*M(0,3) +
+			M(1,3)*M(1,3) +
+			M(2,3)*M(2,3) +
+			M(3,3)*M(3,3);
+	return sqrt(normSq);
+}
 //---------------------------------------------------------

@@ -917,11 +917,10 @@ void Cloud::reconstruct(
 		getNeighVects(p, neighs, vneighs);
 
 		Vector3f norm;
-		if( idx < m_npointsOrig ){
+		if( idx >= m_npointsOrig ){
 			norm = m_norms[idx];
 		}
 		else{
-			//norm = m_norms[idx];
 			norm = update_normal(idx, neighs);
 		}
 

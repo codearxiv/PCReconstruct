@@ -144,11 +144,13 @@ protected:
 
 private:
 	void setupVertexAttribs(QOpenGLBuffer vbo);
+	void setGLView();
 	void setGLCloud();
 	void setGLCloudNorms(float scale);
 	void setGLCloudDebug();
 	void setGLBBox(
 			BoundBox bBox, QOpenGLBuffer vbo, QOpenGLBuffer ebo);
+	float frobeniusNorm4x4(QMatrix4x4 M);
 
 	bool m_core;
 	int m_vRot;
@@ -167,6 +169,9 @@ private:
 	QOpenGLBuffer m_cloudDebugVbo;
 	QOpenGLShaderProgram *m_program;
 	int m_projMatrixLoc;
+	float m_aspectRatio;
+	float m_nearPlane;
+	float m_farPlane;
 	int m_mvMatrixLoc;
 	int m_normalMatrixLoc;
 	int m_lightPosLoc;
