@@ -41,6 +41,7 @@ public:
 private:
 	void open();
 	void saveAs();
+	void undo();
 	void setRandom();
     void setBBox();
 	void decimate();
@@ -57,6 +58,7 @@ public slots:
 signals:
 	void cloudChanged(CloudPtr cloud);
 	void cloudQueried(CloudPtr& cloud);
+	void cloudUndo();
 	void cloudSetRandom(size_t nPoints);
     void cloudSetBBox(float minBBox[3], float maxBBox[3]);
 	void cloudDecimate(size_t nHoles, size_t kNN);

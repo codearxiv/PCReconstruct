@@ -152,12 +152,39 @@ void Cloud::clear()
 
 	m_cloud.clear();
 	m_norms.clear();
+	m_cloud_bak.clear();
+	m_norms_bak.clear();
 	delete m_CT;
 	m_CT = nullptr;
 	m_CTStale = true;
 	m_bBox = nullptr;
 	m_npointsOrig = 0;
 }
+
+
+//---------------------------------------------------------
+
+void Cloud::backup()
+{
+	QMutexLocker locker(&m_recMutex);
+
+	m_cloud_bak = m_cloud;
+	m_norms_bak = m_norms;
+}
+//---------------------------------------------------------
+
+void Cloud::restore()
+{
+	QMutexLocker locker(&m_recMutex);
+
+	std::swap(m_cloud, m_cloud_bak);
+	std::swap(m_norms, m_norms_bak);
+	m_npointsOrig = m_cloud.size();
+	delete m_CT;
+	m_CT = nullptr;
+	m_CTStale = true;
+}
+
 
 //---------------------------------------------------------
 

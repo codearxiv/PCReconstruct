@@ -52,9 +52,11 @@ MainWindow::MainWindow(QWidget *parent) :
 	//------
 	// Add actions
 	QMenu *fileMenu = menuBar()->addMenu("&File");
+	QMenu *editMenu = menuBar()->addMenu("&Edit");
 	QMenu *viewMenu = menuBar()->addMenu("&View");
 	QMenu *toolsMenu = menuBar()->addMenu("&Tools");
 	QMenu *helpMenu = menuBar()->addMenu("&Help");
+
 
 	QToolBar *fileToolBar = addToolBar("File");
 
@@ -81,6 +83,19 @@ MainWindow::MainWindow(QWidget *parent) :
 			fileMenu->addAction(exitIcon, "E&xit", this, &QWidget::close);
 	exitAct->setShortcuts(QKeySequence::Quit);
 	exitAct->setStatusTip("Exit PCReconstruct");
+
+
+	QToolBar *editToolBar = addToolBar("Edit");
+
+	const QIcon undoIcon =
+			QIcon::fromTheme("application-undo", QIcon(":/images/undo.png"));
+	QAction *undoAct = new QAction(undoIcon, "&Undo", this);
+	undoAct->setShortcuts(QKeySequence::Undo);
+	undoAct->setStatusTip("Undo");
+	connect(undoAct, &QAction::triggered, this, &MainWindow::undo);
+	editMenu->addAction(undoAct);
+	editToolBar->addAction(undoAct);
+
 
 	viewMenu->addAction(dock->toggleViewAction());
 
@@ -147,6 +162,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	connect(this, &MainWindow::cloudQueried,
 			centralWidget, &Window::getCloud);
+
+	connect(this, &MainWindow::cloudUndo,
+			centralWidget, &Window::undoCloud);
 
 	connect(this, &MainWindow::cloudSetRandom,
 			centralWidget, &Window::setRandomCloud);
@@ -265,6 +283,13 @@ void MainWindow::saveAs()
 	}
 
 
+}
+
+//---------------------------------------------------------
+
+void MainWindow::undo()
+{
+	emit cloudUndo();
 }
 
 
@@ -419,7 +444,9 @@ void MainWindow::options()
 void MainWindow::about()
 {
    QMessageBox::about(this, "About",
-			"PCReconstruct. Copyright 2019 Piotr (Peter) Beben.");
+					  QString("PCReconstruct.\n") +
+					  QString("Copyright 2019 Piotr (Peter) Beben.\n") +
+					  QString("pdbcas@gmail.com\n"));
 }
 
 //---------------------------------------------------------

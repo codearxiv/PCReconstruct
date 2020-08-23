@@ -103,6 +103,7 @@ public slots:
 	void cleanup();
 	void setCloud(CloudPtr cloud);
 	void getCloud(CloudPtr& cloud);
+	void undoCloud();
 	void setRandomCloud(size_t nPoints);
     void setCloudBBox(float minBBox[3], float maxBBox[3]);
 	void decimateCloud(size_t nHoles, size_t kNN)

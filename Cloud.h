@@ -47,6 +47,8 @@ public:
 
 	void setBoundBox(BoundBox *bBox);
 	void clear();
+	void backup();
+	void restore();
 	void fromPCL(CloudPtr cloud);
 	void toPCL(CloudPtr& cloud);
 	void fromRandomPlanePoints(
@@ -84,6 +86,8 @@ private:
 
 	vector<Vector3f> m_cloud;
 	vector<Vector3f> m_norms;
+	vector<Vector3f> m_cloud_bak;
+	vector<Vector3f> m_norms_bak;
 	vector<std::pair<Vector3f,Vector3f>> m_debug;
 	vector<GLfloat> m_vertGL;
 	vector<GLfloat> m_normGL;

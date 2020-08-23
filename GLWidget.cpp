@@ -535,6 +535,15 @@ void GLWidget::getCloud(CloudPtr& cloud)
 
 //---------------------------------------------------------
 
+void GLWidget::undoCloud()
+{
+	m_cloud.restore();
+
+	updateCloud(false);
+}
+
+//---------------------------------------------------------
+
 void GLWidget::setRandomCloud(size_t nPoints)
 {
 	QMutexLocker locker(&m_recMutex);

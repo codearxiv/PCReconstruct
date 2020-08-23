@@ -21,8 +21,8 @@
  */
 
 /****************************************************************************
-**     Peter Beben: Added some performance tweaks. Namely, minimized the
-**     frequency of vector allocation and copy by replacing calls to
+**     Peter Beben: Added some performance tweaks. Namely, minimized
+**     the number of vector allocation and copy by replacing calls to
 **     getChildren with getChildrenPtr where possible.
 ****************************************************************************/
 

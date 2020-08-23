@@ -86,6 +86,9 @@ Window::Window(QMainWindow *mw, MessageLogger* msgLogger)
 	connect(this, &Window::cloudQueried,
 			glWidget, &GLWidget::getCloud);
 
+	connect(this, &Window::cloudUndo,
+			glWidget, &GLWidget::undoCloud);
+
 	connect(this, &Window::cloudSetRandom,
 			glWidget, &GLWidget::setRandomCloud);
 

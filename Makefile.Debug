@@ -334,6 +334,7 @@ debug\qrc_PCReconstruct.cpp: PCReconstruct.qrc \
 		images\save.png \
 		images\open.png \
 		images\cut.png \
+		images\undo.png \
 		images\copy.png \
 		images\new.png \
 		images\paste.png
