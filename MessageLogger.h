@@ -1,3 +1,7 @@
+//-----------------------------------------------------------
+//     Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
+//     See LICENSE included with this distribution.
+
 #ifndef MESSAGELOGGER_H
 #define MESSAGELOGGER_H
 

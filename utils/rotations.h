@@ -1,6 +1,6 @@
 //-----------------------------------------------------------
 //  Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
-//  See LICENSE included.
+//  See LICENSE included with this distribution.
 
 #ifndef ROTATIONS_H
 #define ROTATIONS_H
