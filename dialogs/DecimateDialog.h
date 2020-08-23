@@ -1,5 +1,5 @@
 //     Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
-//     See LICENSE included.
+//     See LICENSE included with this distribution.
 
 #ifndef DECIMATEDIALOG_H
 #define DECIMATEDIALOG_H

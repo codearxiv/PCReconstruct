@@ -1,6 +1,6 @@
 //-----------------------------------------------------------
 //  Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
-//  See LICENSE included.
+//  See LICENSE included with this distribution.
 
 #include "Cloud.h"
 #include "constants.h"
@@ -54,8 +54,8 @@ typedef pcl::PointCloud<pcl::PointXYZ>::Ptr CloudPtr;
 
 //---------------------------------------------------------
 
-Cloud::Cloud(MessageLogger* m_msgLogger, QObject *parent)
-	: QObject(parent), m_CT(nullptr), m_msgLogger(m_msgLogger),
+Cloud::Cloud(MessageLogger* msgLogger, QObject *parent)
+	: QObject(parent), m_CT(nullptr), m_msgLogger(msgLogger),
 	  m_bBox(nullptr)
 
 {
