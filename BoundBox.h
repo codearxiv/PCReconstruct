@@ -30,6 +30,7 @@ public:
 	void set(const Cloud& cloud);
 	void pad(float padX, float padY, float padZ);
 	void rescale(float frac);
+	void setParentCloud(Cloud *cloud);
 
 	int vertCount() const { return m_vertCount; }
 	void getExtents(float minBBox[], float maxBBox[]) const {
@@ -69,6 +70,7 @@ private:
 	float m_maxBBox[3] = {0.0f,0.0f,0.0f};
 	int m_vertCount = 0;
 	std::array<GLfloat, 8*6> m_vertGL;
+	Cloud* m_cloud = nullptr;
 
     static constexpr std::array<GLuint, 24> m_elemGL = {
 		0, 1,

@@ -49,6 +49,9 @@ public slots:
     void setCloudBBox(float minBBox[3], float maxBBox[3])
     { emit cloudSetBBox(minBBox, maxBBox); }
 
+	void approxCloudNorms(int nIters, size_t kNN)
+	{ emit cloudApproxNorms(nIters, kNN); }
+
 	void decimateCloud(size_t nHoles, size_t kNN)
 	{ emit cloudDecimate(nHoles, kNN); }
 
@@ -68,6 +71,9 @@ public slots:
     void setPointSize(float size)
     { emit pointSizeChanged(size); }
 
+	void setNormScale(float scale)
+	{ emit normScaleChanged(scale); }
+
 	void changeBBoxFields(float minBBox[3], float maxBBox[3])
 	{ emit bBoxFieldsChanged(minBBox, maxBBox);}
 
@@ -79,6 +85,7 @@ signals:
 	void cloudNormsViewGL(bool enabled);
 	void cloudSetRandom(size_t nPoints);
     void cloudSetBBox(float minBBox[3], float maxBBox[3]);
+	void cloudApproxNorms(int nIters, size_t kNN);
 	void cloudDecimate(size_t nHoles, size_t kNN);
 	void cloudSparsify(float percent);
 	void cloudReconstruct(
@@ -86,6 +93,7 @@ signals:
 			size_t natm, size_t latm, size_t maxNewPoints, bool looseBBox,
 			SparseApprox method);
     void pointSizeChanged(float size);
+	void normScaleChanged(float scale);
 	void bBoxFieldsChanged(float minBBox[3], float maxBBox[3]);
 
 protected:

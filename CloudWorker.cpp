@@ -18,6 +18,15 @@ CloudWorker::~CloudWorker()
 {
 }
 
+//-------------------------------------------------------------------------
+
+void CloudWorker::approxCloudNorms(int nIters, size_t kNN)
+{
+	if(m_cloud->pointCount() == 0) return;
+	m_cloud->approxCloudNorms(nIters, kNN);
+	emit finished(false);
+
+}
 
 //-------------------------------------------------------------------------
 void CloudWorker::decimateCloud(size_t nHoles, size_t kNN)

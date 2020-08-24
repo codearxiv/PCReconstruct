@@ -36,10 +36,12 @@ SOURCES += \
 	Window.cpp \
 	dialogs/BoundBoxDialog.cpp \
 	dialogs/DecimateDialog.cpp \
+	dialogs/NormalsDialog.cpp \
 	dialogs/OptionsDialog.cpp \
 	dialogs/RandomSurfDialog.cpp \
 	dialogs/ReconstructDialog.cpp \
 	dialogs/SparsifyDialog.cpp \
+	dialogs/get_field.cpp \
 	dictionarylearning/MatchingPursuit.cpp \
 	dictionarylearning/OrthogonalPursuit.cpp \
 	dictionarylearning/cosine_transform.cpp \
@@ -65,10 +67,12 @@ HEADERS += \
 	constants.h \
 	dialogs/BoundBoxDialog.h \
 	dialogs/DecimateDialog.h \
+	dialogs/NormalsDialog.h \
 	dialogs/OptionsDialog.h \
 	dialogs/RandomSurfDialog.h \
 	dialogs/ReconstructDialog.h \
 	dialogs/SparsifyDialog.h \
+	dialogs/get_field.h \
 	dictionarylearning/MatchingPursuit.h \
 	dictionarylearning/OrthogonalPursuit.h \
 	dictionarylearning/cosine_transform.h \

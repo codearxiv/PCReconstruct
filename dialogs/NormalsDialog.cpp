@@ -1,7 +1,7 @@
 //     Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
 //     See LICENSE included with this distribution.
 
-#include "DecimateDialog.h"
+#include "NormalsDialog.h"
 #include "get_field.h"
 #include "constants.h"
 
@@ -15,20 +15,20 @@
 #include <QIntValidator>
 
 
-DecimateDialog::DecimateDialog(QWidget *parent) : QDialog(parent)
+NormalsDialog::NormalsDialog(QWidget *parent) : QDialog(parent)
 {
 	validator = new QIntValidator(1, int_infinity, this);
 
 	form = new QFormLayout(this);
-	form->addRow(new QLabel("Create random holes within bounding box"));
-	nHolesLineEdit = new QLineEdit(this);
-	nHolesLineEdit->setValidator(validator);
-	nHolesLineEdit->setText("50");
-	form->addRow(QString("Number of holes:"), nHolesLineEdit);
-	nPointsLineEdit = new QLineEdit(this);
-	nPointsLineEdit->setValidator(validator);
-	nPointsLineEdit->setText("100");
-	form->addRow(QString("Number of points per hole:"), nPointsLineEdit);
+	form->addRow(new QLabel("Approximate cloud normals"));
+	nItersLineEdit = new QLineEdit(this);
+	nItersLineEdit->setValidator(validator);
+	nItersLineEdit->setText("25");
+	form->addRow(QString("Number of iterations:"), nItersLineEdit);
+	kNNLineEdit = new QLineEdit(this);
+	kNNLineEdit->setValidator(validator);
+	kNNLineEdit->setText("25");
+	form->addRow(QString("Number of neighbouring points used:"), kNNLineEdit);
 
 	buttonBox = new QDialogButtonBox(
 				QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
@@ -42,19 +42,18 @@ DecimateDialog::DecimateDialog(QWidget *parent) : QDialog(parent)
 
 
 
-bool DecimateDialog::getFields(size_t& nHoles, size_t& kNN) const
+bool NormalsDialog::getFields(int& nIters, size_t& kNN) const
 {
 	bool ok;
+	size_t temp;
 
-	ok = get_integer_field(nHolesLineEdit, validator, nHoles);
+	ok = get_integer_field(nItersLineEdit, validator, temp);
 	if(!ok) return false;
+	nIters = int(temp);
 
-	ok = get_integer_field(nPointsLineEdit, validator, kNN);
+	ok = get_integer_field(kNNLineEdit, validator, kNN);
 	if(!ok) return false;
 
 	return true;
 }
-
-
-
 

@@ -2,6 +2,7 @@
 //     See LICENSE included with this distribution.
 
 #include "OptionsDialog.h"
+#include "get_field.h"
 #include "constants.h"
 
 #include <QMainWindow>
@@ -15,14 +16,20 @@
 
 OptionsDialog::OptionsDialog(QWidget *parent) : QDialog(parent)
 {
-    validator = new QDoubleValidator(0.0, double_infinity, 2, this);
+	validator = new QDoubleValidator(0.0, double_infinity, 5, this);
 
     form = new QFormLayout(this);
     form->addRow(new QLabel("Change app settings"));
-    pointSizeLineEdit = new QLineEdit(this);
+
+	pointSizeLineEdit = new QLineEdit(this);
     pointSizeLineEdit->setValidator(validator);
 	pointSizeLineEdit->setText("5.0");
     form->addRow(QString("Display point size:"), pointSizeLineEdit);
+
+	normScaleLineEdit = new QLineEdit(this);
+	normScaleLineEdit->setValidator(validator);
+	normScaleLineEdit->setText("0.01");
+	form->addRow(QString("Display normals size:"), normScaleLineEdit);
 
     buttonBox = new QDialogButtonBox(
                 QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
@@ -35,23 +42,16 @@ OptionsDialog::OptionsDialog(QWidget *parent) : QDialog(parent)
 }
 
 
-bool OptionsDialog::getFields(float& percent) const
+bool OptionsDialog::getFields(float& pointSize, float& normScale) const
 {
 
-    QString nPointsStr = pointSizeLineEdit->text();
-    int pos = 0;
-    if(validator->validate(nPointsStr, pos) != QValidator::Acceptable){
-        pointSizeLineEdit->clear();
-        return false;
-    }
-    else{
-        bool ok;
-        percent = nPointsStr.toFloat(&ok);
-        if(!ok) {
-            pointSizeLineEdit->clear();
-            return false;
-        }
-    }
+	bool ok;
+
+	ok = get_float_field(pointSizeLineEdit, validator, pointSize);
+	if(!ok) return false;
+
+	ok = get_float_field(normScaleLineEdit, validator, normScale);
+	if(!ok) return false;
 
     return true;
 }

@@ -2,6 +2,7 @@
 //     See LICENSE included with this distribution.
 
 #include "RandomSurfDialog.h"
+#include "get_field.h"
 #include "constants.h"
 
 #include <QFormLayout>
@@ -39,22 +40,8 @@ RandomSurfDialog::RandomSurfDialog(QWidget *parent) : QDialog(parent)
 bool RandomSurfDialog::getFields(size_t& nPoints) const
 {
 
-	QString nPointsStr = nPointsLineEdit->text();
-	int pos = 0;
-	if(validator->validate(nPointsStr, pos) != QValidator::Acceptable){
-		nPointsLineEdit->clear();
-		return false;
-	}
-	else{
-		bool ok;
-		nPoints = nPointsStr.toULongLong(&ok);
-		if(!ok) {
-			nPointsLineEdit->clear();
-			return false;
-		}
-	}
-
-	return true;
+	bool ok = get_integer_field(nPointsLineEdit, validator, nPoints);
+	return ok;
 }
 
 

@@ -21,12 +21,13 @@ class OptionsDialog : public QDialog
 
 public:
     OptionsDialog(QWidget *parent = nullptr);
-	bool getFields(float& percent) const;
+	bool getFields(float& pointSize, float& normScale) const;
 
 private:
     QFormLayout *form;
     QLineEdit *pointSizeLineEdit;
-    QDialogButtonBox *buttonBox;
+	QLineEdit *normScaleLineEdit;
+	QDialogButtonBox *buttonBox;
     QDoubleValidator *validator;
 
 };

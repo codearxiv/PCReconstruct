@@ -2,7 +2,9 @@
 //     See LICENSE included with this distribution.
 
 #include "SparsifyDialog.h"
+#include "get_field.h"
 #include "constants.h"
+
 
 #include <QMainWindow>
 #include <QFormLayout>
@@ -16,7 +18,7 @@
 
 SparsifyDialog::SparsifyDialog(QWidget *parent) : QDialog(parent)
 {
-	validator = new QDoubleValidator(0.0, 100.0, 2, this);
+	validator = new QDoubleValidator(0.0, 100.0, 5, this);
 
 	form = new QFormLayout(this);
 	form->addRow(new QLabel(
@@ -39,22 +41,7 @@ SparsifyDialog::SparsifyDialog(QWidget *parent) : QDialog(parent)
 
 bool SparsifyDialog::getFields(float& percent) const
 {
-
-	QString nPointsStr = percentLineEdit->text();
-	int pos = 0;
-	if(validator->validate(nPointsStr, pos) != QValidator::Acceptable){
-		percentLineEdit->clear();
-		return false;
-	}
-	else{
-		bool ok;
-		percent = nPointsStr.toFloat(&ok);
-		if(!ok) {
-			percentLineEdit->clear();
-			return false;
-		}
-	}
-
-	return true;
+	bool ok = get_float_field(percentLineEdit, validator, percent);
+	return ok;
 }
 

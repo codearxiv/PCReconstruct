@@ -2,6 +2,7 @@
 //     See LICENSE included with this distribution.
 
 #include "ReconstructDialog.h"
+#include "get_field.h"
 #include "constants.h"
 
 #include <QFormLayout>
@@ -139,83 +140,32 @@ int ReconstructDialog::getFields(
 		size_t& natm, size_t& latm, size_t& maxNewPoints, bool& looseBBox,
 		SparseApprox& method) const
 {
+	bool ok;
+	size_t temp;
 
-	auto good = QValidator::Acceptable;
-	bool ok = true;
+	ok = get_integer_field(nItersLineEdit, intValidator, temp);
+	if(!ok) return -1;
+	kSVDIters = int(temp);
 
-	int pos = 0;
-	QString kSVDItersStr = nItersLineEdit->text();
-    if(intValidator->validate(kSVDItersStr, pos) != good){ ok = false; }
-	else{ kSVDIters = kSVDItersStr.toULongLong(&ok); }
+	ok = get_integer_field(kNNLineEdit, intValidator, kNN);
+	if(!ok) return -2;
 
-	if(!ok) {
-		nItersLineEdit->clear();
-		return -1;
-	}
+	ok = get_integer_field(nFreqLineEdit, intValidator, nfreq);
+	if(!ok) return -3;
 
-	pos = 0;
-	QString kNNStr = kNNLineEdit->text();
-    if(intValidator->validate(kNNStr, pos) != good){ ok = false; }
-	else{ kNN = kNNStr.toULongLong(&ok); }
+	ok = get_float_field(densifyLineEdit, doubleValidator, densify);
+	if(!ok) return -4;
 
-	if(!ok) {
-		kNNLineEdit->clear();
-		return -2;
-	}
+	ok = get_integer_field(nAtmLineEdit, intValidator, natm);
+	if(!ok) return -5;
 
-	pos = 0;
-	QString nfreqStr = nFreqLineEdit->text();
-    if(intValidator->validate(nfreqStr, pos) != good){ ok = false; }
-	else{ nfreq = nfreqStr.toULongLong(&ok); }
+	ok = get_integer_field(lAtmLineEdit, intValidator, latm);
+	if(ok) if(latm > natm) ok = false;
+	if(!ok) return -6;
 
-	if(!ok) {
-		nFreqLineEdit->clear();
-		return -3;
-	}
-
-    pos = 0;
-    QString densifyStr = densifyLineEdit->text();
-    if(doubleValidator->validate(densifyStr, pos) != good){ ok = false; }
-    else{ densify = densifyStr.toFloat(&ok); }
-
-    if(!ok) {
-        densifyLineEdit->clear();
-        return -4;
-    }
-
-	pos = 0;
-	QString natmStr = nAtmLineEdit->text();
-    if(intValidator->validate(natmStr, pos) != good){ ok = false; }
-	else{ natm = natmStr.toULongLong(&ok); }
-
-	if(!ok) {
-		nAtmLineEdit->clear();
-        return -5;
-	}
-
-	pos = 0;
-	QString latmStr = lAtmLineEdit->text();
-    if(intValidator->validate(latmStr, pos) != good){ ok = false; }
-	else{
-		latm = latmStr.toULongLong(&ok);
-		if(latm > natm) ok = false;
-	}
-
-	if(!ok) {
-		lAtmLineEdit->clear();
-        return -6;
-	}
-
-	pos = 0;
-	QString maxNewStr = maxNewLineEdit->text();
-    if(intValidator->validate(maxNewStr, pos) != good){ ok = false; }
-	else{ maxNewPoints = maxNewStr.toULongLong(&ok); }
-
-	if(!ok) {
-		maxNewLineEdit->clear();
-        return -7;
-	}
-
+	ok = get_integer_field(maxNewLineEdit, intValidator, maxNewPoints);
+	if(!ok) return -7;
+	
 	switch(m_bBoxComboIdx){
 	case 0:
 		looseBBox = true;

@@ -98,6 +98,9 @@ Window::Window(QMainWindow *mw, MessageLogger* msgLogger)
     connect(this, &Window::cloudSetBBox,
             glWidget, &GLWidget::setCloudBBox);
 
+	connect(this, &Window::cloudApproxNorms,
+			glWidget, &GLWidget::approxCloudNorms);
+
 	connect(this, &Window::cloudDecimate,
 			glWidget, &GLWidget::decimateCloud);
 
@@ -109,6 +112,9 @@ Window::Window(QMainWindow *mw, MessageLogger* msgLogger)
 
     connect(this, &Window::pointSizeChanged,
             glWidget, &GLWidget::setPointSize);
+
+	connect(this, &Window::normScaleChanged,
+			glWidget, &GLWidget::setNormScale);
 
 	connect(glWidget, &GLWidget::bBoxFieldsChanged,
 			this, &Window::changeBBoxFields);

@@ -23,6 +23,7 @@ class Window;
 class MessageLogger;
 class RandomSurfDialog;
 class BoundBoxDialog;
+class NormalsDialog;
 class DecimateDialog;
 class SparsifyDialog;
 class ReconstructDialog;
@@ -45,6 +46,7 @@ private:
 	void viewGLNorms(bool enabled);
 	void setRandom();
     void setBBox();
+	void approxNorms();
 	void decimate();
 	void sparsify();
 	void reconstruct();
@@ -63,6 +65,7 @@ signals:
 	void cloudNormsViewGL(bool enabled);
 	void cloudSetRandom(size_t nPoints);
     void cloudSetBBox(float minBBox[3], float maxBBox[3]);
+	void cloudApproxNorms(int nIters, size_t kNN);
 	void cloudDecimate(size_t nHoles, size_t kNN);
 	void cloudSparsify(float percent);
 	void cloudReconstruct(
@@ -70,6 +73,7 @@ signals:
 			size_t natm, size_t latm, size_t maxNewPoints, bool looseBBox,
 			SparseApprox method);
     void pointSizeChanged(float size);
+	void normScaleChanged(float scale);
 
 private:
 	Window *centralWidget;
@@ -79,6 +83,7 @@ private:
 	QPlainTextEdit *logText;
     RandomSurfDialog *randomSurfDialog;
     BoundBoxDialog *boundBoxDialog;
+	NormalsDialog *normalsDialog;
 	DecimateDialog *decimateDialog;
 	SparsifyDialog *sparsifyDialog;
 	ReconstructDialog *reconstructDialog;

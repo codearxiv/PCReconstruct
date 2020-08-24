@@ -7,6 +7,7 @@
 
 #include "Cover_Tree.h"
 #include "CoverTreePoint.h"
+#include "BoundBox.h"
 #include "constants.h"
 //#include "MessageLogger.h"
 
@@ -46,9 +47,10 @@ public:
 	size_t debugCount() const { return m_debug.size(); }
 
 	void setBoundBox(BoundBox *bBox);
+	void invalidateCT();
 	void clear();
 	void backup();
-	void restore();
+	void restore();	
 	void fromPCL(CloudPtr cloud);
 	void toPCL(CloudPtr& cloud);
 	void fromRandomPlanePoints(
@@ -92,9 +94,10 @@ private:
 	vector<GLfloat> m_vertGL;
 	vector<GLfloat> m_normGL;
 	vector<GLfloat> m_debugGL;
-	CoverTree<CoverTreePoint<Vector3f>> *m_CT;
 	BoundBox* m_bBox = nullptr;
+	CoverTree<CoverTreePoint<Vector3f>> *m_CT;
 	bool m_CTStale = true;
+	size_t m_npointsCT = 0;
 	MessageLogger* m_msgLogger;
 	QRecursiveMutex m_recMutex;
 	size_t m_npointsOrig = 0;

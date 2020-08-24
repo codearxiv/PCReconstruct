@@ -22,6 +22,7 @@
 #include <qopengl.h>
 #include <QCoreApplication>
 #include <QRecursiveMutex>
+#include <omp.h>
 #include <queue>
 #include <numeric>
 #include <random>
@@ -185,14 +186,23 @@ void Cloud::restore()
 	m_CTStale = true;
 }
 
-
 //---------------------------------------------------------
 
 void Cloud::setBoundBox(BoundBox *bBox) {
+	QMutexLocker locker(&m_recMutex);
+
 	m_bBox = bBox;
+	bBox->setParentCloud(this);
 	m_CTStale = true;
 }
 
+//---------------------------------------------------------
+
+void Cloud::invalidateCT() {
+
+	QMutexLocker locker(&m_recMutex);
+	m_CTStale = true;
+}
 
 //---------------------------------------------------------
 
@@ -300,6 +310,7 @@ size_t Cloud::addPoint(const Vector3f& v, const Vector3f& n, bool threadSafe)
 	if( m_CT != nullptr ) {
 		CoverTreePoint<Vector3f> cp(v, idx);
 		m_CT->insert(cp);
+		++m_npointsCT;
 	}
 
 	if ( threadSafe ) m_recMutex.unlock();
@@ -383,6 +394,7 @@ void Cloud::buildSpatialIndex(bool useBBox)
 	size_t npoints = m_cloud.size();
 	size_t threshold = 0, lastPos = 0;
 
+	m_npointsCT = 0;
 	for(size_t i = 0; i < npoints; ++i){
 		// Log progress
 		if(m_msgLogger != nullptr) {
@@ -395,6 +407,7 @@ void Cloud::buildSpatialIndex(bool useBBox)
 		if( useBBox2 ) if( !m_bBox->pointInBBox(p) ) continue;
 		CoverTreePoint<Vector3f> cp(p, i);
 		m_CT->insert(cp);
+		++m_npointsCT;
 	}
 
 	m_CTStale = false;
@@ -407,36 +420,41 @@ void Cloud::approxCloudNorms(int iters, size_t kNN)
 	QMutexLocker locker(&m_recMutex);
 
 	bool useBBox = (m_bBox != nullptr);
-	size_t npoints = m_cloud.size();
-	size_t threshold = 0, lastPos = 0;
+	Index npoints = m_cloud.size();
+	size_t threshold = 0, lastPos = 0, progress = 0;
+
+	if( m_CTStale ) buildSpatialIndex();
+
+#pragma omp parallel default(shared)
+{
 	vector<CoverTreePoint<Vector3f>> neighs;
 	vector<Vector3f> vneighs;
 	vector<Vector3f> vwork;
 
-	if( m_CTStale ) buildSpatialIndex();
-
-	for(size_t i=0; i < npoints; ++i){
-		// Log progress
-		if(m_msgLogger != nullptr) {
-//			QCoreApplication::processEvents();
-			m_msgLogger->logProgress(
-						"Building cloud normals",
-						i+1, npoints, 5, threshold, lastPos);
-		}
-
+#pragma omp for schedule(dynamic)
+	for(Index i=0; i < npoints; ++i){
 		Vector3f p = m_cloud[i];
 		if( useBBox ) if( !m_bBox->pointInBBox(p) ) continue;
 		CoverTreePoint<Vector3f> cp(p, 0);
 		neighs = m_CT->kNearestNeighbors(cp, kNN);
 		m_norms[i] = approxNorm(p, iters, neighs, vneighs, vwork);
-//***
-//		if( i == 0 ){
-//			for(size_t j=0; j < neighs.size(); ++j){
-//				Vector3f q = m_cloud[neighs[j].getId()];
-//				m_debug.push_back(std::make_pair(p,q));
-//			}
-//		}
+
+		// Log progress
+		if(m_msgLogger != nullptr) {
+#pragma omp atomic
+			++progress;
+			m_msgLogger->logProgress(
+						"Building cloud normals",
+						progress, npoints, 5, threshold, lastPos);
+		}
+
 	}
+
+	m_msgLogger->logMessage("Building cloud normals: 100%...", false);
+
+
+} //Parallel
+
 
 }
 
@@ -803,7 +821,9 @@ void Cloud::reconstruct(
 	}
 
 
-	if( m_CTStale ) buildSpatialIndex(!looseBBox);
+	if( m_CTStale || (looseBBox && m_npointsCT < m_cloud.size()) ){
+		buildSpatialIndex(!looseBBox);
+	}
 
 	for(size_t idx = 0; idx < m_npointsOrig; ++idx){
 		// Log progress

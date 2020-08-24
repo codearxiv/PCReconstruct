@@ -7,6 +7,7 @@
 #include "MessageLogger.h"
 #include "RandomSurfDialog.h"
 #include "BoundBoxDialog.h"
+#include "NormalsDialog.h"
 #include "DecimateDialog.h"
 #include "SparsifyDialog.h"
 #include "ReconstructDialog.h"
@@ -117,6 +118,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(boundBoxAct, &QAction::triggered, this, &MainWindow::setBBox);
     toolsMenu->addAction(boundBoxAct);
 
+	QAction *normalsAct = new QAction("&Approx. Normals", this);
+	normalsAct->setStatusTip(
+				"Approximate cloud surface normals");
+	connect(normalsAct, &QAction::triggered, this, &MainWindow::approxNorms);
+	toolsMenu->addAction(normalsAct);
+
 	QAction *decimateAct = new QAction("&Decimate", this);
 	decimateAct->setStatusTip("Generate random holes in point cloud");
 	connect(decimateAct, &QAction::triggered, this, &MainWindow::decimate);
@@ -181,6 +188,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::cloudSetBBox,
             centralWidget, &Window::setCloudBBox);
 
+	connect(this, &MainWindow::cloudApproxNorms,
+			centralWidget, &Window::approxCloudNorms);
+
 	connect(this, &MainWindow::cloudDecimate,
 			centralWidget, &Window::decimateCloud);
 
@@ -193,6 +203,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::pointSizeChanged,
             centralWidget, &Window::setPointSize);
 
+	connect(this, &MainWindow::normScaleChanged,
+			centralWidget, &Window::setNormScale);
+
 	connect(centralWidget, &Window::bBoxFieldsChanged,
 			this, &MainWindow::changeBBoxFields);
 
@@ -202,7 +215,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     randomSurfDialog = new RandomSurfDialog(this);
     boundBoxDialog = new BoundBoxDialog(this);
-    decimateDialog = new DecimateDialog(this);
+	normalsDialog = new NormalsDialog(this);
+	decimateDialog = new DecimateDialog(this);
 	sparsifyDialog = new SparsifyDialog(this);
 	reconstructDialog = new ReconstructDialog(this);
     optionsDialog = new OptionsDialog(this);
@@ -348,6 +362,26 @@ void MainWindow::setBBox()
 
 //---------------------------------------------------------
 
+void MainWindow::approxNorms()
+{
+	// Show the dialog as modal
+	if(normalsDialog->exec() == QDialog::Accepted){
+		int nIters;
+		size_t kNN;
+		bool ok = normalsDialog->getFields(nIters, kNN);
+		if(!ok){
+			badInputMessageBox(
+						QString("All fields should be bigger than zero."));
+			return;
+		}
+		emit cloudApproxNorms(nIters, kNN);
+	}
+
+}
+
+
+//---------------------------------------------------------
+
 void MainWindow::decimate()
 {
 	// Show the dialog as modal
@@ -443,14 +477,15 @@ void MainWindow::options()
 {
     // Show the dialog as modal
     if(optionsDialog->exec() == QDialog::Accepted){
-        float pointSize;
-        bool ok = optionsDialog->getFields(pointSize);
+		float pointSize, normScale;
+		bool ok = optionsDialog->getFields(pointSize, normScale);
         if(!ok){
-            badInputMessageBox("point size field should be greater than zero.");
+			badInputMessageBox("All field should be greater than zero.");
             return;
         }
         emit pointSizeChanged(pointSize);
-    }
+		emit normScaleChanged(normScale);
+	}
 
 }
 

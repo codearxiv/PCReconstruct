@@ -3,6 +3,7 @@
 
 
 #include "BoundBoxDialog.h"
+#include "get_field.h"
 #include "constants.h"
 
 #include <QMainWindow>
@@ -53,38 +54,14 @@ BoundBoxDialog::BoundBoxDialog(QWidget *parent) : QDialog(parent)
 //-----------------------------------------------------------
 bool BoundBoxDialog::getFields(float minBBox[], float maxBBox[]) const
 {
+	bool ok;
+
     for(int i=0; i < 3; ++i){
-        QString minStr = minLineEdit[i]->text();
-        int pos = 0;
-        if(validator->validate(minStr, pos) != QValidator::Acceptable){
-            minLineEdit[i]->clear();
-            return false;
-        }
-        else{
-            bool ok;
-            minBBox[i] = minStr.toFloat(&ok);
-            if(!ok) {
-                minLineEdit[i]->clear();
-                return false;
-            }
-        }
+		ok = get_float_field(minLineEdit[i], validator, minBBox[i]);
+		if(!ok) return false;
 
-        QString maxStr = maxLineEdit[i]->text();
-        pos = 0;
-        if(validator->validate(maxStr, pos) != QValidator::Acceptable){
-            maxLineEdit[i]->clear();
-            return false;
-        }
-        else{
-            bool ok;
-            maxBBox[i] = maxStr.toFloat(&ok);
-            if( maxBBox[i] <= minBBox[i] ) ok = false;
-            if(!ok) {
-                maxLineEdit[i]->clear();
-                return false;
-            }
-        }
-
+		ok = get_float_field(maxLineEdit[i], validator, maxBBox[i]);
+		if(!ok) return false;
     }
 
     return true;

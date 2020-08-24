@@ -48,8 +48,8 @@
 **
 ****************************************************************************/
 /****************************************************************************
-**     Peter Beben: modified this file for the purpose of point cloud
-**     visualization.
+**     Peter Beben: heavily modified this file for the purpose of point
+**     cloud visualization in this project.
 **     Views ALL points in the point cloud without any pruning (so it
 **     must be small enough to fit into video memory!!).
 ****************************************************************************/
@@ -85,10 +85,10 @@ GLWidget::GLWidget(QWidget *parent, MessageLogger* msgLogger)
 	  m_rotVect(0.0f,0.0f,0.0f),
 	  m_movVect(0.0f,0.0f,0.0f),
 	  m_pointSize(5.0f),
-	  m_normScale(1.0f),
 	  m_showCloudNorms(false),
 	  m_aspectRatio(1.0f),
 	  m_farPlane(100.0f), m_nearPlane(0.01f),
+	  m_modelSize(1.0f),
 	  m_cloudVbo(QOpenGLBuffer::VertexBuffer),
 	  m_cloudBBoxVbo(QOpenGLBuffer::VertexBuffer),
 	  m_cloudBBoxEbo(QOpenGLBuffer::IndexBuffer),
@@ -108,6 +108,9 @@ GLWidget::GLWidget(QWidget *parent, MessageLogger* msgLogger)
 	m_cloudThread = new QThread(this);
 	m_cloudWorker = new CloudWorker(m_cloud);
 	m_cloudWorker->moveToThread(m_cloudThread);
+
+	connect(this, &GLWidget::cloudApproxNorms,
+			m_cloudWorker, &CloudWorker::approxCloudNorms);
 
 	connect(this, &GLWidget::cloudDecimate,
 			m_cloudWorker, &CloudWorker::decimateCloud);
@@ -224,7 +227,7 @@ static const char *fragmentShaderSourceCore =
 		"uniform vec3 vertColor;\n"
 		"void main() {\n"
 		"   highp vec3 L = normalize(lightPos - vert);\n"
-		"   highp float NL = max(abs(dot(normalize(vertNormal), L)), 0.0);\n"
+		"   highp float NL = max((dot(normalize(vertNormal), L)), 0.0);\n"
 		"   highp vec3 color = vertColor;\n"
 		"   highp vec3 col = clamp(color * (0.7 + NL), 0.0, 1.0);\n"
 //		"   highp vec3 col = color;\n"
@@ -255,7 +258,7 @@ static const char *fragmentShaderSource =
 		"uniform highp vec3 vertColor;\n"
 		"void main() {\n"
 		"   highp vec3 L = normalize(lightPos - vert);\n"
-		"   highp float NL = max(abs(dot(normalize(vertNormal), L)), 0.0);\n"
+		"   highp float NL = max((dot(normalize(vertNormal), L)), 0.0);\n"
 		"   highp vec3 color = vertColor;\n"
 		"   highp vec3 col = clamp(color * (0.7 + NL), 0.0, 1.0);\n"
 //		"   highp vec3 col = color;\n"
@@ -312,8 +315,7 @@ void GLWidget::initializeGL()
 
 	setGLView();
 
-	// Light position is fixed.
-	m_program->setUniformValue(m_lightPosLoc, QVector3D(0, 0, 70));
+	m_program->setUniformValue(m_lightPosLoc, QVector3D(0, 0, 2*m_modelSize));
 
 	m_program->release();
 
@@ -336,6 +338,7 @@ void GLWidget::paintGL()
 	QMatrix3x3 normalMatrix = m_world.normalMatrix();
 	m_program->setUniformValue(m_normalMatrixLoc, normalMatrix);
     m_program->setUniformValue(m_pointSizeLoc, m_pointSize);
+	m_program->setUniformValue(m_lightPosLoc, QVector3D(0, 0, 2*m_modelSize));
 
 	size_t npoints = m_cloud.pointCount();
 	size_t npointsOrig = m_cloud.pointCountOrig();
@@ -386,15 +389,14 @@ void GLWidget::setGLView()
 	m_rotVect = QVector3D(0.0f,0.0f,0.0f);
 	m_movVect = QVector3D(0.0f,0.0f,0.0f);
 
-	float diag = m_cloudBBox.diagonalSize();
-	m_nearPlane = 1e-5*diag;
-	m_farPlane = 100.0f*diag;
+	m_nearPlane = 1e-5*m_modelSize;
+	m_farPlane = 100.0f*m_modelSize;
 	m_proj.setToIdentity();
 	m_proj.perspective(45.0f, m_aspectRatio, m_nearPlane, m_farPlane);
 
 	m_world.setToIdentity();
 	m_camera.setToIdentity();
-	m_camera.translate(0, 0, -diag);
+	m_camera.translate(0, 0, -m_modelSize);
 }
 //---------------------------------------------------------
 
@@ -570,6 +572,8 @@ void GLWidget::setRandomCloud(size_t nPoints)
 
 void GLWidget::getCloud(CloudPtr& cloud)
 {
+	QMutexLocker locker(&m_recMutex);
+
 	m_cloud.toPCL(cloud);
 }
 
@@ -577,6 +581,8 @@ void GLWidget::getCloud(CloudPtr& cloud)
 
 void GLWidget::undoCloud()
 {
+	QMutexLocker locker(&m_recMutex);
+
 	m_cloud.restore();
 
 	updateCloud(false);
@@ -620,12 +626,12 @@ void GLWidget::updateCloud(bool updateBBox)
 		m_cloudBBox.getExtents(minBBox, maxBBox);
 		emit bBoxFieldsChanged(minBBox, maxBBox);
 		m_cloud.setBoundBox(&m_cloudBBox);
-		m_normScale = 2e-2*m_cloudBBox.diagonalSize();
+		m_modelSize = m_cloudBBox.diagonalSize();
 		setGLBBox(m_cloudBBox, m_cloudBBoxVbo, m_cloudBBoxEbo);
 	}
 
 	setGLCloud();
-	setGLCloudNorms(m_normScale);
+	setGLCloudNorms(1e-2*m_modelSize);
 
 #ifdef SHOW_CLOUD_DBUG
 	setGLCloudDebug();

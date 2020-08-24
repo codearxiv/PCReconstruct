@@ -24,6 +24,7 @@ public:
 	~CloudWorker();
 
 public slots:
+	void approxCloudNorms(int nIters, size_t kNN);
 	void decimateCloud(size_t nHoles, size_t kNN);
 	void sparsifyCloud(float percent);
 	void reconstructCloud(

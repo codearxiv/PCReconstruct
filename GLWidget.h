@@ -48,8 +48,8 @@
 **
 ****************************************************************************/
 /****************************************************************************
-**     Peter Beben: modified this file for the purpose of point cloud
-**     visualization.
+**     Peter Beben: heavily modified this file for the purpose of point
+**     cloud visualization in this project.
 **     Views ALL points in the point cloud without any pruning (so it
 **     must be small enough to fit into video memory!!).
 ****************************************************************************/
@@ -107,6 +107,8 @@ public slots:
 	void undoCloud();
     void setCloudBBox(float minBBox[3], float maxBBox[3]);
 	void viewGLCloudNorms(bool enabled);
+	void approxCloudNorms(int nIters, size_t kNN)
+	{ emit cloudApproxNorms(nIters, kNN); }
 	void decimateCloud(size_t nHoles, size_t kNN)
 	{ emit cloudDecimate(nHoles,kNN); }
 	void sparsifyCloud(float percent)
@@ -121,12 +123,14 @@ public slots:
 					maxNewPoints, looseBBox, method);
 	}
     void setPointSize(float size) { m_pointSize = size; }
+	void setNormScale(float scale) { setGLCloudNorms(scale*m_modelSize); }
 	void updateCloud(bool updateBBox);
 
 signals:
 	void vectRotationChanged(int angle, QVector3D v);
 	void vectTranslationChanged(QVector3D v);
 	//void cloudSetRandom(size_t nPoints);
+	void cloudApproxNorms(int nIters, size_t kNN);
 	void cloudDecimate(size_t nHoles, size_t kNN);
 	void cloudSparsify(float percent);
 	void cloudReconstruct(
@@ -174,6 +178,7 @@ private:
 	float m_aspectRatio;
 	float m_nearPlane;
 	float m_farPlane;
+	float m_modelSize;
 	int m_mvMatrixLoc;
 	int m_normalMatrixLoc;
 	int m_lightPosLoc;

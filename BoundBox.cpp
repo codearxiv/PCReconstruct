@@ -25,11 +25,30 @@ BoundBox::BoundBox(const float minBBox[3], const float maxBBox[3],
 
 BoundBox::BoundBox(const Cloud& cloud, MessageLogger* msgLogger)
 {
-	m_msgLogger = msgLogger;
+	m_msgLogger = msgLogger;	
 	set(cloud);
 }
+
 //---------------------------------------------------------
 
+void BoundBox::set(const Cloud& cloud)
+{
+	float minBBox[3] = {float_infinity, float_infinity, float_infinity};
+	float maxBBox[3] = {-float_infinity, -float_infinity, -float_infinity};
+
+	size_t numPoints = cloud.pointCount();
+	for(size_t i = 0; i < numPoints; ++i){
+		Vector3f v = cloud.point(i);
+		for(int j=0; j<3; ++j) {
+			minBBox[j] = std::min(v[j], minBBox[j]);
+			maxBBox[j] = std::max(v[j], maxBBox[j]);
+		}
+	}
+
+	set(minBBox, maxBBox);
+}
+
+//---------------------------------------------------------
 
 void BoundBox::set(const float minBBox[3], const float maxBBox[3])
 {
@@ -39,27 +58,7 @@ void BoundBox::set(const float minBBox[3], const float maxBBox[3])
 	}
 	m_vertCount = 8;
 
-}
-
-//---------------------------------------------------------
-
-void BoundBox::set(const Cloud& cloud)
-{
-	for(int j=0; j<3; ++j) {
-		m_minBBox[j] = float_infinity;
-		m_maxBBox[j] = -float_infinity;
-	}
-
-	size_t numPoints = cloud.pointCount();
-	for(size_t i = 0; i < numPoints; ++i){
-		Vector3f v = cloud.point(i);
-		for(int j=0; j<3; ++j) {
-			m_minBBox[j] = std::min(v[j], m_minBBox[j]);
-			m_maxBBox[j] = std::max(v[j], m_maxBBox[j]);
-		}
-	}
-
-	m_vertCount = 8;
+	if( m_cloud != nullptr ) m_cloud->invalidateCT();
 
 }
 
@@ -74,6 +73,8 @@ void BoundBox::pad(float padX, float padY, float padZ)
 		m_maxBBox[j] += padding[j];
 	}
 
+	if( m_cloud != nullptr ) m_cloud->invalidateCT();
+
 }
 
 //---------------------------------------------------------
@@ -86,6 +87,17 @@ void BoundBox::rescale(float frac)
 		m_minBBox[j] -= padding;
 		m_maxBBox[j] += padding;
 	}
+
+	if( m_cloud != nullptr ) m_cloud->invalidateCT();
+}
+
+//---------------------------------------------------------
+
+void BoundBox::setParentCloud(Cloud *cloud)
+{
+
+	m_cloud = cloud;
+	if( m_cloud != nullptr ) m_cloud->invalidateCT();
 }
 
 
