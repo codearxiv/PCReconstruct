@@ -36,6 +36,7 @@ The resulting reconstruction of the sparsified bunny:
 Original Stanford bunny sampled with 172,974 points: 
 
 ![2a](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture2a.PNG)
+![2aa](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture2aa.PNG)
 
 Decimating it's mid body with random holes:
 
