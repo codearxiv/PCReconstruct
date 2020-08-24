@@ -42,6 +42,7 @@ private:
 	void open();
 	void saveAs();
 	void undo();
+	void viewGLNorms(bool enabled);
 	void setRandom();
     void setBBox();
 	void decimate();
@@ -59,6 +60,7 @@ signals:
 	void cloudChanged(CloudPtr cloud);
 	void cloudQueried(CloudPtr& cloud);
 	void cloudUndo();
+	void cloudNormsViewGL(bool enabled);
 	void cloudSetRandom(size_t nPoints);
     void cloudSetBBox(float minBBox[3], float maxBBox[3]);
 	void cloudDecimate(size_t nHoles, size_t kNN);

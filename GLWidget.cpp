@@ -70,7 +70,6 @@
 #include <QRecursiveMutex>
 #include <math.h>
 
-//#define SHOW_CLOUD_NORMS
 //#define SHOW_CLOUD_DBUG
 
 
@@ -85,7 +84,10 @@ GLWidget::GLWidget(QWidget *parent, MessageLogger* msgLogger)
 	  m_program(0),
 	  m_rotVect(0.0f,0.0f,0.0f),
 	  m_movVect(0.0f,0.0f,0.0f),
-	  m_pointSize(5.0f), m_aspectRatio(1.0f),
+	  m_pointSize(5.0f),
+	  m_normScale(1.0f),
+	  m_showCloudNorms(false),
+	  m_aspectRatio(1.0f),
 	  m_farPlane(100.0f), m_nearPlane(0.01f),
 	  m_cloudVbo(QOpenGLBuffer::VertexBuffer),
 	  m_cloudBBoxVbo(QOpenGLBuffer::VertexBuffer),
@@ -131,6 +133,8 @@ GLWidget::~GLWidget()
 {
 	m_cloudThread->quit();
 	m_cloudThread->wait();
+//	delete m_cloudThread;
+	delete m_cloudWorker;
 	cleanup();
 }
 //---------------------------------------------------------
@@ -184,10 +188,12 @@ void GLWidget::cleanup()
 		return;
 	makeCurrent();
 	m_cloudVbo.destroy();
+	m_cloudNormsVbo.destroy();
 	m_cloudBBoxVbo.destroy();
+	m_cloudDebugVbo.destroy();
 	delete m_program;
 	m_program = 0;
-	doneCurrent();
+	doneCurrent();	
 }
 //---------------------------------------------------------
 
@@ -218,7 +224,7 @@ static const char *fragmentShaderSourceCore =
 		"uniform vec3 vertColor;\n"
 		"void main() {\n"
 		"   highp vec3 L = normalize(lightPos - vert);\n"
-		"   highp float NL = max(dot(normalize(vertNormal), L), 0.0);\n"
+		"   highp float NL = max(abs(dot(normalize(vertNormal), L)), 0.0);\n"
 		"   highp vec3 color = vertColor;\n"
 		"   highp vec3 col = clamp(color * (0.7 + NL), 0.0, 1.0);\n"
 //		"   highp vec3 col = color;\n"
@@ -249,7 +255,7 @@ static const char *fragmentShaderSource =
 		"uniform highp vec3 vertColor;\n"
 		"void main() {\n"
 		"   highp vec3 L = normalize(lightPos - vert);\n"
-		"   highp float NL = max(dot(normalize(vertNormal), L), 0.0);\n"
+		"   highp float NL = max(abs(dot(normalize(vertNormal), L)), 0.0);\n"
 		"   highp vec3 color = vertColor;\n"
 		"   highp vec3 col = clamp(color * (0.7 + NL), 0.0, 1.0);\n"
 //		"   highp vec3 col = color;\n"
@@ -294,11 +300,9 @@ void GLWidget::initializeGL()
 	QOpenGLVertexArrayObject::Binder vaoBinderCloudBBox(&m_cloudBBoxVao);
 	setGLBBox(m_cloudBBox, m_cloudBBoxVbo, m_cloudBBoxEbo);
 
-#ifdef SHOW_CLOUD_NORMS
 	m_cloudNormsVao.create();
 	QOpenGLVertexArrayObject::Binder vaoBinderCloudNorms(&m_cloudNormsVao);
 	setGLCloudNorms(1.0f);
-#endif
 
 #ifdef SHOW_CLOUD_DBUG
 	m_cloudDebugVao.create();
@@ -352,18 +356,17 @@ void GLWidget::paintGL()
 	glDrawElements(GL_LINES, idxCount, GL_UNSIGNED_INT, 0);
 //	glDrawElements(GL_LINES, idxCount, GL_UNSIGNED_INT, m_cloudBBox.elemGLData());
 
-#ifdef SHOW_CLOUD_NORMS
-	m_program->setUniformValue(m_colorLoc, QVector3D(1.0f, 0.0f, 1.0f));
-	QOpenGLVertexArrayObject::Binder vaoBinder3(&m_cloudNormsVao);
-	glDrawArrays(GL_LINES, 0, 2*npoints);
-#endif
+	if( m_showCloudNorms ){
+		m_program->setUniformValue(m_colorLoc, QVector3D(1.0f, 0.0f, 1.0f));
+		QOpenGLVertexArrayObject::Binder vaoBinder3(&m_cloudNormsVao);
+		glDrawArrays(GL_LINES, 0, 2*npoints);
+	}
 
 #ifdef SHOW_CLOUD_DBUG
 	m_program->setUniformValue(m_colorLoc, QVector3D(0.0f, 0.0f, 0.5f));
 	QOpenGLVertexArrayObject::Binder vaoBinder4(&m_cloudDebugVao);
 	glDrawArrays(GL_LINES, 0, 2*m_cloud.debugCount());
 #endif
-
 
 	m_program->release();
 }
@@ -526,21 +529,6 @@ void GLWidget::setCloud(CloudPtr cloud)
 	setGLView();
 }
 
-//---------------------------------------------------------
-
-void GLWidget::getCloud(CloudPtr& cloud)
-{
-	m_cloud.toPCL(cloud);
-}
-
-//---------------------------------------------------------
-
-void GLWidget::undoCloud()
-{
-	m_cloud.restore();
-
-	updateCloud(false);
-}
 
 //---------------------------------------------------------
 
@@ -558,8 +546,7 @@ void GLWidget::setRandomCloud(size_t nPoints)
 		float height =
 				C(0)*cos(D(0)*pu) +
 				C(1)*cos(D(1)*pv) +
-				C(2)*
-				cos(D(2)*pu)*cos(D(3)*pu) +
+				C(2)*cos(D(2)*pu)*cos(D(3)*pu) +
 				C(3)*cos(D(4)*pu)*cos(D(5)*pv) +
 				C(4)*cos(D(6)*pv)*cos(D(7)*pv) +
 				E(0)*sin(F(0)*pu) +
@@ -578,6 +565,24 @@ void GLWidget::setRandomCloud(size_t nPoints)
 	setGLView();
 }
 
+
+//---------------------------------------------------------
+
+void GLWidget::getCloud(CloudPtr& cloud)
+{
+	m_cloud.toPCL(cloud);
+}
+
+//---------------------------------------------------------
+
+void GLWidget::undoCloud()
+{
+	m_cloud.restore();
+
+	updateCloud(false);
+}
+
+
 //---------------------------------------------------------
 
 void GLWidget::setCloudBBox(float minBBox[3], float maxBBox[3])
@@ -589,9 +594,16 @@ void GLWidget::setCloudBBox(float minBBox[3], float maxBBox[3])
 	emit bBoxFieldsChanged(minBBox, maxBBox);
 	m_cloud.setBoundBox(&m_cloudBBox);
     setGLBBox(m_cloudBBox, m_cloudBBoxVbo, m_cloudBBoxEbo);
-	//m_farPlane = 10.0f*maxBBox[2];
     update();
 
+}
+
+//---------------------------------------------------------
+
+void GLWidget::viewGLCloudNorms(bool enabled)
+{
+	m_showCloudNorms = enabled;
+	update();
 }
 
 //---------------------------------------------------------
@@ -608,16 +620,12 @@ void GLWidget::updateCloud(bool updateBBox)
 		m_cloudBBox.getExtents(minBBox, maxBBox);
 		emit bBoxFieldsChanged(minBBox, maxBBox);
 		m_cloud.setBoundBox(&m_cloudBBox);
+		m_normScale = 2e-2*m_cloudBBox.diagonalSize();
 		setGLBBox(m_cloudBBox, m_cloudBBoxVbo, m_cloudBBoxEbo);
 	}
 
 	setGLCloud();
-
-#ifdef SHOW_CLOUD_NORMS
-	m_cloud.approxCloudNorms(25, 15);
-	float scale = 2e-2*m_cloudBBox.diagonalSize();
-	setGLCloudNorms(scale);
-#endif
+	setGLCloudNorms(m_normScale);
 
 #ifdef SHOW_CLOUD_DBUG
 	setGLCloudDebug();

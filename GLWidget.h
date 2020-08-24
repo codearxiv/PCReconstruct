@@ -102,10 +102,11 @@ public slots:
 	void setVectTranslation(QVector3D v);
 	void cleanup();
 	void setCloud(CloudPtr cloud);
+	void setRandomCloud(size_t nPoints);
 	void getCloud(CloudPtr& cloud);
 	void undoCloud();
-	void setRandomCloud(size_t nPoints);
     void setCloudBBox(float minBBox[3], float maxBBox[3]);
+	void viewGLCloudNorms(bool enabled);
 	void decimateCloud(size_t nHoles, size_t kNN)
 	{ emit cloudDecimate(nHoles,kNN); }
 	void sparsifyCloud(float percent)
@@ -179,6 +180,8 @@ private:
 	int m_colorLoc;
     int m_pointSizeLoc;
     float m_pointSize;
+	float m_normScale;
+	bool m_showCloudNorms;
 	QMatrix4x4 m_proj;
 	QMatrix4x4 m_camera;
 	QMatrix4x4 m_world;

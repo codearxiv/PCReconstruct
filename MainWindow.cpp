@@ -99,6 +99,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	viewMenu->addAction(dock->toggleViewAction());
 
+	QAction *viewNormsAct = new QAction("&View normals", this);
+	viewNormsAct->setStatusTip("View point cloud normals.");
+	viewNormsAct->setCheckable(true);
+	connect(viewNormsAct, &QAction::triggered, this, &MainWindow::viewGLNorms);
+	viewMenu->addAction(viewNormsAct);
+
     QAction *randomSurfAct = new QAction("&Random surface", this);
     randomSurfAct->setStatusTip(
 				"Sample a point cloud randomly from a random surface");
@@ -165,6 +171,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	connect(this, &MainWindow::cloudUndo,
 			centralWidget, &Window::undoCloud);
+
+	connect(this, &MainWindow::cloudNormsViewGL,
+			centralWidget, &Window::viewGLCloudNorms);
 
 	connect(this, &MainWindow::cloudSetRandom,
 			centralWidget, &Window::setRandomCloud);
@@ -292,6 +301,12 @@ void MainWindow::undo()
 	emit cloudUndo();
 }
 
+//---------------------------------------------------------
+
+void MainWindow::viewGLNorms(bool enabled)
+{
+	emit cloudNormsViewGL(enabled);
+}
 
 //---------------------------------------------------------
 

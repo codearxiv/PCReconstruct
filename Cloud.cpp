@@ -97,9 +97,9 @@ const GLfloat* Cloud::normGLData(float scale)
 {
 	m_normGL.resize(12 * m_cloud.size());
 	for(size_t i=0, j=0; i < m_cloud.size(); ++i){
-		m_normGL[j] = m_cloud[i][0];
-		m_normGL[j+1] = m_cloud[i][1];
-		m_normGL[j+2] = m_cloud[i][2];
+		m_normGL[j] = m_cloud[i][0] - scale*m_norms[i][0];
+		m_normGL[j+1] = m_cloud[i][1] - scale*m_norms[i][1];
+		m_normGL[j+2] = m_cloud[i][2] - scale*m_norms[i][2];
 		m_normGL[j+3] = m_norms[i][0];
 		m_normGL[j+4] = m_norms[i][1];
 		m_normGL[j+5] = m_norms[i][2];
@@ -803,7 +803,6 @@ void Cloud::reconstruct(
 	}
 
 
-	//if( m_CTStale ) buildSpatialIndex(false);
 	if( m_CTStale ) buildSpatialIndex(!looseBBox);
 
 	for(size_t idx = 0; idx < m_npointsOrig; ++idx){
@@ -944,7 +943,7 @@ void Cloud::reconstruct(
 		getNeighVects(p, neighs, vneighs);
 
 		Vector3f norm;
-		if( idx >= m_npointsOrig ){
+		if( idx < m_npointsOrig ){
 			norm = m_norms[idx];
 		}
 		else{
