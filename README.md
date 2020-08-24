@@ -49,10 +49,10 @@ Increasing the default patch size field to 300 to take into account the large ga
 
 The resulting reconstruction of the decimated armadillo (reconstructed points highlighted and unhighlighted): 
 
-![2d](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture2dq.PNG)
+![2d](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture2d.PNG)
 ![2dd](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture2dd.PNG)
-![2e](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture2eq.PNG)
-![2ee](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture2eeq.PNG)
+![2e](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture2e.PNG)
+![2ee](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture2ee.PNG)
 
 
 ## Sparsified Random Surface:
