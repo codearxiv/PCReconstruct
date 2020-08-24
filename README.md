@@ -32,6 +32,27 @@ The resulting reconstruction of the sparsified bunny:
 
 ![1e](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture1e.PNG)
 
+## Decimated Armadillo:
+Original Stanford bunny sampled with 172,974 points: 
+
+![2a](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture2a.PNG)
+
+Decimating it's mid body with random holes:
+
+![2b](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture2b.PNG)
+![2bb](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture2bb.PNG)
+
+Increasing the default patch size field to 300 to take into account the large gaps relative to sampling density:
+
+![2c](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture2c.PNG)
+
+The resulting reconstruction of the sdecimated armadillo (reconstructed points highlighted and unhighlighted): 
+
+![2d](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture2d.PNG)
+![2dd](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture2dd.PNG)
+![2e](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture2e.PNG)
+![2ee](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture2ee.PNG)
+
 
 ## Sparsified Random Surface:
 Original surface sampled with 35000 points: 
