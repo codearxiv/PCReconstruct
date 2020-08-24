@@ -4,7 +4,7 @@ A point cloud reconstruction tool written in Qt C++, using Eigen, OpenMP, and Op
 
 Takes a PCL point cloud surface and fills in gaps or densifies sparse regions by learning from the various surface features of the cloud.
 
-This is done using a "continuous signal" variation of the k-SVD dictionary learning algorithm adapted to unstructured point clouds.
+This is done using a "continuous dictionary" variation of the k-SVD dictionary learning algorithm adapted to unstructured point clouds.
 
 ## TODO: 
 * Still struggles in areas of very high curvature. Smaller patch sizes may have to be selected here automatically. 
