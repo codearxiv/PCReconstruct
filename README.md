@@ -63,7 +63,7 @@ But this is because of the normals need updating using a smaller patch size
 
 ![2e2](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture2e2.PNG)
 
-Doing this we get
+Doing this we get the final repaired armadillo
 
 ![2f2](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture2f2.PNG)
 ![2f](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture2f.PNG)
