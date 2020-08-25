@@ -25,7 +25,7 @@ after sparsifying, and the curvature there is too high as well).
 
 We increase the default densification field to 1.5 to get a denser reconstruction,
 and set patch frequency to 2 since we dont expect much bumpiness in the final result
-within a patch size of 50. We also want tthe "use points outside bounding box" 
+within a patch size of 50. We also want the "use points outside bounding box" 
 field set "True" to get better agreement around the boundary of the bounding box:
 
 ![1d](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture1d.PNG)
@@ -65,8 +65,8 @@ But this is because of the normals need updating using a smaller patch size
 
 Doing this we get
 
-![2f](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture2f.PNG)
 ![2f2](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture2f2.PNG)
+![2f](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture2f.PNG)
 
 
 ## Sparsified Random Surface:
