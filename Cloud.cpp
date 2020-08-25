@@ -795,7 +795,8 @@ void Cloud::reconstruct(
 			size_t idx, const vector<CoverTreePoint<Vector3f>>& neighs)
 	{
 		neighsNrm.clear();
-		size_t kNNNrm = min(size_t(50), neighs.size());
+//		size_t kNNNrm = min(size_t(50), neighs.size());
+		size_t kNNNrm = neighs.size();
 		for(size_t j=0;j<kNNNrm;++j){ neighsNrm.push_back(neighs[j]); }
 		m_norms[idx] =
 				approxNorm(m_cloud[idx], 25, neighsNrm, vneighsNrm, vwork);
