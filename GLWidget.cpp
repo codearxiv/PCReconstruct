@@ -227,9 +227,9 @@ static const char *fragmentShaderSourceCore =
 		"uniform vec3 vertColor;\n"
 		"void main() {\n"
 		"   highp vec3 L = normalize(lightPos - vert);\n"
-		"   highp float NL = max((dot(normalize(vertNormal), L)), 0.0);\n"
+		"   highp float NL = max(abs(dot(normalize(vertNormal), L)), 0.0);\n"
 		"   highp vec3 color = vertColor;\n"
-		"   highp vec3 col = clamp(color * (0.7 + NL), 0.0, 1.0);\n"
+		"   highp vec3 col = clamp(color * (0.3 + 0.8*NL), 0.0, 1.0);\n"
 //		"   highp vec3 col = color;\n"
 		"   fragColor = vec4(col, 1.0);\n"
 		"}\n";
@@ -258,9 +258,9 @@ static const char *fragmentShaderSource =
 		"uniform highp vec3 vertColor;\n"
 		"void main() {\n"
 		"   highp vec3 L = normalize(lightPos - vert);\n"
-		"   highp float NL = max((dot(normalize(vertNormal), L)), 0.0);\n"
+		"   highp float NL = max(abs(dot(normalize(vertNormal), L)), 0.0);\n"
 		"   highp vec3 color = vertColor;\n"
-		"   highp vec3 col = clamp(color * (0.7 + NL), 0.0, 1.0);\n"
+		"   highp vec3 col = clamp(color * (0.3 + 0.8*NL), 0.0, 1.0);\n"
 //		"   highp vec3 col = color;\n"
 		"   gl_FragColor = vec4(col, 1.0);\n"
 		"}\n";

@@ -425,6 +425,8 @@ void Cloud::approxCloudNorms(int iters, size_t kNN)
 
 	if( m_CTStale ) buildSpatialIndex();
 
+//	std::clock_t c_start = std::clock();//***
+
 #pragma omp parallel default(shared)
 {
 	vector<CoverTreePoint<Vector3f>> neighs;
@@ -450,10 +452,14 @@ void Cloud::approxCloudNorms(int iters, size_t kNN)
 
 	}
 
-	m_msgLogger->logMessage("Building cloud normals: 100%...", false);
-
-
 } //Parallel
+
+//	std::clock_t c_end = std::clock();//***
+//	double time_elapsed_ms = 1000.0 * (c_end-c_start) / CLOCKS_PER_SEC;
+//	std::cout << "\nCPU time used: " << time_elapsed_ms << " ms\n" << std::endl;
+
+
+	m_msgLogger->logMessage("Building cloud normals: 100%...", false);
 
 
 }
@@ -587,8 +593,6 @@ void Cloud::reconstruct(
 	QMutexLocker locker(&m_recMutex);
 	//assert(m_CT != nullptr);
 	assert(kNN >= 1 && nfreq >= 1 && natm >= 1 && latm >= 1 && latm <= natm);
-	//double time_elapsed_ms;
-	//std::clock_t c_start, c_end;
 
 	m_npointsOrig = m_cloud.size();
 	if(m_npointsOrig == 0) return;
@@ -902,13 +906,13 @@ void Cloud::reconstruct(
 		m_msgLogger->logMessage("Training dictionary...");
 	}
 
-//	c_start = std::clock();//***
+//	std::clock_t c_start = std::clock();//***
 
 	ksvd_dct2D(true, Ws, Us, Vs, nfreq, latm, kSVDIters, 0.0,
 			   sparseFunct, D, C, m_msgLogger);
 
-//	c_end = std::clock();//***
-//	time_elapsed_ms = 1000.0 * (c_end-c_start) / CLOCKS_PER_SEC;
+//	std::clock_t c_end = std::clock();//***
+//	double time_elapsed_ms = 1000.0 * (c_end-c_start) / CLOCKS_PER_SEC;
 //	std::cout << "\nCPU time used: " << time_elapsed_ms << " ms\n" << std::endl;
 
 
