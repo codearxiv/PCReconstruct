@@ -1,6 +1,6 @@
 # PCReconstruct
 
-A point cloud completion tool written in Qt C++, using Eigen, OpenMP, and OpenGL.
+Sparse coding based point cloud completion tool written in Qt C++, using Eigen, OpenMP, and OpenGL.
 
 Takes a PCL point cloud surface and fills in gaps or densifies sparse regions by learning from the various surface features of the cloud.
 
