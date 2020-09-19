@@ -426,8 +426,9 @@ void Cloud::approxCloudNorms(int iters, size_t kNN)
 	if( m_CTStale ) buildSpatialIndex();
 
 //	std::clock_t c_start = std::clock();//***
+	const bool useOpenMP = true;
 
-#pragma omp parallel default(shared)
+#pragma omp parallel if(useOpenMP) default(shared)
 {
 	vector<CoverTreePoint<Vector3f>> neighs;
 	vector<Vector3f> vneighs;
@@ -578,7 +579,7 @@ void Cloud::sparsify(float percent)
     }
 
     size_t nKeep = size_t(ceil( percent*nPointsUse/100.0 ));
-    size_t nRemove = max(size_t(0), nPointsUse - nKeep);
+	size_t nRemove = max(size_t(0), nPointsUse - nKeep);
 	decimate(nRemove, 1);
 
 }
@@ -586,9 +587,9 @@ void Cloud::sparsify(float percent)
 //---------------------------------------------------------
 
 void Cloud::reconstruct(
-        int kSVDIters, size_t kNN, size_t nfreq, float densify,
+		int kSVDIters, size_t kNN, size_t nfreq, float densify,
 		size_t natm, size_t latm, size_t maxNewPoints, bool looseBBox,
-        SparseApprox method)
+		SparseApprox method)
 {
 	QMutexLocker locker(&m_recMutex);
 	//assert(m_CT != nullptr);
@@ -787,12 +788,14 @@ void Cloud::reconstruct(
 
 	//--------
 
-	vector<CoverTreePoint<Vector3f>> neighsNrm;
-	vector<Vector3f> vneighsNrm;
-	vector<Vector3f> vwork;
 
-	auto update_normal = [&](
-			size_t idx, const vector<CoverTreePoint<Vector3f>>& neighs)
+	auto update_normal = [=](
+			size_t idx,
+			const vector<CoverTreePoint<Vector3f>>& neighs,
+			vector<CoverTreePoint<Vector3f>>& neighsNrm,
+			vector<Vector3f>& vneighsNrm,
+			vector<Vector3f>& vwork
+			)
 	{
 		neighsNrm.clear();
 //		size_t kNNNrm = min(size_t(50), neighs.size());
@@ -805,44 +808,47 @@ void Cloud::reconstruct(
 
 	//--------
 
-	vector<CoverTreePoint<Vector3f>> neighs;
-	vector<Vector3f> vneighs;
-	vector<Vector3f> vneighsXY;
-	MapMtrxi gridXY(nullptr, 0, 0);
-	vectoria iworkGrid(kNN);
-	vector<gridLocation> gridLoc;
-
-	VectorXf Usig, Vsig, Wsig;
-	vector<VectorXf> Us;
-	vector<VectorXf> Vs;
-	vector<VectorXf> Ws;
-
-	queue<size_t> qpoints;
-	std::priority_queue<std::pair<float, size_t>> pqpoints;
-	size_t threshold = 0, lastPos = 0;
-
 	if(m_msgLogger != nullptr) {
 		m_msgLogger->logMessage("** Point cloud reconstruction **");
 	}
-
 
 	if( m_CTStale || (looseBBox && m_npointsCT < m_cloud.size()) ){
 		buildSpatialIndex(!looseBBox);
 	}
 
-	for(size_t idx = 0; idx < m_npointsOrig; ++idx){
-		// Log progress
-		if(m_msgLogger != nullptr) {
-			m_msgLogger->logProgress(
-						"Setting up signals",
-						idx+1, m_npointsOrig, 5, threshold, lastPos);
-		}
+	queue<size_t> qpoints;
+	std::priority_queue<std::pair<float, size_t>> pqpoints;
+
+	vector<VectorXf> Us;
+	vector<VectorXf> Vs;
+	vector<VectorXf> Ws;
+
+	size_t threshold = 0, lastPos = 0, progress = 0;
+	const bool useOpenMP = true;
+
+#pragma omp parallel if(useOpenMP) default(shared)
+{
+
+	vector<CoverTreePoint<Vector3f>> neighs;
+	vector<Vector3f> vneighs;
+	vector<Vector3f> vneighsXY;
+	vector<CoverTreePoint<Vector3f>> neighsNrm;
+	vector<Vector3f> vneighsNrm;
+	vector<Vector3f> vwork;
+
+	MapMtrxi gridXY(nullptr, 0, 0);
+	vectoria iworkGrid(kNN);
+	vector<gridLocation> gridLoc;
+	VectorXf Usig, Vsig, Wsig;
+
+#pragma omp for schedule(dynamic)
+	for(Index idx = 0; idx < m_npointsOrig; ++idx){
 
 		Vector3f p = m_cloud[idx];
 		if( useBBox ) if( !m_bBox->pointInBBox(p) ) continue;
 		pointKNN(p, kNN, neighs);
 		getNeighVects(p, neighs, vneighs);
-		Vector3f norm = update_normal(idx, neighs);
+		Vector3f norm = update_normal(idx, neighs, neighsNrm, vneighsNrm, vwork);
 
 		float sizeX, sizeY;
 		size_t gridDimX, gridDimY;
@@ -854,20 +860,35 @@ void Cloud::reconstruct(
 		if( !success ) continue;
 
 		setup_grid_signal(gridLoc, Usig, Vsig, Wsig);
-		Us.push_back(Usig);
-		Vs.push_back(Vsig);
-		Ws.push_back(Wsig);
 
 		size_t numEmpty = get_num_empty_cells(
 					p, rotXY, gridXY, sizeX, sizeY, gridDimX, gridDimY);
 
+#pragma omp critical
+{
+		Us.push_back(Usig);
+		Vs.push_back(Vsig);
+		Ws.push_back(Wsig);
 //		if( numEmpty > 0 ) qpoints.push(idx);
 		if( numEmpty > 0 ){
 			float weight = float(numEmpty)/(gridDimX*gridDimY);
 			pqpoints.push(std::make_pair(weight,idx));
 		}
 
+		++progress;
+		// Log progress
+		if(m_msgLogger != nullptr) {
+			m_msgLogger->logProgress(
+						"Setting up signals",
+						progress, m_npointsOrig, 5, threshold, lastPos);
+		}
+} // critical
+
+
 	}
+
+
+} // parallel
 
 
 	while( !pqpoints.empty() ){
@@ -918,6 +939,18 @@ void Cloud::reconstruct(
 
 
 	//--------
+
+	vector<CoverTreePoint<Vector3f>> neighs;
+	vector<Vector3f> vneighs;
+	vector<Vector3f> vneighsXY;
+	vector<CoverTreePoint<Vector3f>> neighsNrm;
+	vector<Vector3f> vneighsNrm;
+	vector<Vector3f> vwork;
+
+	MapMtrxi gridXY(nullptr, 0, 0);
+	vectoria iworkGrid(kNN);
+	vector<gridLocation> gridLoc;
+	VectorXf Usig, Vsig, Wsig;
 
 	MapMtrxf T(nullptr, kNN, nfreqsq);
 	MapMtrxf TD(nullptr, kNN, natm);
@@ -972,7 +1005,7 @@ void Cloud::reconstruct(
 			norm = m_norms[idx];
 		}
 		else{
-			norm = update_normal(idx, neighs);
+			norm = update_normal(idx, neighs, neighsNrm, vneighsNrm, vwork);
 		}
 
 		float sizeX, sizeY;
