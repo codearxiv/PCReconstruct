@@ -32,7 +32,7 @@ field set "True" to get better agreement around the boundary of the bounding box
 
 ![1d](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture1d.PNG)
 
-The resulting reconstruction of the sparsified bunny: 
+The resulting completion of the sparsified bunny: 
 
 ![1e](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture1e.PNG)
 
@@ -57,7 +57,7 @@ The resulting reconstruction of the decimated armadillo, with reconstructed poin
 ![2d](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture2d.PNG)
 ![2d2](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture2d2.PNG)
 
-When we unhighlight the new points the back looks unnaturally smooth
+When we unhighlight the newly added points, the rear shell looks unnaturally smooth
 
 ![2e](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture2e.PNG)
 
