@@ -7,8 +7,10 @@ Takes a PCL point cloud surface and fills in gaps or densifies sparse regions by
 This is done using a "continuous dictionary" variation of the k-SVD dictionary learning algorithm adapted to unstructured point clouds.
 
 ## TODO: 
-* Struggles in areas of very high curvature, producing artifacts that go off in random directions. 
-* The slow signal setup step of reconstruction could be parallelized.
+* Still struggles in areas of very high curvature, producing artifacts that go off in random directions. 
+* If original point cloud normals are provided, take them into account (especially at parallel near approaches between two surfaces).
+* Dictionary learning could be off-loaded to GPU.
+* Potential OpenMP parallelization in point creation loop.
 * Take point colour values into account.
 
 ## Sparsified Stanford Bunny:
