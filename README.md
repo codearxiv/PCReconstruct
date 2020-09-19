@@ -102,5 +102,5 @@ Increasing the default patch size field to 250 to take into account the large ga
 
 The resulting reconstruction of the decimated point cloud:
 
-![8d](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture8d.PNG)
+![8d](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture8a.PNG)
 
