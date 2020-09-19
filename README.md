@@ -7,7 +7,7 @@ Takes a PCL point cloud surface and fills in gaps or densifies sparse regions by
 This is done using a "continuous dictionary" variation of the k-SVD dictionary learning algorithm adapted to unstructured point clouds.
 
 ## TODO: 
-* Reconstruction struggles in areas of very high curvature, producing artifacts that go off in random directions. 
+* Struggles in areas of very high curvature, producing artifacts that go off in random directions. 
 * The slow signal setup step of reconstruction could be parallelized.
 * Take point colour values into account.
 
@@ -90,17 +90,17 @@ The resulting reconstruction of the sparsified point cloud:
 ## Decimated Random Surface:
 Original surface sampled with 15000 points:
 
-![7a](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture7a.PNG)
+![8a](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture8a.PNG)
 
 Heavily decimated with random holes:
 
-![7b](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture7b.PNG)
+![8b](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture8b.PNG)
 
-Increasing the default patch size field to 150 to take into account the large gaps relative to sampling density:
+Increasing the default patch size field to 250 to take into account the large gaps relative to sampling density:
 
-![7c](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture7c.PNG)
+![8c](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture8c.PNG)
 
 The resulting reconstruction of the decimated point cloud:
 
-![7d](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture7d.PNG)
+![8d](https://github.com/codearxiv/PCReconstruct/blob/master/images/Capture8d.PNG)
 
