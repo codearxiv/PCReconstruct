@@ -1,10 +1,10 @@
 # PCReconstruct
 
-Dictionary learning based point cloud completion tool written in Qt C++, using Eigen, OpenMP, and OpenGL.
+Point cloud completion tool based on dictionary learning, written in Qt C++, using Eigen, OpenMP, and OpenGL.
 
 Takes a PCL point cloud surface and fills in gaps or densifies sparse regions by learning from the various surface features of the cloud.
 
-This is done using a "continuous dictionary" variation of the k-SVD dictionary learning algorithm adapted to unstructured point clouds.
+This is done using a variation of the k-SVD dictionary learning algorithm that allows for continuous atoms and dealing with unstructured point cloud data.
 
 ## TODO: 
 * Still struggles in areas of very high curvature, producing artifacts that go off in random directions. 
