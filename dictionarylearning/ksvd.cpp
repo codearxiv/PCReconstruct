@@ -3,7 +3,6 @@
 //     See LICENSE included with this distribution.
 
 
-#define EIGEN_NO_MALLOC
 //#define DEBUG_KSVD
 
 #include "ksvd.h"

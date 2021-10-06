@@ -2,8 +2,6 @@
 //     Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
 //     See LICENSE included with this distribution.
 
-#define EIGEN_NO_MALLOC
-
 #include "OrthogonalPursuit.h"
 #include "ensure_buffer_size.h"
 #include "constants.h"

@@ -2,7 +2,6 @@
 //  Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
 //  See LICENSE included with this distribution.
 
-
 #include "pt_to_pt_distsq.h"
 
 #include <Eigen/Dense>

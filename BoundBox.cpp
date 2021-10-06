@@ -7,6 +7,10 @@
 #include "MessageLogger.h"
 #include "constants.h"
 
+#include <qopengl.h>
+#include <Eigen/Dense>
+#include <array>
+
 using Vector3f = Eigen::Vector3f;
 
 

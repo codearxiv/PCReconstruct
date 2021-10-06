@@ -3,8 +3,6 @@
 //     See LICENSE included with this distribution.
 
 
-#define EIGEN_NO_MALLOC
-
 #include "MatchingPursuit.h"
 #include "ensure_buffer_size.h"
 #include "constants.h"

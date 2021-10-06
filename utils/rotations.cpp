@@ -2,12 +2,11 @@
 //  Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
 //  See LICENSE included with this distribution.
 
-
-#include <Eigen/Geometry>
-#include <math.h>
 #include "rotations.h"
 #include "constants.h"
 
+#include <Eigen/Geometry>
+#include <math.h>
 #include <Eigen/Dense>
 
 using Eigen::Vector3f;

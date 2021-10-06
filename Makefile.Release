@@ -13,7 +13,7 @@ EQ            = =
 
 CC            = cl
 CXX           = cl
-DEFINES       = -DUNICODE -D_UNICODE -DWIN32 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -DWIN64 -DQT_DEPRECATED_WARNINGS -DNDEBUG -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB
+DEFINES       = -DUNICODE -D_UNICODE -DWIN32 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -DWIN64 -DQT_DEPRECATED_WARNINGS -DEIGEN_NO_MALLOC -DEIGEN_NO_DEBUG -D_USE_MATH_DEFINES -DNDEBUG -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB
 CFLAGS        = -nologo -Zc:wchar_t -FS -Zc:strictStrings -O2 -MD -W3 -w44456 -w44457 -w44458 $(DEFINES)
 CXXFLAGS      = -nologo -Zc:wchar_t -FS -Zc:rvalueCast -Zc:inline -Zc:strictStrings -Zc:throwingNew -Zc:referenceBinding -Zc:__cplusplus -openmp -O2 -MD -W3 -w34100 -w34189 -w44996 -w44456 -w44457 -w44458 -wd4577 -wd4467 -EHsc $(DEFINES)
 INCPATH       = -I. -I"..\..\lib\PCL 1.9.1\include\pcl-1.9" -I..\..\lib\eigen3 -I..\..\lib\Boost\include\boost-1_68 -I..\..\lib\OpenNI2\Include -I..\..\lib\FLANN\include -ICover-Tree -Idialogs -Idictionarylearning -Iutils -IC:\Qt\Qt5.14.2\5.14.2\msvc2015_64\include -IC:\Qt\Qt5.14.2\5.14.2\msvc2015_64\include\QtWidgets -IC:\Qt\Qt5.14.2\5.14.2\msvc2015_64\include\QtGui -IC:\Qt\Qt5.14.2\5.14.2\msvc2015_64\include\QtANGLE -IC:\Qt\Qt5.14.2\5.14.2\msvc2015_64\include\QtCore -Irelease -I/include -IC:\Qt\Qt5.14.2\5.14.2\msvc2015_64\mkspecs\win32-msvc 
@@ -16396,7 +16396,8 @@ release\pt_to_pt_distsq.obj: utils\pt_to_pt_distsq.cpp utils\pt_to_pt_distsq.h \
 		..\..\lib\eigen3\Eigen\src\Eigenvalues\SelfAdjointEigenSolver_LAPACKE.h \
 		release\PCReconstruct_pch.obj
 
-release\rotations.obj: utils\rotations.cpp ..\..\lib\eigen3\Eigen\Geometry \
+release\rotations.obj: utils\rotations.cpp utils\rotations.h \
+		..\..\lib\eigen3\Eigen\Dense \
 		..\..\lib\eigen3\Eigen\Core \
 		..\..\lib\eigen3\Eigen\src\Core\util\DisableStupidWarnings.h \
 		..\..\lib\eigen3\Eigen\src\Core\util\Macros.h \
@@ -16537,16 +16538,24 @@ release\rotations.obj: utils\rotations.cpp ..\..\lib\eigen3\Eigen\Geometry \
 		..\..\lib\eigen3\Eigen\src\Core\Assign_MKL.h \
 		..\..\lib\eigen3\Eigen\src\Core\GlobalFunctions.h \
 		..\..\lib\eigen3\Eigen\src\Core\util\ReenableStupidWarnings.h \
-		..\..\lib\eigen3\Eigen\SVD \
-		..\..\lib\eigen3\Eigen\QR \
+		..\..\lib\eigen3\Eigen\LU \
+		..\..\lib\eigen3\Eigen\src\misc\Kernel.h \
+		..\..\lib\eigen3\Eigen\src\misc\Image.h \
+		..\..\lib\eigen3\Eigen\src\LU\FullPivLU.h \
+		..\..\lib\eigen3\Eigen\src\LU\PartialPivLU.h \
+		..\..\lib\eigen3\Eigen\src\misc\lapacke.h \
+		..\..\lib\eigen3\Eigen\src\misc\lapacke_mangling.h \
+		..\..\lib\eigen3\Eigen\src\LU\PartialPivLU_LAPACKE.h \
+		..\..\lib\eigen3\Eigen\src\LU\Determinant.h \
+		..\..\lib\eigen3\Eigen\src\LU\InverseImpl.h \
+		..\..\lib\eigen3\Eigen\src\LU\arch\Inverse_SSE.h \
 		..\..\lib\eigen3\Eigen\Cholesky \
 		..\..\lib\eigen3\Eigen\Jacobi \
 		..\..\lib\eigen3\Eigen\src\Jacobi\Jacobi.h \
 		..\..\lib\eigen3\Eigen\src\Cholesky\LLT.h \
 		..\..\lib\eigen3\Eigen\src\Cholesky\LDLT.h \
-		..\..\lib\eigen3\Eigen\src\misc\lapacke.h \
-		..\..\lib\eigen3\Eigen\src\misc\lapacke_mangling.h \
 		..\..\lib\eigen3\Eigen\src\Cholesky\LLT_LAPACKE.h \
+		..\..\lib\eigen3\Eigen\QR \
 		..\..\lib\eigen3\Eigen\Householder \
 		..\..\lib\eigen3\Eigen\src\Householder\Householder.h \
 		..\..\lib\eigen3\Eigen\src\Householder\HouseholderSequence.h \
@@ -16557,21 +16566,14 @@ release\rotations.obj: utils\rotations.cpp ..\..\lib\eigen3\Eigen\Geometry \
 		..\..\lib\eigen3\Eigen\src\QR\CompleteOrthogonalDecomposition.h \
 		..\..\lib\eigen3\Eigen\src\QR\HouseholderQR_LAPACKE.h \
 		..\..\lib\eigen3\Eigen\src\QR\ColPivHouseholderQR_LAPACKE.h \
+		..\..\lib\eigen3\Eigen\SVD \
 		..\..\lib\eigen3\Eigen\src\misc\RealSvd2x2.h \
 		..\..\lib\eigen3\Eigen\src\SVD\UpperBidiagonalization.h \
 		..\..\lib\eigen3\Eigen\src\SVD\SVDBase.h \
 		..\..\lib\eigen3\Eigen\src\SVD\JacobiSVD.h \
 		..\..\lib\eigen3\Eigen\src\SVD\BDCSVD.h \
 		..\..\lib\eigen3\Eigen\src\SVD\JacobiSVD_LAPACKE.h \
-		..\..\lib\eigen3\Eigen\LU \
-		..\..\lib\eigen3\Eigen\src\misc\Kernel.h \
-		..\..\lib\eigen3\Eigen\src\misc\Image.h \
-		..\..\lib\eigen3\Eigen\src\LU\FullPivLU.h \
-		..\..\lib\eigen3\Eigen\src\LU\PartialPivLU.h \
-		..\..\lib\eigen3\Eigen\src\LU\PartialPivLU_LAPACKE.h \
-		..\..\lib\eigen3\Eigen\src\LU\Determinant.h \
-		..\..\lib\eigen3\Eigen\src\LU\InverseImpl.h \
-		..\..\lib\eigen3\Eigen\src\LU\arch\Inverse_SSE.h \
+		..\..\lib\eigen3\Eigen\Geometry \
 		..\..\lib\eigen3\Eigen\src\Geometry\OrthoMethods.h \
 		..\..\lib\eigen3\Eigen\src\Geometry\EulerAngles.h \
 		..\..\lib\eigen3\Eigen\src\Geometry\Homogeneous.h \
@@ -16587,8 +16589,6 @@ release\rotations.obj: utils\rotations.cpp ..\..\lib\eigen3\Eigen\Geometry \
 		..\..\lib\eigen3\Eigen\src\Geometry\AlignedBox.h \
 		..\..\lib\eigen3\Eigen\src\Geometry\Umeyama.h \
 		..\..\lib\eigen3\Eigen\src\Geometry\arch\Geometry_SSE.h \
-		utils\rotations.h \
-		..\..\lib\eigen3\Eigen\Dense \
 		..\..\lib\eigen3\Eigen\Eigenvalues \
 		..\..\lib\eigen3\Eigen\src\Eigenvalues\Tridiagonalization.h \
 		..\..\lib\eigen3\Eigen\src\Eigenvalues\RealSchur.h \

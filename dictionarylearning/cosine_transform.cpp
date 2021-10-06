@@ -2,9 +2,6 @@
 //  Copyright (C) 2019 Piotr (Peter) Beben <pdbcas@gmail.com>
 //  See LICENSE included with this distribution.
 
-#define _USE_MATH_DEFINES
-#define EIGEN_NO_MALLOC
-
 #include "cosine_transform.h"
 #include "ensure_buffer_size.h"
 #include "constants.h"

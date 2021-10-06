@@ -242,12 +242,12 @@ static const char *vertexShaderSource =
 		"uniform mat4 projMatrix;\n"
 		"uniform mat4 mvMatrix;\n"
 		"uniform mat3 normalMatrix;\n"
-        "uniform float pointSize;\n"
+		"uniform float pointSize;\n"
 		"void main() {\n"
 		"   vert = vertex.xyz;\n"
 		"   vertNormal = normalMatrix * normal;\n"
 		"   gl_Position = projMatrix * mvMatrix * vertex;\n"
-        "   gl_PointSize = pointSize/(0.1+10.0*abs(gl_Position.z));\n"
+		"   gl_PointSize = pointSize/(0.1+10.0*abs(gl_Position.z));\n"
 //		"   gl_PointSize = 500.0;\n"
 		"}\n";
 
@@ -404,6 +404,8 @@ void GLWidget::setGLCloud()
 {
 	size_t npoints = m_cloud.pointCount();	
 
+	makeCurrent();
+
 	// Setup our vertex buffer object for point cloud.
 	m_cloudVbo.create();
 	m_cloudVbo.bind();
@@ -420,6 +422,8 @@ void GLWidget::setGLCloudNorms(float scale)
 {
 	size_t npoints = m_cloud.pointCount();
 
+	makeCurrent();
+
 	m_cloudNormsVbo.create();
 	m_cloudNormsVbo.bind();
 	m_cloudNormsVbo.allocate(
@@ -435,6 +439,8 @@ void GLWidget::setGLCloudDebug()
 {
 	size_t ndebug = m_cloud.debugCount();
 
+	makeCurrent();
+
 	m_cloudDebugVbo.create();
 	m_cloudDebugVbo.bind();
 	m_cloudDebugVbo.allocate(
@@ -449,6 +455,8 @@ void GLWidget::setGLCloudDebug()
 void GLWidget::setGLBBox(
 		BoundBox bBox, QOpenGLBuffer vbo, QOpenGLBuffer ebo)
 {
+	makeCurrent();
+
 	vbo.create();
 	vbo.bind();
 	vbo.allocate(bBox.vertGLData(), 6*bBox.vertCount()*sizeof(GLfloat));
